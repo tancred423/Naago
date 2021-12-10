@@ -1,6 +1,8 @@
 const mysql = require('../naagoLib/mysql')
 const FfxivUtil = require('../naagoLib/FfxivUtil')
 const moment = require('moment')
+const { MessageActionRow, MessageButton } = require('discord.js')
+const DiscordUtil = require('./DiscordUtil')
 
 module.exports = class DbUtil {
   static async getMysqlResult(sql) {
@@ -58,6 +60,11 @@ module.exports = class DbUtil {
   }
 
   static async fetchCharacter(interaction, characterId) {
+    const loadingEmote = await DiscordUtil.getEmote(
+      interaction.client,
+      'loading'
+    )
+
     // Get character data
     let sql = `
       SELECT *
@@ -66,27 +73,27 @@ module.exports = class DbUtil {
     `
 
     const characterDataRes = await this.getMysqlResult(sql)
+
     const characterData =
-      characterDataRes && typeof characterDataRes.json_string === 'string'
+      typeof characterDataRes?.json_string === 'string'
         ? JSON.parse(characterDataRes.json_string)
         : undefined
 
     if (characterData) {
-      const lastUpdate = new Date(characterData.last_update).getTime()
+      const lastUpdate = new Date(characterDataRes.latest_update).getTime()
       const now = Date.now()
       const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
 
       if (now - lastUpdate > 2 * 60 * 60 * 1000) {
         // Last update was for >= 2 hours. Update data now.
-        interaction?.followUp({
-          content: 'Updating lodestone data. This might take several seconds.',
-          ephemeral: true
-        })
+        await interaction.editReply(
+          `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
+        )
 
         const character = await FfxivUtil.getCharacterById(characterId)
         sql = `
             UPDATE character_data
-            SET last_update=${mysql.escape(nowSQL)},
+            SET latest_update=${mysql.escape(nowSQL)},
                 json_string=${mysql.escape(JSON.stringify(character))}
             WHERE character_id=${mysql.escape(characterId)}
           `
@@ -108,10 +115,9 @@ module.exports = class DbUtil {
       }
     } else {
       // No character data yet. Cache now.
-      interaction?.followUp({
-        content: 'Updating lodestone data. This might take several seconds.',
-        ephemeral: true
-      })
+      await interaction.editReply(
+        `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
+      )
 
       const character = await FfxivUtil.getCharacterById(characterId)
       const now = Date.now()
@@ -272,7 +278,7 @@ module.exports = class DbUtil {
         WHERE user_id=${mysql.escape(userId)}
       `
 
-      return await this.getMysqlResult(sql)
+      await mysql.query(sql)
     } else {
       // Insert
       const sql = `
@@ -283,7 +289,7 @@ module.exports = class DbUtil {
         )
       `
 
-      return await this.getMysqlResult(sql)
+      await mysql.query(sql)
     }
   }
 }

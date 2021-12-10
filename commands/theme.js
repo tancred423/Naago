@@ -2,7 +2,6 @@ const { SlashCommandBuilder } = require('@discordjs/builders')
 
 const DiscordUtil = require('../naagoLib/DiscordUtil')
 const DbUtil = require('../naagoLib/DbUtil')
-const mysql = require('../naagoLib/mysql')
 
 module.exports = {
   data: new SlashCommandBuilder()

@@ -62,7 +62,7 @@ module.exports = {
       })
     } else {
       const characterId = characterIds[0]
-      const character = await DbUtil.fetchCharacter(null, characterId)
+      const character = await DbUtil.fetchCharacter(interaction, characterId)
 
       if (!character) {
         const embed = DiscordUtil.getErrorEmbed(

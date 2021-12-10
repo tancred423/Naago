@@ -8,7 +8,8 @@ module.exports = class ButtonUtil {
   static async execute(interaction) {
     const userId = interaction.user.id
     const messageAuthorId = interaction.message.interaction?.user.id
-    if (!messageAuthorId) throw new Error()
+    const buttonId = interaction.component.customId
+
     if (userId !== messageAuthorId) {
       await interaction.deferUpdate()
       const embed = DiscordUtil.getErrorEmbed(
@@ -20,8 +21,6 @@ module.exports = class ButtonUtil {
       })
       return
     }
-
-    const buttonId = interaction.component.customId
 
     if (buttonId.startsWith('me')) {
       await interaction.deferUpdate()

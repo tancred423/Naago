@@ -37,6 +37,8 @@ module.exports = class DiscordUtil {
       return await naagoEmoteServer.emojis.fetch('915541076977254411')
     } else if (name === 'twitter') {
       return await naagoEmoteServer.emojis.fetch('915541076989861908')
+    } else if (name === 'loading') {
+      return await naagoEmoteServer.emojis.fetch('918998950885875762')
     } else return null
   }
 }
