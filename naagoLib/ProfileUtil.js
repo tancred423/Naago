@@ -1269,7 +1269,7 @@ class Stats {
 
     this.ctx.fillStyle = color
     this.ctx.textAlign = 'left'
-    this.ctx.fillText(title, this.x + 10, this.yAdd + 23)
+    this.ctx.fillText(title, this.x + 10, this.yAdd + 23, 140)
 
     this.ctx.fillStyle = this.theme.block_title
     this.ctx.textAlign = 'right'
