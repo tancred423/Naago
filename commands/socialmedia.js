@@ -53,7 +53,7 @@ module.exports = {
       // Get character ID
       const sql = `
         SELECT *
-        FROM verify
+        FROM verifications
         WHERE user_id=${mysql.escape(userId)}
       `
       const verify = await DbUtil.getMysqlResult(sql)
@@ -101,7 +101,7 @@ module.exports = {
       // Get character ID
       const sql = `
         SELECT *
-        FROM verify
+        FROM verifications
         WHERE user_id=${mysql.escape(userId)}
       `
       const verify = await DbUtil.getMysqlResult(sql)

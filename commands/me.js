@@ -36,7 +36,7 @@ module.exports = {
     }
 
     const profilePages = await DbUtil.getProfilePages(userId)
-    const profilePage = profilePages.profilePage
+    const profilePage = profilePages.profilePage ?? 'profile'
     const subProfilePage = profilePages.subProfilePage
 
     try {

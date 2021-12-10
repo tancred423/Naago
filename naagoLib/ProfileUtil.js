@@ -240,7 +240,9 @@ class Profile {
     )
     await profileBlock.add(
       'Started',
-      moment(this.character.started * 1000).format('Do MMM Y')
+      this.character.started === 'Private'
+        ? 'Private'
+        : moment(this.character.started * 1000).format('Do MMM Y')
     )
     await profileBlock.add(
       'City-state',
@@ -249,7 +251,6 @@ class Profile {
       false,
       true
     )
-
     await profileBlock.add(
       'Characteristics',
       `${this.character.characteristics.race} (${this.character.characteristics.tribe})`,
@@ -279,7 +280,9 @@ class Profile {
     )
     await profileBlock.add(
       'Achievements',
-      `${this.character.amount_achievements} (${this.character.ap} AP)`,
+      this.character.amount_achievements !== 'Private'
+        ? `${this.character.amount_achievements} (${this.character.ap} AP)`
+        : 'Private',
       './images/achievements.png',
       false,
       false,
@@ -1097,7 +1100,7 @@ class Profile {
 
     // Stats
     stats = new Stats(theme, ctx, x, yAdd, fWidth)
-    stats.add('Average Item Level', this.character.average_ilvl)
+    stats.add('Average Item Level', this.character.item_level)
 
     ////////////////////////////////////////////
     // Role

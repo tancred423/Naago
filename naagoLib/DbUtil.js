@@ -207,7 +207,8 @@ module.exports = class DbUtil {
       AND platform=${mysql.escape(platform)}
     `
 
-    const socialMedia = await this.getMysqlResult(sql)
+    let socialMedia = await this.getMysqlResult(sql)
+    if (socialMedia?.length === 0) socialMedia = null
 
     if (socialMedia) {
       // Update

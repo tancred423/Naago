@@ -10,6 +10,7 @@ module.exports = class ButtonUtil {
     const messageAuthorId = interaction.message.interaction?.user.id
     if (!messageAuthorId) throw new Error()
     if (userId !== messageAuthorId) {
+      await interaction.deferUpdate()
       const embed = DiscordUtil.getErrorEmbed(
         'You cannot interact with commands from someone else.'
       )
