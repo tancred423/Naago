@@ -34,34 +34,17 @@ module.exports = class FfxivUtil {
     else return res.data.List.map((a) => a.ID)
   }
 
-  static async getCharacterById(id) {
+  static async getCharacterById(id, onlyBio = false) {
+    if (onlyBio) {
+      const res = await axios.get(
+        `http://localhost:8080/character/${id}?columns=Character.Bio,Character.Name`
+      )
+      return res.status === 200 ? res.data.Character : undefined
+    }
+
     const res = await axios.get(`http://localhost:8080/character/${id}`)
     if (res.status !== 200) return undefined
-    else {
-      const char = res.data.Character
-      const iLvls = []
-
-      if (char.mainhand?.item_level) iLvls.push(char.mainhand.item_level)
-      if (char.offhand?.item_level) iLvls.push(char.offhand.item_level)
-      if (char.head?.item_level) iLvls.push(char.head.item_level)
-      if (char.body?.item_level) iLvls.push(char.body.item_level)
-      if (char.hands?.item_level) iLvls.push(char.hands.item_level)
-      if (char.legs?.item_level) iLvls.push(char.legs.item_level)
-      if (char.feet?.item_level) iLvls.push(char.feet.item_level)
-      if (char.earrings?.item_level) iLvls.push(char.earrings.item_level)
-      if (char.necklace?.item_level) iLvls.push(char.necklace.item_level)
-      if (char.bracelets?.item_level) iLvls.push(char.bracelets.item_level)
-      if (char.ring1?.item_level) iLvls.push(char.ring1.item_level)
-      if (char.ring2?.item_level) iLvls.push(char.ring2.item_level)
-
-      let avgIlvl = 0
-      for (const iLvl of iLvls) avgIlvl += parseInt(iLvl.split(' ')[2])
-      res.data.Character.average_ilvl = NaagoUtil.addLeadingZeros(
-        Math.ceil(avgIlvl / iLvls.length)
-      )
-
-      return res.data.Character
-    }
+    else return res.data.Character
   }
 
   static generateVerificationCode() {

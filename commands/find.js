@@ -76,7 +76,7 @@ module.exports = {
           const profileImage = await ProfileUtil.getImage(
             interaction,
             character,
-            true,
+            false,
             'profile'
           )
           if (!profileImage)

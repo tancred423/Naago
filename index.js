@@ -48,15 +48,25 @@ client.on('interactionCreate', async (interaction) => {
     } catch (error) {
       console.error(error)
 
-      await interaction.deleteReply()
-      await interaction.followUp({
-        embeds: [
-          DiscordUtil.getErrorEmbed(
-            'There was an error while executing this command.'
-          )
-        ],
-        ephemeral: true
-      })
+      if (interaction.ephemeral) {
+        await interaction.editReply({
+          embeds: [
+            DiscordUtil.getErrorEmbed(
+              'There was an error while executing this command.'
+            )
+          ]
+        })
+      } else {
+        await interaction.deleteReply()
+        await interaction.followUp({
+          embeds: [
+            DiscordUtil.getErrorEmbed(
+              'There was an error while executing this command.'
+            )
+          ],
+          ephemeral: true
+        })
+      }
     }
   } else if (interaction.isButton()) {
     try {

@@ -10,6 +10,7 @@ const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const { createCanvas, loadImage } = require('canvas')
 const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
+const moment = require('moment')
 
 module.exports = class ProfileUtil {
   static async getImage(
@@ -197,7 +198,7 @@ class Profile {
     // Item level
     ctx.fillStyle = theme.item_level
     ctx.font = `bold 30px roboto condensed`
-    ctx.fillText(this.character.average_ilvl, 700 + 20, 140, 80)
+    ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
     ctx.restore()
@@ -210,17 +211,17 @@ class Profile {
     ctx.textAlign = 'center'
     if (this.character.title) {
       ctx.fillStyle = theme.title
-      ctx.font = `normal 35px roboto condensed`
-      ctx.fillText(`< ${this.character.title} >`, 450 / 2, 110, 410)
+      ctx.font = `normal 35px myriad pro`
+      ctx.fillText(`< ${this.character.title} >`, 450 / 2, 100, 410)
     }
 
     // Name
     ctx.fillStyle = theme.name
-    ctx.font = `normal 60px romanus`
+    ctx.font = `normal 60px myriad pro`
     ctx.fillText(
       this.character.name,
       450 / 2,
-      50 + (this.character.title ? 0 : 20),
+      40 + (this.character.title ? 0 : 20),
       410
     )
     ctx.textAlign = 'left'
@@ -228,40 +229,80 @@ class Profile {
     ////////////////////////////////////////////
     // Character Info
     ////////////////////////////////////////////
-    let yAdd = 117
+    let yAdd = 97
 
     const profileBlock = new ProfileBlock(theme, ctx, yAdd)
     await profileBlock.add(
       'World',
-      `${this.character.server.world} (${this.character.server.dc})`
+      `${this.character.server.world} (${this.character.server.dc})`,
+      null,
+      true
     )
+    await profileBlock.add(
+      'Started',
+      moment(this.character.started * 1000).format('Do MMM Y')
+    )
+    await profileBlock.add(
+      'City-state',
+      this.character.town.name,
+      this.character.town.icon,
+      false,
+      true
+    )
+
     await profileBlock.add(
       'Characteristics',
       `${this.character.characteristics.race} (${this.character.characteristics.tribe})`,
       this.character.characteristics.gender == '♀'
         ? './images/emoji_female.png'
-        : './images/emoji_male.png'
+        : './images/emoji_male.png',
+      true
+    )
+    await profileBlock.add('Nameday', this.character.nameday, null, true)
+    await profileBlock.add(
+      `Grand Company: ${this.character.grand_company.name}`,
+      this.character.grand_company.rank,
+      this.character.grand_company.icon,
+      true
     )
     await profileBlock.add(
       'Free Company',
       this.character.free_company ? this.character.free_company.name : '-',
-      this.character.free_company ? this.character.free_company.icon : null
+      this.character.free_company ? this.character.free_company.icon : null,
+      true
     )
-    await profileBlock.add(
-      `Grand Company: ${this.character.grand_company.name}`,
-      this.character.grand_company.rank,
-      this.character.grand_company.icon
-    )
-    await profileBlock.add(
-      'City-state',
-      this.character.town.name,
-      this.character.town.icon
-    )
-    await profileBlock.add('Nameday', this.character.nameday)
     await profileBlock.add(
       'Guardian',
       this.character.guardian_deity.name,
-      this.character.guardian_deity.icon
+      this.character.guardian_deity.icon,
+      true
+    )
+    await profileBlock.add(
+      'Achievements',
+      `${this.character.amount_achievements} (${this.character.ap} AP)`,
+      './images/achievements.png',
+      false,
+      false,
+      true,
+      1
+    )
+    await profileBlock.add(
+      'Mounts',
+      this.character.amount_mounts,
+      null,
+      false,
+      true,
+      true,
+      2
+    )
+    await profileBlock.add(
+      'Minions',
+      this.character.amount_minions,
+      null,
+      false,
+      true,
+      true,
+      3
     )
 
     ////////////////////////////////////////////
@@ -368,7 +409,7 @@ class Profile {
     // Item level
     ctx.fillStyle = theme.item_level
     ctx.font = `bold 30px roboto condensed`
-    ctx.fillText(this.character.average_ilvl, 700 + 20, 140, 80)
+    ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
     ctx.restore()
@@ -591,7 +632,7 @@ class Profile {
     // Item level
     ctx.fillStyle = theme.item_level
     ctx.font = `bold 30px roboto condensed`
-    ctx.fillText(this.character.average_ilvl, 700 + 20, 140, 80)
+    ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
     ctx.restore()
@@ -751,7 +792,7 @@ class Profile {
     // Item level
     ctx.fillStyle = theme.item_level
     ctx.font = `bold 30px roboto condensed`
-    ctx.fillText(this.character.average_ilvl, 700 + 20, 140, 80)
+    ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
     ctx.restore()
@@ -860,7 +901,7 @@ class Profile {
     // Item level
     ctx.fillStyle = theme.item_level
     ctx.font = `bold 30px roboto condensed`
-    ctx.fillText(this.character.average_ilvl, 700 + 20, 140, 80)
+    ctx.fillText(this.character.item_level, 700 + 20, 140, 50)
     ctx.textAlign = 'left'
 
     ctx.restore()
@@ -1134,25 +1175,44 @@ class ProfileBlock {
     this.yAdd = yAdd
   }
 
-  async add(title, content, iconLink = null) {
-    this.yAdd += 60
+  async add(
+    title,
+    content,
+    iconLink = null,
+    fullWidth = false,
+    rightSide = false,
+    triple = false,
+    slot = null
+  ) {
+    let x = rightSide ? 230 : 20
+    if (triple && slot === 2) x = 265
+    if (triple && slot === 3) x = 350
 
-    const maxWidth = iconLink ? 330 : 390
+    let fWidth = fullWidth ? 410 : 410 / 2 - 5
+    if (triple && slot === 1) fWidth = 240
+    if (triple && (slot === 2 || slot === 3)) fWidth = 80
+    if (!rightSide) this.yAdd += 55
+
+    const maxWidth = iconLink ? fWidth - 60 : fWidth - 20
 
     this.ctx.fillStyle = this.theme.block_background
-    this.ctx.roundRect(20, this.yAdd, 410, 50, borderRadius).fill()
+    this.ctx.roundRect(x, this.yAdd, fWidth, 50, borderRadius).fill()
 
     this.ctx.fillStyle = this.theme.block_title
     this.ctx.font = `normal 16px roboto condensed`
-    this.ctx.fillText(title, 30, this.yAdd + 3, 410)
+    this.ctx.fillText(title, x + 10, this.yAdd + 3, maxWidth)
 
     this.ctx.fillStyle = this.theme.block_content
     this.ctx.font = `bold 24px arial`
-    this.ctx.fillText(content, 30, this.yAdd + 18, maxWidth)
+    this.ctx.fillText(content, x + 10, this.yAdd + 18, maxWidth)
 
     if (iconLink) {
       const icon = await loadImage(iconLink)
-      this.ctx.drawImage(icon, 400 - icon.width / 2, this.yAdd + 10)
+      this.ctx.drawImage(
+        icon,
+        fWidth - icon.width / 2 - 5 + (rightSide ? fWidth + 10 : 0),
+        this.yAdd + 10
+      )
     }
   }
 }

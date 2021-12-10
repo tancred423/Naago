@@ -145,7 +145,7 @@ module.exports = class ButtonUtil {
         const profileEmbed = await ProfileUtil.getEmbed(
           interaction,
           character,
-          true,
+          false,
           profilePage,
           subProfilePage,
           false
@@ -169,7 +169,7 @@ module.exports = class ButtonUtil {
         const profileImage = await ProfileUtil.getImage(
           interaction,
           character,
-          true,
+          false,
           profilePage,
           subProfilePage
         )
