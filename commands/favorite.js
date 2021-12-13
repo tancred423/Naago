@@ -39,7 +39,7 @@ module.exports = {
     const userId = interaction.user.id
     const verification = await DbUtil.getCharacterVerification(userId)
 
-    if (verification.is_verified) {
+    if (verification?.is_verified) {
       if (interaction.options.getSubcommand() === 'add') {
         await interaction.deferReply({ ephemeral: true })
 

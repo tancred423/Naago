@@ -50,7 +50,7 @@ module.exports = {
       const userId = interaction.user.id
       const verification = await DbUtil.getCharacterVerification(userId)
 
-      if (verification.is_verified) {
+      if (verification?.is_verified) {
         // Check url
         const urlString = url.replace('www.', '')
         try {
@@ -91,7 +91,7 @@ module.exports = {
       const userId = interaction.user.id
       const verification = await DbUtil.getCharacterVerification(userId)
 
-      if (verification.is_verified) {
+      if (verification?.is_verified) {
         // Get character
         const characterId = verification.character_id
 

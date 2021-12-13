@@ -28,7 +28,7 @@ module.exports = class ButtonUtil {
 
       const verification = await DbUtil.getCharacterVerification(userId)
 
-      if (verification.is_verified) {
+      if (verification?.is_verified) {
         // Get character
         const characterId = verification.character_id
         const character = await DbUtil.fetchCharacter(interaction, characterId)
