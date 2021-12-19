@@ -3,7 +3,7 @@ const { Client, Collection, Intents } = require('discord.js')
 const {
   token,
   twitterStreamEnabled,
-  maintenanceStartInstantly
+  lodestoneCheckOnStart
 } = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
@@ -14,6 +14,7 @@ const GlobalUtil = require('./naagoLib/GlobalUtil')
 const MaintenanceUtil = require('./naagoLib/MaintenanceUtil')
 const moment = require('moment')
 const cron = require('node-cron')
+const TopicsUtil = require('./naagoLib/TopicsUtil')
 
 // Locale
 moment.locale('en')
@@ -70,10 +71,13 @@ client.once('ready', () => {
 
   // Maintenance checker
   try {
-    if (maintenanceStartInstantly) MaintenanceUtil.updateDb()
-    else {
+    if (lodestoneCheckOnStart) {
+      MaintenanceUtil.updateDb()
+      TopicsUtil.updateDb()
+    } else {
       cron.schedule('*/15 * * * *', () => {
         MaintenanceUtil.updateDb()
+        TopicsUtil.updateDb()
       })
     }
   } catch (err) {

@@ -1,5 +1,6 @@
 const { from } = require('form-data')
 const moment = require('moment')
+const TurndownService = require('turndown')
 
 module.exports = class NaagoUtil {
   static convertMsToDigitalClock(ms) {
@@ -217,5 +218,43 @@ module.exports = class NaagoUtil {
       .replaceAll('Oct', '10')
       .replaceAll('Nov', '11')
       .replaceAll('Dec', '12')
+  }
+
+  static topicHtmlToMarkdown(html) {
+    if (!html) return html
+
+    const turndownService = new TurndownService()
+    let markdown = turndownService.turndown(html).split('\n')
+    markdown.shift()
+    return markdown.join('\n\n')
+  }
+
+  static parseImageLinkFromMarkdown(markdown) {
+    if (!markdown) return markdown
+
+    const split = markdown.split('\n')
+    const links = []
+    for (const i in split) {
+      if (split[i].startsWith('[![]')) {
+        links.push(split[i].split(')](')[1]?.slice(0, -1))
+      } else if (split[i].startsWith('#')) {
+        split[i] = `**__${split[i].replaceAll('#', '').trim()}__**`
+      } else if (split[i].startsWith('\\*')) {
+        split[i] = `_${split[i]}_`
+      } else split[i] = split[i].trim()
+    }
+
+    markdown = split.join('\n')
+
+    markdown = markdown
+      .replaceAll(/(\[\!\[\]).*\)/g, '')
+      .replaceAll(/\n{3,}/g, '\n\n')
+
+    markdown = this.cutString(markdown, 4096)
+
+    return {
+      markdown: markdown,
+      links: links
+    }
   }
 }

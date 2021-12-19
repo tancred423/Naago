@@ -637,6 +637,53 @@ module.exports = class DbUtil {
   }
 
   ////////////////////////////////////////////
+  // Topic
+  ////////////////////////////////////////////
+  static async getTopicByTitle(title, date) {
+    try {
+      const sql = `
+        SELECT *
+        FROM topic_data
+        WHERE title=${mysql.escape(title)}
+        AND date=${mysql.escape(moment(date).format('YYYY-MM-DD HH:mm:ss'))}
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting topic by title was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async addTopic(topic) {
+    try {
+      if (!(await this.getTopicByTitle(topic.title, topic.date))) {
+        // Insert
+        const sql = `
+          INSERT INTO topic_data (title,date)
+          VALUES (
+            ${mysql.escape(topic.title)},
+            ${mysql.escape(moment(topic.date).format('YYYY-MM-DD HH:mm:ss'))}
+          )
+        `
+
+        await mysql.query(sql)
+
+        return true
+      } else return 'existant'
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding topic was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
   // Setup - Fashion Report
   ////////////////////////////////////////////
   static async getFashionReportInfo() {
@@ -809,6 +856,95 @@ module.exports = class DbUtil {
     } catch (err) {
       console.error(
         `[ERROR] Unsetting maintenance channel ID was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Setup - Topic
+  ////////////////////////////////////////////
+  static async getTopicInfo() {
+    try {
+      const sql = `
+        SELECT *
+        FROM topics
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting topic info was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async getTopicChannelId(guildId) {
+    try {
+      const sql = `
+        SELECT channel_id
+        FROM topics
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      const res = await this.getMysqlResult(sql)
+      return res?.channel_id
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting topic channel ID was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async setTopicChannelId(guildId, channelId) {
+    try {
+      if (await this.getTopicChannelId(guildId)) {
+        // Update
+        const sql = `
+          UPDATE topics
+          SET channel_id=${mysql.escape(channelId)}
+          WHERE guild_id=${mysql.escape(guildId)}
+        `
+
+        await mysql.query(sql)
+      } else {
+        // Insert
+        const sql = `
+          INSERT INTO topics (guild_id,channel_id)
+          VALUES (
+            ${mysql.escape(guildId)},
+            ${mysql.escape(channelId)}
+          )
+        `
+
+        await mysql.query(sql)
+      }
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Setting topic channel ID was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  static async unsetTopicChannelId(guildId) {
+    try {
+      const sql = `
+        DELETE FROM topics
+        WHERE guild_id=${mysql.escape(guildId)}
+      `
+
+      await mysql.query(sql)
+
+      return true
+    } catch (err) {
+      console.error(
+        `[ERROR] Unsetting topic channel ID was NOT successful. Error: ${err.message}`
       )
       return false
     }

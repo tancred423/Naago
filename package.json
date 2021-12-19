@@ -27,6 +27,7 @@
     "moment-timezone": "^0.5.34",
     "mysql2": "^2.3.3",
     "node-cron": "^3.0.0",
+    "turndown": "^7.1.1",
     "twitter-api-v2": "^1.7.2"
   }
 }

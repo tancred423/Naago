@@ -1,7 +1,7 @@
 const { MessageEmbed, Permissions } = require('discord.js')
 const { green, red, blurple } = require('../config.json')
 const NaagoUtil = require('./NaagoUtil')
-const { maintenanceIconLink } = require('../config.json')
+const { maintenanceIconLink, topicIconLink } = require('../config.json')
 
 module.exports = class DiscordUtil {
   static getSuccessEmbed(message) {
@@ -106,11 +106,23 @@ module.exports = class DiscordUtil {
   static getMaintenanceEmbed(maint, botColor) {
     return new MessageEmbed()
       .setColor(botColor)
-      .setAuthor(maint.tag, maintenanceIconLink, null)
+      .setAuthor(maint.tag, maintenanceIconLink)
       .setTitle(maint.title)
       .setURL(maint.link)
       .setDescription(maint.details)
       .setFooter('Posted at')
       .setTimestamp(maint.date)
+  }
+
+  static getTopicEmbed(topic, botColor) {
+    return new MessageEmbed()
+      .setColor(botColor)
+      .setAuthor('[News]', topicIconLink)
+      .setTitle(topic.title)
+      .setURL(topic.link)
+      .setDescription(topic.description)
+      .setImage(topic.banner)
+      .setFooter('Posted at')
+      .setTimestamp(topic.date)
   }
 }

@@ -1,8 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { MessageEmbed } = require('discord.js')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
 const DbUtil = require('../naagoLib/DbUtil')
-const { maintenanceIconLink } = require('../config.json')
 
 module.exports = {
   data: new SlashCommandBuilder()
