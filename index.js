@@ -3,12 +3,14 @@ const { Client, Collection, Intents } = require('discord.js')
 const {
   token,
   twitterStreamEnabled,
-  lodestoneCheckOnStart
+  lodestoneCheckOnStart,
+  deployContextInteractions
 } = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
 const ButtonUtil = require('./naagoLib/ButtonUtil')
 const SelectMenuUtil = require('./naagoLib/SelectMenuUtil')
+const ContextMenuUtil = require('./naagoLib/ContextMenuUtil')
 const TwitterUtil = require('./naagoLib/TwitterUtil')
 const GlobalUtil = require('./naagoLib/GlobalUtil')
 const MaintenanceUtil = require('./naagoLib/MaintenanceUtil')
@@ -83,6 +85,29 @@ client.once('ready', () => {
   } catch (err) {
     console.error(err)
   }
+
+  // Context
+  if (deployContextInteractions) {
+    client.application.commands
+      .create(
+        {
+          name: 'Add favorite',
+          type: 2
+        },
+        '913246450752839720'
+      )
+      .catch(console.error)
+
+    client.application.commands
+      .create(
+        {
+          name: 'Remove favorite',
+          type: 2
+        },
+        '913246450752839720'
+      )
+      .catch(console.error)
+  }
 })
 
 client.on('interactionCreate', async (interaction) => {
@@ -91,8 +116,8 @@ client.on('interactionCreate', async (interaction) => {
 
     try {
       await command.execute(interaction)
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      console.error(err)
 
       if (interaction.ephemeral) {
         await interaction.editReply({
@@ -117,8 +142,8 @@ client.on('interactionCreate', async (interaction) => {
   } else if (interaction.isButton()) {
     try {
       ButtonUtil.execute(interaction)
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
         'There was an error while executing this command.'
       )
@@ -130,8 +155,21 @@ client.on('interactionCreate', async (interaction) => {
   } else if (interaction.isSelectMenu()) {
     try {
       SelectMenuUtil.execute(interaction)
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      console.error(err)
+      const embed = DiscordUtil.getErrorEmbed(
+        'There was an error while executing this command.'
+      )
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
+      })
+    }
+  } else if (interaction.isContextMenu()) {
+    try {
+      ContextMenuUtil.execute(interaction)
+    } catch (err) {
+      console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
         'There was an error while executing this command.'
       )

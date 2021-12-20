@@ -115,13 +115,19 @@ module.exports = class DbUtil {
       if (characterData) {
         const lastUpdate = new Date(characterDataRes.latest_update).getTime()
         const now = Date.now()
-        const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
+        const nowSQL = moment(now)
+          .tz('Europe/London')
+          .format('YYYY-MM-DD HH:mm:ss')
 
         if (now - lastUpdate > 2 * 60 * 60 * 1000) {
           // Last update was for >= 2 hours. Update data now.
-          await interaction.editReply(
-            `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
-          )
+          await interaction.editReply({
+            content: `${loadingEmote} *Updating lodestone data. This might take several seconds.*`,
+            components: [],
+            files: [],
+            embeds: [],
+            attachments: []
+          })
 
           const character = await FfxivUtil.getCharacterById(characterId)
           sql = `
@@ -148,15 +154,21 @@ module.exports = class DbUtil {
         }
       } else {
         // No character data yet. Cache now.
-        await interaction.editReply(
-          `${loadingEmote} *Updating lodestone data. This might take several seconds.*`
-        )
+        await interaction.editReply({
+          content: `${loadingEmote} *Updating lodestone data. This might take several seconds.*`,
+          components: [],
+          files: [],
+          embeds: [],
+          attachments: []
+        })
 
         const character = await FfxivUtil.getCharacterById(characterId)
         if (!character) return undefined
 
         const now = Date.now()
-        const nowSQL = moment(now).format('YYYY-MM-DD HH:mm:ss')
+        const nowSQL = moment(now)
+          .tz('Europe/London')
+          .format('YYYY-MM-DD HH:mm:ss')
 
         sql = `
           INSERT INTO character_data (character_id,latest_update,json_string)
@@ -182,6 +194,45 @@ module.exports = class DbUtil {
     } catch (err) {
       console.error(
         `[ERROR] Fetching character was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  // No refreshing, just taking the cache
+  static async getCharacter(userId) {
+    try {
+      // Get character id
+      let sql = `
+        SELECT character_id
+        FROM verifications
+        WHERE user_id=${mysql.escape(userId)}
+      `
+
+      const res = await this.getMysqlResult(sql)
+      if (!res) return undefined
+
+      const characterId = res.character_id
+
+      sql = `
+        SELECT json_string
+        FROM character_data
+        WHERE character_id=${mysql.escape(characterId)}
+      `
+
+      const res2 = await this.getMysqlResult(sql)
+      if (!res2) return undefined
+
+      const characterData = JSON.parse(res2.json_string)
+
+      return {
+        id: characterId,
+        name: characterData.name,
+        server: `${characterData.server.world} (${characterData.server.dc})`
+      }
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting character was NOT successful. Error: ${err.message}`
       )
       return undefined
     }
@@ -447,9 +498,11 @@ module.exports = class DbUtil {
         `
 
         await mysql.query(sql)
+
+        return true
       }
 
-      return true
+      return 'existant'
     } catch (err) {
       console.error(
         `[ERROR] Adding favorite was NOT successful. Error: ${err.message}`
@@ -460,15 +513,21 @@ module.exports = class DbUtil {
 
   static async removeFavorite(userId, characterId) {
     try {
-      const sql = `
-        DELETE FROM favorites
-        WHERE user_id=${mysql.escape(userId)}
-        AND character_id=${mysql.escape(characterId)}
-      `
+      const favorites = await this.getFavorites(userId)
 
-      await mysql.query(sql)
+      if (favorites?.find((o) => o.character_id == characterId)) {
+        const sql = `
+          DELETE FROM favorites
+          WHERE user_id=${mysql.escape(userId)}
+          AND character_id=${mysql.escape(characterId)}
+        `
 
-      return true
+        await mysql.query(sql)
+
+        return true
+      }
+
+      return 'notfound'
     } catch (err) {
       console.error(
         `[ERROR] Removing favorite was NOT successful. Error: ${err.message}`
@@ -609,7 +668,9 @@ module.exports = class DbUtil {
             ${mysql.escape(maintenance.title)},
             ${mysql.escape(maintenance.tag)},
             ${mysql.escape(
-              moment(maintenance.date).format('YYYY-MM-DD HH:mm:ss')
+              moment(maintenance.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
             )},
             ${mysql.escape(maintenance.link)},
             ${mysql.escape(maintenance.details)},
@@ -645,7 +706,9 @@ module.exports = class DbUtil {
         SELECT *
         FROM topic_data
         WHERE title=${mysql.escape(title)}
-        AND date=${mysql.escape(moment(date).format('YYYY-MM-DD HH:mm:ss'))}
+        AND date=${mysql.escape(
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+        )}
       `
 
       const res = await mysql.query(sql)
@@ -667,7 +730,11 @@ module.exports = class DbUtil {
           INSERT INTO topic_data (title,date)
           VALUES (
             ${mysql.escape(topic.title)},
-            ${mysql.escape(moment(topic.date).format('YYYY-MM-DD HH:mm:ss'))}
+            ${mysql.escape(
+              moment(topic.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
+            )}
           )
         `
 

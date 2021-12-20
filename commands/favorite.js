@@ -109,7 +109,7 @@ module.exports = {
 
             if (successful === 'capped') {
               const embed = DiscordUtil.getErrorEmbed(
-                `\`${name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\``
+                `\`${name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.`
               )
 
               await interaction.editReply({
