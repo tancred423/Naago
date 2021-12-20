@@ -11,21 +11,14 @@ module.exports = {
 
     if (maints) {
       const botColor = await DiscordUtil.getBotColorByInteraction(interaction)
-      const embedsCollection = []
-      const tmpEmbeds = []
+      const embeds = []
 
       for (const maint of maints) {
-        if (tmpEmbeds.length >= 10) {
-          embedsCollection.push(tmpEmbeds)
-          tmpEmbeds = []
-        }
-
-        tmpEmbeds.push(DiscordUtil.getMaintenanceEmbed(maint, botColor))
+        if (tmpEmbeds.length >= 10) break
+        embeds.push(DiscordUtil.getMaintenanceEmbed(maint, botColor))
       }
-      embedsCollection.push(tmpEmbeds)
 
-      for (const embeds of embedsCollection)
-        await interaction.reply({ embeds: embeds })
+      await interaction.reply({ embeds: embeds })
     } else
       await interaction.reply({
         ephemeral: true,
