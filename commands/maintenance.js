@@ -14,11 +14,16 @@ module.exports = {
       const embeds = []
 
       for (const maint of maints) {
-        if (tmpEmbeds.length >= 10) break
+        if (embeds.length >= 10) break
         embeds.push(DiscordUtil.getMaintenanceEmbed(maint, botColor))
       }
 
-      await interaction.reply({ embeds: embeds })
+      const content =
+        embeds.length > 1
+          ? 'These maintenances are currently active:'
+          : 'This maintenance is currently active:'
+
+      await interaction.reply({ content: content, embeds: embeds })
     } else
       await interaction.reply({
         ephemeral: true,

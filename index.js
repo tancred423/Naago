@@ -4,7 +4,8 @@ const {
   token,
   twitterStreamEnabled,
   lodestoneCheckOnStart,
-  deployContextInteractions
+  deployContextInteractions,
+  guildId
 } = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
@@ -94,7 +95,7 @@ client.once('ready', () => {
           name: 'Add favorite',
           type: 2
         },
-        '913246450752839720'
+        guildId
       )
       .catch(console.error)
 
@@ -104,7 +105,7 @@ client.once('ready', () => {
           name: 'Remove favorite',
           type: 2
         },
-        '913246450752839720'
+        guildId
       )
       .catch(console.error)
   }
