@@ -8,6 +8,7 @@ module.exports = {
     .setName('theme')
     .setDescription('Change the theme of the profiles you request.'),
   async execute(interaction) {
+    const client = interaction.client
     const userId = interaction.user.id
     const verification = await DbUtil.getCharacterVerification(userId)
 
@@ -28,18 +29,54 @@ module.exports = {
         .addOptions([
           {
             label: 'Dark UI',
-            description: 'The dark UI as in-game',
-            value: 'dark'
+            description: 'The dark UI like in-game',
+            value: 'dark',
+            emoji: await DiscordUtil.getEmote(client, 'theme_dark')
           },
           {
             label: 'Light UI',
-            description: 'The light UI as in-game',
-            value: 'light'
+            description: 'The light UI like in-game',
+            value: 'light',
+            emoji: await DiscordUtil.getEmote(client, 'theme_light')
           },
           {
             label: 'Classic UI',
-            description: 'The classic (blue) UI as in-game',
-            value: 'classic'
+            description: 'The classic UI like in-game',
+            value: 'classic',
+            emoji: await DiscordUtil.getEmote(client, 'theme_classic')
+          },
+          {
+            label: 'Character Selection',
+            description: 'Background from character selection',
+            value: 'character_selection',
+            emoji: await DiscordUtil.getEmote(
+              client,
+              'theme_character_selection'
+            )
+          },
+          {
+            label: 'Amaurot',
+            description: 'Amaurot projection from the Tempest',
+            value: 'amaurot',
+            emoji: await DiscordUtil.getEmote(client, 'theme_amaurot')
+          },
+          {
+            label: 'Final Days',
+            description: 'Starshowers',
+            value: 'final_days',
+            emoji: await DiscordUtil.getEmote(client, 'theme_final_days')
+          },
+          {
+            label: '[EW Spoilers] Our fellow neighbour',
+            description: '(It spoilers the 3rd map)',
+            value: 'moon',
+            emoji: await DiscordUtil.getEmote(client, 'theme_moon')
+          },
+          {
+            label: '[EW Spoilers] Far apart',
+            description: '(It spoilers the 6th map)',
+            value: 'ultima_thule',
+            emoji: await DiscordUtil.getEmote(client, 'theme_ultima_thule')
           }
         ])
     )

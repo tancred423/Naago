@@ -38,7 +38,6 @@ module.exports = class DiscordUtil {
   static async getEmote(client, name) {
     const naagoEmoteServerId = '915541034220531772'
     const naagoEmoteServer = await client.guilds.fetch(naagoEmoteServerId)
-
     if (!naagoEmoteServer) return null
 
     if (name === 'github')
@@ -61,7 +60,23 @@ module.exports = class DiscordUtil {
       return await naagoEmoteServer.emojis.fetch('915541076989861908')
     else if (name === 'loading')
       return await naagoEmoteServer.emojis.fetch('918998950885875762')
-    else return null
+    else if (name === 'theme_dark') {
+      return await naagoEmoteServer.emojis.fetch('922677850543357982')
+    } else if (name === 'theme_light') {
+      return await naagoEmoteServer.emojis.fetch('922677850480467979')
+    } else if (name === 'theme_classic') {
+      return await naagoEmoteServer.emojis.fetch('922677850522390529')
+    } else if (name === 'theme_final_days') {
+      return await naagoEmoteServer.emojis.fetch('922681780606230629')
+    } else if (name === 'theme_ultima_thule') {
+      return await naagoEmoteServer.emojis.fetch('922689049569931304')
+    } else if (name === 'theme_moon') {
+      return await naagoEmoteServer.emojis.fetch('922689049569931304')
+    } else if (name === 'theme_amaurot') {
+      return await naagoEmoteServer.emojis.fetch('922699017337597952')
+    } else if (name === 'theme_character_selection') {
+      return await naagoEmoteServer.emojis.fetch('922709333639311422')
+    } else return null
   }
 
   static async hasAllPermissions(interaction, member, ...permissions) {

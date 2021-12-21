@@ -1,5 +1,6 @@
 {
   "background": "#FED7AE",
+  "background_transparency": "#00000050",
   "background_border": "#9C7C63",
   "window_title": "#8B4F33",
   "window_title_name": "#8B4F33",

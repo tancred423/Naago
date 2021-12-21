@@ -2,6 +2,7 @@ const {
   width,
   height,
   borderRadius,
+  borderRadiusOuter,
   maxLevel,
   maxLevelLimited,
   maxMounts,
@@ -96,11 +97,7 @@ class Profile {
 
   async getTheme() {
     const themeName = await DbUtil.getTheme(this.userId)
-    return themeName === 'classic'
-      ? require('../themes/classic.json')
-      : themeName === 'light'
-      ? require('../themes/light.json')
-      : require('../themes/dark.json')
+    return require(`../themes/${themeName}.json`)
   }
 
   async getProfile() {
@@ -122,13 +119,25 @@ class Profile {
     ////////////////////////////////////////////
 
     // Background fill
-    ctx.fillStyle = theme.background
-    ctx.roundRect(0, 0, width, height, borderRadius).fill()
+    if (theme.background.startsWith('#')) {
+      ctx.fillStyle = theme.background
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+    } else {
+      ctx.save()
+      ctx.lineWidth = 0
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
+      ctx.clip()
+      const backgroundImage = await loadImage(theme.background)
+      ctx.drawImage(backgroundImage, 0, 0)
+      ctx.fillStyle = theme.background_transparency
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+      ctx.restore()
+    }
 
     // Background border
     ctx.strokeStyle = theme.background_border
-    ctx.lineWidth = 5
-    ctx.roundRect(0, 0, width, height, borderRadius).stroke()
+    ctx.lineWidth = 3
+    ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
 
     ////////////////////////////////////////////
     // Window
@@ -150,7 +159,7 @@ class Profile {
 
     // Window title underline
     ctx.strokeStyle = theme.window_title_underline
-    ctx.lineWidth = 3
+    ctx.lineWidth = 2
     ctx.roundRect(10, 35, width - 20, 0, borderRadius).stroke()
 
     ////////////////////////////////////////////
@@ -344,13 +353,25 @@ class Profile {
     ////////////////////////////////////////////
 
     // Background fill
-    ctx.fillStyle = theme.background
-    ctx.roundRect(0, 0, width, height, borderRadius).fill()
+    if (theme.background.startsWith('#')) {
+      ctx.fillStyle = theme.background
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+    } else {
+      ctx.save()
+      ctx.lineWidth = 0
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
+      ctx.clip()
+      const backgroundImage = await loadImage(theme.background)
+      ctx.drawImage(backgroundImage, 0, 0)
+      ctx.fillStyle = theme.background_transparency
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+      ctx.restore()
+    }
 
     // Background border
     ctx.strokeStyle = theme.background_border
-    ctx.lineWidth = 5
-    ctx.roundRect(0, 0, width, height, borderRadius).stroke()
+    ctx.lineWidth = 3
+    ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
 
     ////////////////////////////////////////////
     // Window
@@ -372,7 +393,7 @@ class Profile {
 
     // Window title underline
     ctx.strokeStyle = theme.window_title_underline
-    ctx.lineWidth = 3
+    ctx.lineWidth = 2
     ctx.roundRect(10, 35, width - 20, 0, borderRadius).stroke()
 
     ////////////////////////////////////////////
@@ -567,13 +588,25 @@ class Profile {
     ////////////////////////////////////////////
 
     // Background fill
-    ctx.fillStyle = theme.background
-    ctx.roundRect(0, 0, width, height, borderRadius).fill()
+    if (theme.background.startsWith('#')) {
+      ctx.fillStyle = theme.background
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+    } else {
+      ctx.save()
+      ctx.lineWidth = 0
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
+      ctx.clip()
+      const backgroundImage = await loadImage(theme.background)
+      ctx.drawImage(backgroundImage, 0, 0)
+      ctx.fillStyle = theme.background_transparency
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+      ctx.restore()
+    }
 
     // Background border
     ctx.strokeStyle = theme.background_border
-    ctx.lineWidth = 5
-    ctx.roundRect(0, 0, width, height, borderRadius).stroke()
+    ctx.lineWidth = 3
+    ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
 
     ////////////////////////////////////////////
     // Window
@@ -595,7 +628,7 @@ class Profile {
 
     // Window title underline
     ctx.strokeStyle = theme.window_title_underline
-    ctx.lineWidth = 3
+    ctx.lineWidth = 2
     ctx.roundRect(10, 35, width - 20, 0, borderRadius).stroke()
 
     ////////////////////////////////////////////
@@ -786,13 +819,25 @@ class Profile {
     ////////////////////////////////////////////
 
     // Background fill
-    ctx.fillStyle = theme.background
-    ctx.roundRect(0, 0, width, height, borderRadius).fill()
+    if (theme.background.startsWith('#')) {
+      ctx.fillStyle = theme.background
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+    } else {
+      ctx.save()
+      ctx.lineWidth = 0
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
+      ctx.clip()
+      const backgroundImage = await loadImage(theme.background)
+      ctx.drawImage(backgroundImage, 0, 0)
+      ctx.fillStyle = theme.background_transparency
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+      ctx.restore()
+    }
 
     // Background border
     ctx.strokeStyle = theme.background_border
-    ctx.lineWidth = 5
-    ctx.roundRect(0, 0, width, height, borderRadius).stroke()
+    ctx.lineWidth = 3
+    ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
 
     ////////////////////////////////////////////
     // Window
@@ -814,7 +859,7 @@ class Profile {
 
     // Window title underline
     ctx.strokeStyle = theme.window_title_underline
-    ctx.lineWidth = 3
+    ctx.lineWidth = 2
     ctx.roundRect(10, 35, width - 20, 0, borderRadius).stroke()
 
     ////////////////////////////////////////////
@@ -916,13 +961,25 @@ class Profile {
     ////////////////////////////////////////////
 
     // Background fill
-    ctx.fillStyle = theme.background
-    ctx.roundRect(0, 0, width, height, borderRadius).fill()
+    if (theme.background.startsWith('#')) {
+      ctx.fillStyle = theme.background
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+    } else {
+      ctx.save()
+      ctx.lineWidth = 0
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
+      ctx.clip()
+      const backgroundImage = await loadImage(theme.background)
+      ctx.drawImage(backgroundImage, 0, 0)
+      ctx.fillStyle = theme.background_transparency
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill()
+      ctx.restore()
+    }
 
     // Background border
     ctx.strokeStyle = theme.background_border
-    ctx.lineWidth = 5
-    ctx.roundRect(0, 0, width, height, borderRadius).stroke()
+    ctx.lineWidth = 3
+    ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke()
 
     ////////////////////////////////////////////
     // Window
@@ -944,7 +1001,7 @@ class Profile {
 
     // Window title underline
     ctx.strokeStyle = theme.window_title_underline
-    ctx.lineWidth = 3
+    ctx.lineWidth = 2
     ctx.roundRect(10, 35, width - 20, 0, borderRadius).stroke()
 
     ////////////////////////////////////////////
