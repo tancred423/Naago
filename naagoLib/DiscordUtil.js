@@ -12,7 +12,8 @@ const {
   noticeIconLink,
   maintenanceIconLink,
   updateIconLink,
-  statusIconLink
+  statusIconLink,
+  lodestoneIconLink
 } = require('../config.json')
 const NaagoUtil = require('./NaagoUtil')
 
