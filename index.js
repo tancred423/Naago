@@ -3,21 +3,21 @@ const { Client, Collection, Intents } = require('discord.js')
 const {
   token,
   twitterStreamEnabled,
-  lodestoneCheckOnStart,
-  deployContextInteractions,
-  guildId
+  lodestoneCheckOnStart
 } = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
 const ButtonUtil = require('./naagoLib/ButtonUtil')
 const SelectMenuUtil = require('./naagoLib/SelectMenuUtil')
-const ContextMenuUtil = require('./naagoLib/ContextMenuUtil')
 const TwitterUtil = require('./naagoLib/TwitterUtil')
 const GlobalUtil = require('./naagoLib/GlobalUtil')
-const MaintenanceUtil = require('./naagoLib/MaintenanceUtil')
 const moment = require('moment')
 const cron = require('node-cron')
 const TopicsUtil = require('./naagoLib/TopicsUtil')
+const NoticesUtil = require('./naagoLib/NoticesUtil')
+const MaintenancesUtil = require('./naagoLib/MaintenancesUtil')
+const UpdatesUtil = require('./naagoLib/UpdatesUtil')
+const StatusUtil = require('./naagoLib/StatusUtil')
 
 // Locale
 moment.locale('en')
@@ -72,44 +72,27 @@ client.once('ready', () => {
     console.error(err)
   }
 
-  // Maintenance checker
+  // Lodestone checker
   try {
     if (lodestoneCheckOnStart) {
-      MaintenanceUtil.updateDb()
-      TopicsUtil.updateDb()
+      checkLodestone()
     } else {
       cron.schedule('*/15 * * * *', () => {
-        MaintenanceUtil.updateDb()
-        TopicsUtil.updateDb()
+        checkLodestone()
       })
     }
   } catch (err) {
     console.error(err)
   }
-
-  // Context
-  if (deployContextInteractions) {
-    client.application.commands
-      .create(
-        {
-          name: 'Add favorite',
-          type: 2
-        },
-        guildId
-      )
-      .catch(console.error)
-
-    client.application.commands
-      .create(
-        {
-          name: 'Remove favorite',
-          type: 2
-        },
-        guildId
-      )
-      .catch(console.error)
-  }
 })
+
+async function checkLodestone() {
+  await TopicsUtil.updateDb()
+  await NoticesUtil.updateDb()
+  await MaintenancesUtil.updateDb()
+  await UpdatesUtil.updateDb()
+  await StatusUtil.updateDb()
+}
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
@@ -167,8 +150,10 @@ client.on('interactionCreate', async (interaction) => {
       })
     }
   } else if (interaction.isContextMenu()) {
+    const command = client.commands.get(interaction.commandName)
+
     try {
-      ContextMenuUtil.execute(interaction)
+      command.execute(interaction)
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(

@@ -3,6 +3,7 @@ const {
   MessageActionRow,
   MessageButton
 } = require('discord.js')
+const { setupTopics } = require('../commands/setup')
 const DbUtil = require('./DbUtil')
 const DiscordUtil = require('./DiscordUtil')
 const ProfileUtil = require('./ProfileUtil')
@@ -23,7 +24,9 @@ module.exports = class SelectMenuUtil {
       return
     }
 
-    if (interaction.customId === 'theme') {
+    const menuId = interaction.customId
+
+    if (menuId === 'theme') {
       await interaction.deferUpdate()
 
       const theme = interaction.values[0]
@@ -57,7 +60,7 @@ module.exports = class SelectMenuUtil {
         components: [],
         embeds: [embed]
       })
-    } else if (interaction.customId === 'favorite.get') {
+    } else if (menuId === 'favorite.get') {
       await interaction.deferUpdate()
 
       const characterId = interaction.values[0]
@@ -113,7 +116,7 @@ module.exports = class SelectMenuUtil {
           })
         }
       }
-    } else if (interaction.customId === 'favorite.remove') {
+    } else if (menuId === 'favorite.remove') {
       await interaction.deferUpdate()
 
       const characterId = interaction.values[0]

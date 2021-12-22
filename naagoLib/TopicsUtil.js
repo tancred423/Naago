@@ -1,5 +1,4 @@
 const axios = require('axios')
-const { MessageEmbed } = require('discord.js')
 const NaagoUtil = require('./NaagoUtil')
 const DiscordUtil = require('./DiscordUtil')
 const DbUtil = require('./DbUtil')
@@ -18,9 +17,7 @@ module.exports = class TopicsUtil {
   }
 
   static async updateDb() {
-    console.log(
-      `[${moment().format('YYYY-MM-DD HH:mm')}] Checking for topics/news`
-    )
+    console.log(`[${moment().format('YYYY-MM-DD HH:mm')}] Checking for topics`)
 
     const latestTopics = await this.getLast10()
     const newTopics = []
@@ -33,12 +30,17 @@ module.exports = class TopicsUtil {
       let markdown = NaagoUtil.topicHtmlToMarkdown(topic.description)
       const parsedMarkdown = NaagoUtil.parseImageLinkFromMarkdown(markdown)
       markdown = parsedMarkdown?.markdown
+      markdown = NaagoUtil.cutString(markdown, 2500)
       topic.description = markdown
       const links = parsedMarkdown?.links
       topic.banner = links?.length === 1 ? links[0] : topic.banner
 
       newTopics.push(topic)
     }
+
+    console.log(
+      `[${moment().format('YYYY-MM-DD HH:mm')}] New topics: ${newTopics.length}`
+    )
 
     for (const newTopic of newTopics.reverse()) {
       DbUtil.addTopic(newTopic)
@@ -50,27 +52,21 @@ module.exports = class TopicsUtil {
     // Send embeds
     const client = GlobalUtil.client
     if (!client) return
-    const tInfo = await DbUtil.getTopicInfo()
-    if (!tInfo || tInfo?.length < 1) return
+    const setups = await DbUtil.getSetups('topics')
+    if (!setups || setups?.length < 1) return
 
-    for (const info of tInfo) {
+    for (const setup of setups) {
       try {
-        const guild = await client.guilds.fetch(info.guild_id)
+        const guild = await client.guilds.fetch(setup.guild_id)
         if (!guild) continue
-        const channel = await guild.channels.fetch(info.channel_id)
+        const channel = await guild.channels.fetch(setup.channel_id)
         if (!channel) continue
 
-        const botColor = await DiscordUtil.getBotColorByClientGuild(
-          client,
-          guild
-        )
-        const embed = DiscordUtil.getTopicEmbed(topic, botColor)
+        const embed = DiscordUtil.getTopicEmbed(topic)
 
         await channel.send({ embeds: [embed] })
       } catch (err) {
-        console.log(
-          `[TOPICS] Could not access guild: ${info.guild_id} and/or channel: ${info.channel_id}`
-        )
+        console.log(`[TOPICS] Sending topic was NOT successful: ${err.message}`)
         continue
       }
     }

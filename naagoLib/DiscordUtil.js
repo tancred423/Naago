@@ -1,7 +1,20 @@
 const { MessageEmbed, Permissions } = require('discord.js')
-const { green, red, blurple } = require('../config.json')
+const {
+  green,
+  red,
+  blurple,
+  colorTopics,
+  colorNotices,
+  colorMaintenances,
+  colorUpdates,
+  colorStatus,
+  topicIconLink,
+  noticeIconLink,
+  maintenanceIconLink,
+  updateIconLink,
+  statusIconLink
+} = require('../config.json')
 const NaagoUtil = require('./NaagoUtil')
-const { maintenanceIconLink, topicIconLink } = require('../config.json')
 
 module.exports = class DiscordUtil {
   static getSuccessEmbed(message) {
@@ -76,6 +89,16 @@ module.exports = class DiscordUtil {
       return await naagoEmoteServer.emojis.fetch('922699017337597952')
     } else if (name === 'theme_character_selection') {
       return await naagoEmoteServer.emojis.fetch('922709333639311422')
+    } else if (name === 'maintenances') {
+      return await naagoEmoteServer.emojis.fetch('922959045193793557')
+    } else if (name === 'notices') {
+      return await naagoEmoteServer.emojis.fetch('922959045256679444')
+    } else if (name === 'status') {
+      return await naagoEmoteServer.emojis.fetch('922959045378326578')
+    } else if (name === 'topics') {
+      return await naagoEmoteServer.emojis.fetch('922959045277650994')
+    } else if (name === 'updates') {
+      return await naagoEmoteServer.emojis.fetch('922959045466398770')
     } else return null
   }
 
@@ -118,26 +141,62 @@ module.exports = class DiscordUtil {
     }
   }
 
-  static getMaintenanceEmbed(maint, botColor) {
+  static getTopicEmbed(topic) {
     return new MessageEmbed()
-      .setColor(botColor)
-      .setAuthor(maint.tag, maintenanceIconLink)
-      .setTitle(maint.title)
-      .setURL(maint.link)
-      .setDescription(maint.details)
-      .setFooter('Posted at')
-      .setTimestamp(maint.date)
-  }
-
-  static getTopicEmbed(topic, botColor) {
-    return new MessageEmbed()
-      .setColor(botColor)
-      .setAuthor('[News]', topicIconLink)
+      .setColor(colorTopics)
+      .setAuthor('Topic', topicIconLink)
       .setTitle(topic.title)
       .setURL(topic.link)
       .setDescription(topic.description)
       .setImage(topic.banner)
-      .setFooter('Posted at')
+      .setFooter('Posted on')
       .setTimestamp(topic.date)
+  }
+
+  static getNoticesEmbed(notice) {
+    return new MessageEmbed()
+      .setColor(colorNotices)
+      .setAuthor(notice.tag, noticeIconLink)
+      .setTitle(notice.title)
+      .setURL(notice.link)
+      .setDescription(notice.details)
+      .setFooter('Posted on')
+      .setTimestamp(notice.date)
+  }
+
+  static getMaintenanceEmbed(maint) {
+    return new MessageEmbed()
+      .setColor(colorMaintenances)
+      .setAuthor(
+        maint.tag === 'Maintenance' ? maint.tag : `Maintenance: ${maint.tag}`,
+        maintenanceIconLink
+      )
+      .setTitle(maint.title)
+      .setURL(maint.link)
+      .setDescription(maint.details)
+      .setFooter('Posted on')
+      .setTimestamp(maint.date)
+  }
+
+  static getUpdatesEmbed(update) {
+    return new MessageEmbed()
+      .setColor(colorUpdates)
+      .setAuthor('Update', updateIconLink)
+      .setTitle(update.title)
+      .setURL(update.link)
+      .setDescription(update.details)
+      .setFooter('Posted on')
+      .setTimestamp(update.date)
+  }
+
+  static getStatusEmbed(status) {
+    return new MessageEmbed()
+      .setColor(colorStatus)
+      .setAuthor(status.tag, statusIconLink)
+      .setTitle(status.title)
+      .setURL(status.link)
+      .setDescription(status.details)
+      .setFooter('Posted on')
+      .setTimestamp(status.date)
   }
 }

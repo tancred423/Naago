@@ -93,13 +93,13 @@ module.exports = class TwitterUtil {
       // Send embeds
       const client = GlobalUtil.client
       if (!client) return
-      const frInfo = await DbUtil.getFashionReportInfo()
-      if (!frInfo || frInfo?.length < 1) return
+      const setups = await DbUtil.getSetups('fashion_report')
+      if (!setups || setups?.length < 1) return
 
-      for (const info of frInfo) {
-        const guild = await client.guilds.fetch(info.guild_id)
+      for (const setup of setups) {
+        const guild = await client.guilds.fetch(setup.guild_id)
         if (!guild) continue
-        const channel = await guild.channels.fetch(info.channel_id)
+        const channel = await guild.channels.fetch(setup.channel_id)
         if (!channel) continue
 
         const embed = new MessageEmbed()

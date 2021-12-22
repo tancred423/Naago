@@ -1,54 +1,50 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { MessageActionRow, MessageButton, Permissions } = require('discord.js')
+const { ChannelType } = require('discord-api-types/v9')
+const { Permissions, MessageActionRow, MessageButton } = require('discord.js')
 const DbUtil = require('../naagoLib/DbUtil')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
+const NaagoUtil = require('../naagoLib/NaagoUtil')
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setup')
     .setDescription("Setup M'naago.")
-    .addSubcommandGroup((subcommandGroup) =>
-      subcommandGroup
-        .setName('fashionreport')
-        .setDescription('Set up automated fashion report details.')
-        .addSubcommand((subcommand) =>
-          subcommand
-            .setName('set')
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName('notifications')
+        .setDescription('Set up automated lodestone notifications.')
+        .addStringOption((option) =>
+          option
+            .setName('type')
+            .setDescription('Which category?')
+            .setRequired(true)
+            .addChoice('Topics (Latest news and patch notes)', 'topics')
+            .addChoice(
+              'Notices (Secondary news and letters from Naoki Yoshida)',
+              'notices'
+            )
+            .addChoice(
+              'Maintenances (All kind of maintenances and their durations)',
+              'maintenances'
+            )
+            .addChoice('Updates (Outcome from maintenances)', 'updates')
+            .addChoice(
+              'Status (Technical difficulties and server statuses)',
+              'status'
+            )
+            .addChoice(
+              'Fashion Report (Solutions by Kaiyoko)',
+              'fashion_report'
+            )
+        )
+        .addChannelOption((option) =>
+          option
+            .setName('channel')
             .setDescription(
-              'Set a channel for automated fashion report details.'
+              'The channel to post the notifications in. Provide the current one to unset it.'
             )
-            .addChannelOption((option) =>
-              option
-                .setName('channel')
-                .setDescription('The channel for fashion report details.')
-                .setRequired(true)
-            )
-        )
-        .addSubcommand((subcommand) =>
-          subcommand
-            .setName('unset')
-            .setDescription('Unset the channel for fashion report details.')
-        )
-    )
-    .addSubcommandGroup((subcommandGroup) =>
-      subcommandGroup
-        .setName('maintenance')
-        .setDescription('Set up automated maintenance details.')
-        .addSubcommand((subcommand) =>
-          subcommand
-            .setName('set')
-            .setDescription('Set a channel for automated maintenance details.')
-            .addChannelOption((option) =>
-              option
-                .setName('channel')
-                .setDescription('The channel for maintenance details.')
-                .setRequired(true)
-            )
-        )
-        .addSubcommand((subcommand) =>
-          subcommand
-            .setName('unset')
-            .setDescription('Unset the channel for maintenance details.')
+            .setRequired(true)
+            .addChannelType(ChannelType.GuildText)
         )
     )
     .addSubcommand((subcommand) =>
@@ -67,173 +63,152 @@ module.exports = {
     )
       return
 
-    await interaction.deferReply({ ephemeral: true })
+    if (interaction.options.getSubcommand() === 'notifications') {
+      const guildId = interaction.guild.id
+      const type = interaction.options.getString('type')
+      const typeName = NaagoUtil.capitalizeFirstLetter(type)
+      const channel = interaction.options.getChannel('channel')
 
-    const guildId = interaction.guild.id
+      const currentChannelId = await DbUtil.getSetupChannelId(guildId, type)
 
-    if (interaction.options.getSubcommandGroup(false) === 'fashionreport') {
-      if (interaction.options.getSubcommand() === 'set') {
-        const channel = interaction.options.getChannel('channel')
-
-        const successful = await DbUtil.setFashionReportChannelId(
-          guildId,
-          channel.id
+      if (channel.id === currentChannelId) {
+        // Unset
+        const row = new MessageActionRow().addComponents(
+          new MessageButton()
+            .setCustomId('setup.unset.cancel')
+            .setLabel('No, cancel.')
+            .setStyle('SECONDARY'),
+          new MessageButton()
+            .setCustomId(`setup.unset.${type}`)
+            .setLabel('Yes, unset it.')
+            .setStyle('DANGER')
         )
 
-        if (!successful) {
-          const embed = DiscordUtil.getErrorEmbed(
-            `Fashion report channel could not be set to ${channel.toString()}. Please contact Tancred#0001 for help.`
-          )
-
-          await interaction.editReply({
-            embeds: [embed]
-          })
-
-          return
-        }
-
-        const embed = DiscordUtil.getSuccessEmbed(
-          `Automated fashion report updates will now be in ${channel.toString()}.`
-        )
-
-        await interaction.editReply({
-          embeds: [embed]
+        await interaction.reply({
+          ephemeral: true,
+          content: `${channel.toString()} is already set as ${typeName} notification channel. Do you want to unset it?`,
+          components: [row]
         })
-      } else {
-        const currentchannel = await DbUtil.getFashionReportChannelId(guildId)
 
-        if (!currentchannel) {
-          const embed = DiscordUtil.getSuccessEmbed(
-            "You didn't set a channel yet."
-          )
-
-          await interaction.editReply({
-            embeds: [embed]
-          })
-
-          return
-        }
-
-        const successful = await DbUtil.unsetFashionReportChannelId(guildId)
-
-        if (!successful) {
-          const embed = DiscordUtil.getErrorEmbed(
-            'The channel could not be unset. Please contact Tancred#0001 for help.'
-          )
-
-          await interaction.editReply({
-            embeds: [embed]
-          })
-
-          return
-        }
-
-        const embed = DiscordUtil.getSuccessEmbed(
-          'Fashion report channel successfully unset.'
-        )
-
-        await interaction.editReply({
-          embeds: [embed]
-        })
+        return
       }
-    } else if (
-      interaction.options.getSubcommandGroup(false) === 'maintenance'
-    ) {
-      if (interaction.options.getSubcommand() === 'set') {
-        const channel = interaction.options.getChannel('channel')
 
-        const successful = await DbUtil.setMaintenanceChannelId(
-          guildId,
-          channel.id
+      // Set/Change
+      const successful = await DbUtil.setSetupChannelId(
+        guildId,
+        type,
+        channel.id
+      )
+
+      if (!successful) {
+        const embed = DiscordUtil.getErrorEmbed(
+          `Could not set ${typeName} notification channel. Please contact Tancred#0001 for help.`
         )
 
-        if (!successful) {
-          const embed = DiscordUtil.getErrorEmbed(
-            `Maintenance channel could not be set to ${channel.toString()}. Please contact Tancred#0001 for help.`
-          )
-
-          await interaction.editReply({
-            embeds: [embed]
-          })
-
-          return
-        }
-
-        const embed = DiscordUtil.getSuccessEmbed(
-          `Automated maintenance updates will now be in ${channel.toString()}.`
-        )
-
-        await interaction.editReply({
-          embeds: [embed]
+        await interaction.reply({
+          embeds: [embed],
+          ephemeral: true
         })
-      } else {
-        const currentchannel = await DbUtil.getMaintenanceChannelId(guildId)
 
-        if (!currentchannel) {
-          const embed = DiscordUtil.getSuccessEmbed(
-            "You didn't set a channel yet."
-          )
-
-          await interaction.editReply({
-            embeds: [embed]
-          })
-
-          return
-        }
-
-        const successful = await DbUtil.unsetMaintenanceChannelId(guildId)
-
-        if (!successful) {
-          const embed = DiscordUtil.getErrorEmbed(
-            'The channel could not be unset. Please contact Tancred#0001 for help.'
-          )
-
-          await interaction.editReply({
-            embeds: [embed]
-          })
-
-          return
-        }
-
-        const embed = DiscordUtil.getSuccessEmbed(
-          'Maintenance channel successfully unset.'
-        )
-
-        await interaction.editReply({
-          embeds: [embed]
-        })
+        return
       }
-    } else {
+
+      const embed = DiscordUtil.getSuccessEmbed(
+        `${channel.toString()} was set up for ${typeName} notifications.`
+      )
+
+      await interaction.reply({
+        embeds: [embed],
+        ephemeral: true
+      })
+    } else if (interaction.options.getSubcommand() === 'purge') {
       const row = new MessageActionRow().addComponents(
         new MessageButton()
           .setCustomId('unsetup.cancel')
           .setLabel('No, cancel.')
           .setStyle('SECONDARY'),
         new MessageButton()
-          .setCustomId(`unsetup.agree}`)
+          .setCustomId(`unsetup.confirm`)
           .setLabel('Yes, delete it.')
           .setStyle('DANGER')
       )
 
-      await interaction.editReply({
+      await interaction.reply({
+        ephemeral: true,
         content:
-          'Are you sure you want to delete all stored data of this guild?',
+          'Are you sure you want to delete all stored data from this server?',
         components: [row]
       })
     }
   },
 
+  unset: async (interaction) => {
+    const idSplit = interaction.component.customId.split('.')
+    if (idSplit.length !== 3) {
+      const embeds = DiscordUtil.getErrorEmbed(
+        `Could not fetch your answer. Please try again later.`
+      )
+
+      await interaction.editReply({
+        embeds: [embeds],
+        ephemeral: true
+      })
+
+      return
+    }
+
+    const type = idSplit[2]
+    const typeName = NaagoUtil.capitalizeFirstLetter(type)
+
+    if (type === 'cancel') {
+      const embed = DiscordUtil.getSuccessEmbed('Cancelled.')
+
+      await interaction.editReply({
+        content: ' ',
+        embeds: [embed],
+        components: []
+      })
+
+      return
+    }
+
+    const successful = DbUtil.unsetSetupChannelId(interaction.guild.id, type)
+
+    if (!successful) {
+      const embed = DiscordUtil.getErrorEmbed(
+        `The channel for ${typeName} notifications could not be unset. Please contact Tancred#0001 for help.`
+      )
+
+      await interaction.editReply({
+        content: ' ',
+        embeds: [embed],
+        components: []
+      })
+    }
+
+    const embed = DiscordUtil.getSuccessEmbed(
+      `${typeName} notifications will no longer be posted in that channel.`
+    )
+
+    await interaction.editReply({
+      content: ' ',
+      embeds: [embed],
+      components: []
+    })
+  },
+
   unsetup: async (interaction) => {
     const idSplit = interaction.component.customId.split('.')
     if (idSplit.length !== 2) {
+      const embeds = DiscordUtil.getErrorEmbed(
+        `Could not fetch your answer. Please try again later.`
+      )
+
       await interaction.editReply({
-        embeds: [
-          DiscordUtil.getErrorEmbed(
-            `Could not fetch your answer. Please try again later.`
-          )
-        ],
+        embeds: [embeds],
         ephemeral: true
       })
+
       return
     }
 
@@ -241,27 +216,19 @@ module.exports = {
 
     if (action === 'cancel') {
       const embed = DiscordUtil.getSuccessEmbed('Cancelled.')
+
       await interaction.editReply({
         content: ' ',
         embeds: [embed],
         components: []
       })
+
       return
     }
 
-    const successful = DbUtil.purgeGuild(interaction.guild.id)
+    const successful = await DbUtil.purgeGuild(interaction.guild.id)
 
-    if (successful) {
-      const embed = DiscordUtil.getSuccessEmbed(
-        'All data from this guild has been deleted.'
-      )
-
-      await interaction.editReply({
-        content: ' ',
-        embeds: [embed],
-        components: []
-      })
-    } else {
+    if (!successful) {
       const embed = DiscordUtil.getErrorEmbed(
         "This guild's data could not be (fully) deleted. Please contact Tancred#0001 for help."
       )
@@ -271,6 +238,18 @@ module.exports = {
         embeds: [embed],
         components: []
       })
+
+      return
     }
+
+    const embed = DiscordUtil.getSuccessEmbed(
+      'All data from this guild has been deleted.'
+    )
+
+    await interaction.editReply({
+      content: ' ',
+      embeds: [embed],
+      components: []
+    })
   }
 }

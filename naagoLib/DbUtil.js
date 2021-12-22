@@ -221,14 +221,13 @@ module.exports = class DbUtil {
       `
 
       const res2 = await this.getMysqlResult(sql)
-      if (!res2) return undefined
 
-      const characterData = JSON.parse(res2.json_string)
+      const characterData = res2 ? JSON.parse(res2.json_string) : undefined
 
       return {
-        id: characterId,
-        name: characterData.name,
-        server: `${characterData.server.world} (${characterData.server.dc})`
+        ID: characterId,
+        name: characterData?.name,
+        server: characterData?.server
       }
     } catch (err) {
       console.error(
@@ -611,93 +610,6 @@ module.exports = class DbUtil {
   }
 
   ////////////////////////////////////////////
-  // Maintenance
-  ////////////////////////////////////////////
-  static async getCurrentMaintenances() {
-    try {
-      const now = moment().tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
-
-      const sql = `
-        SELECT *
-        FROM maintenance_data
-        WHERE m_from <= ${mysql.escape(now)}
-        AND m_to >= ${mysql.escape(now)}
-        ORDER BY id DESC
-      `
-
-      let res = await mysql.query(sql)
-
-      if (res?.[0]?.length < 1) res = undefined
-      else res = res?.[0]
-
-      return res
-    } catch (err) {
-      console.error(
-        `[ERROR] Getting current maintenance was NOT successful. Error: ${err.message}`
-      )
-      return undefined
-    }
-  }
-
-  static async getMaintenanceByTitle(title) {
-    try {
-      const sql = `
-        SELECT *
-        FROM maintenance_data
-        WHERE title=${mysql.escape(title)}
-      `
-
-      const res = await mysql.query(sql)
-
-      return res?.[0]?.[0]
-    } catch (err) {
-      console.error(
-        `[ERROR] Getting maintenance by title was NOT successful. Error: ${err.message}`
-      )
-      return undefined
-    }
-  }
-
-  static async addMaintenance(maintenance) {
-    try {
-      if (!(await this.getMaintenanceByTitle(maintenance.title))) {
-        // Insert
-        const sql = `
-          INSERT INTO maintenance_data (title,tag,date,link,details,m_from,m_to)
-          VALUES (
-            ${mysql.escape(maintenance.title)},
-            ${mysql.escape(maintenance.tag)},
-            ${mysql.escape(
-              moment(maintenance.date)
-                .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
-            )},
-            ${mysql.escape(maintenance.link)},
-            ${mysql.escape(maintenance.details)},
-            ${mysql.escape(
-              maintenance.mFrom
-                .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
-            )},
-            ${mysql.escape(
-              maintenance.mTo.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
-            )}
-          )
-        `
-
-        await mysql.query(sql)
-
-        return true
-      } else return 'existant'
-    } catch (err) {
-      console.error(
-        `[ERROR] Adding maintenance was NOT successful. Error: ${err.message}`
-      )
-      return false
-    }
-  }
-
-  ////////////////////////////////////////////
   // Topic
   ////////////////////////////////////////////
   static async getTopicByTitle(title, date) {
@@ -751,13 +663,273 @@ module.exports = class DbUtil {
   }
 
   ////////////////////////////////////////////
-  // Setup - Fashion Report
+  // Notices
   ////////////////////////////////////////////
-  static async getFashionReportInfo() {
+  static async getNoticeByTitle(title, date) {
     try {
       const sql = `
         SELECT *
-        FROM fashion_reports
+        FROM notice_data
+        WHERE title=${mysql.escape(title)}
+        AND date=${mysql.escape(
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+        )}
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting notices by title was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async addNotices(notice) {
+    try {
+      if (!(await this.getNoticeByTitle(notice.title, notice.date))) {
+        // Insert
+        const sql = `
+          INSERT INTO notice_data (title,tag,date,link,details)
+          VALUES (
+            ${mysql.escape(notice.title)},
+            ${mysql.escape(notice.tag)},
+            ${mysql.escape(
+              moment(notice.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
+            )},
+            ${mysql.escape(notice.link)},
+            ${mysql.escape(notice.details)}
+          )
+        `
+
+        await mysql.query(sql)
+
+        return true
+      } else return 'existant'
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding notice was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Maintenance
+  ////////////////////////////////////////////
+  static async getCurrentMaintenances() {
+    try {
+      const now = moment().tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+
+      const sql = `
+        SELECT *
+        FROM maintenance_data
+        WHERE m_from <= ${mysql.escape(now)}
+        AND m_to >= ${mysql.escape(now)}
+        ORDER BY id DESC
+      `
+
+      let res = await mysql.query(sql)
+
+      if (res?.[0]?.length < 1) res = undefined
+      else res = res?.[0]
+
+      return res
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting current maintenance was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async getMaintenanceByTitle(title, date) {
+    try {
+      const sql = `
+        SELECT *
+        FROM maintenance_data
+        WHERE title=${mysql.escape(title)}
+        AND date=${mysql.escape(
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+        )}
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting maintenance by title was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async addMaintenance(maintenance) {
+    try {
+      if (
+        !(await this.getMaintenanceByTitle(maintenance.title, maintenance.date))
+      ) {
+        // Insert
+        const sql = `
+          INSERT INTO maintenance_data (title,tag,date,link,details,m_from,m_to)
+          VALUES (
+            ${mysql.escape(maintenance.title)},
+            ${mysql.escape(maintenance.tag)},
+            ${mysql.escape(
+              moment(maintenance.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
+            )},
+            ${mysql.escape(maintenance.link)},
+            ${mysql.escape(maintenance.details)},
+            ${mysql.escape(
+              maintenance.mFrom
+                ?.tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
+            )},
+            ${mysql.escape(
+              maintenance.mTo?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+            )}
+          )
+        `
+
+        await mysql.query(sql)
+
+        return true
+      } else return 'existant'
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding maintenance was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Updates
+  ////////////////////////////////////////////
+  static async getUpdateByTitle(title, date) {
+    try {
+      const sql = `
+        SELECT *
+        FROM update_data
+        WHERE title=${mysql.escape(title)}
+        AND date=${mysql.escape(
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+        )}
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting update by title was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async addUpdate(update) {
+    try {
+      if (!(await this.getUpdateByTitle(update.title, update.date))) {
+        // Insert
+        const sql = `
+          INSERT INTO update_data (title,date,link,details)
+          VALUES (
+            ${mysql.escape(update.title)},
+            ${mysql.escape(
+              moment(update.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
+            )},
+            ${mysql.escape(update.link)},
+            ${mysql.escape(update.details)}
+          )
+        `
+
+        await mysql.query(sql)
+
+        return true
+      } else return 'existant'
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding update was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Status
+  ////////////////////////////////////////////
+  static async getStatusByTitle(title, date) {
+    try {
+      const sql = `
+        SELECT *
+        FROM status_data
+        WHERE title=${mysql.escape(title)}
+        AND date=${mysql.escape(
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+        )}
+      `
+
+      const res = await mysql.query(sql)
+
+      return res?.[0]?.[0]
+    } catch (err) {
+      console.error(
+        `[ERROR] Getting status by title was NOT successful. Error: ${err.message}`
+      )
+      return undefined
+    }
+  }
+
+  static async addStatus(status) {
+    try {
+      if (!(await this.getStatusByTitle(status.title, status.date))) {
+        // Insert
+        const sql = `
+          INSERT INTO status_data (title,tag,date,link,details)
+          VALUES (
+            ${mysql.escape(status.title)},
+            ${mysql.escape(status.tag)},
+            ${mysql.escape(
+              moment(status.date)
+                .tz('Europe/London')
+                .format('YYYY-MM-DD HH:mm:ss')
+            )},
+            ${mysql.escape(status.link)},
+            ${mysql.escape(status.details)}
+          )
+        `
+
+        await mysql.query(sql)
+
+        return true
+      } else return 'existant'
+    } catch (err) {
+      console.error(
+        `[ERROR] Adding status was NOT successful. Error: ${err.message}`
+      )
+      return false
+    }
+  }
+
+  ////////////////////////////////////////////
+  // Setup
+  ////////////////////////////////////////////
+  static async getSetups(type) {
+    try {
+      const sql = `
+        SELECT *
+        FROM setups
+        WHERE type=${mysql.escape(type)}
       `
 
       const res = await mysql.query(sql)
@@ -765,47 +937,51 @@ module.exports = class DbUtil {
       return res?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting fashion report info was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting ${type} channel IDs was NOT successful. Error: ${err.message}`
       )
       return undefined
     }
   }
 
-  static async getFashionReportChannelId(guildId) {
+  static async getSetupChannelId(guildId, type) {
     try {
       const sql = `
         SELECT channel_id
-        FROM fashion_reports
+        FROM setups
         WHERE guild_id=${mysql.escape(guildId)}
+        AND type=${mysql.escape(type)}
       `
 
       const res = await this.getMysqlResult(sql)
+
       return res?.channel_id
     } catch (err) {
       console.error(
-        `[ERROR] Getting fashion report channel ID was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting ${type} channel ID was NOT successful. Error: ${err.message}`
       )
       return undefined
     }
   }
 
-  static async setFashionReportChannelId(guildId, channelId) {
+  static async setSetupChannelId(guildId, type, channelId) {
     try {
-      if (await this.getFashionReportChannelId(guildId)) {
+      if (await this.getSetupChannelId(guildId, type)) {
         // Update
         const sql = `
-          UPDATE fashion_reports
+          UPDATE setups
           SET channel_id=${mysql.escape(channelId)}
           WHERE guild_id=${mysql.escape(guildId)}
+          AND type=${mysql.escape(type)}
         `
 
         await mysql.query(sql)
       } else {
         // Insert
         const sql = `
-          INSERT INTO fashion_reports (guild_id,channel_id)
+          INSERT INTO setups (guild_id,type,channel_id)
           VALUES (
             ${mysql.escape(guildId)},
+            ${mysql.escape(type)},
             ${mysql.escape(channelId)}
           )
         `
@@ -815,17 +991,18 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Setting fashion report channel ID was NOT successful. Error: ${err.message}`
+        `[ERROR] Setting ${type} channel ID was NOT successful. Error: ${err.message}`
       )
       return false
     }
   }
 
-  static async unsetFashionReportChannelId(guildId) {
+  static async unsetSetupChannelId(guildId, type) {
     try {
       const sql = `
-        DELETE FROM fashion_reports
+        DELETE FROM setups
         WHERE guild_id=${mysql.escape(guildId)}
+        AND type=${mysql.escape(type)}
       `
 
       await mysql.query(sql)
@@ -833,185 +1010,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Unsetting fashion report channel ID was NOT successful. Error: ${err.message}`
-      )
-      return false
-    }
-  }
-
-  ////////////////////////////////////////////
-  // Setup - Maintenance
-  ////////////////////////////////////////////
-  static async getMaintenanceInfo() {
-    try {
-      const sql = `
-        SELECT *
-        FROM maintenances
-      `
-
-      const res = await mysql.query(sql)
-
-      return res?.[0]
-    } catch (err) {
-      console.error(
-        `[ERROR] Getting maintenance info was NOT successful. Error: ${err.message}`
-      )
-      return undefined
-    }
-  }
-
-  static async getMaintenanceChannelId(guildId) {
-    try {
-      const sql = `
-        SELECT channel_id
-        FROM maintenances
-        WHERE guild_id=${mysql.escape(guildId)}
-      `
-
-      const res = await this.getMysqlResult(sql)
-      return res?.channel_id
-    } catch (err) {
-      console.error(
-        `[ERROR] Getting maintenance channel ID was NOT successful. Error: ${err.message}`
-      )
-      return undefined
-    }
-  }
-
-  static async setMaintenanceChannelId(guildId, channelId) {
-    try {
-      if (await this.getMaintenanceChannelId(guildId)) {
-        // Update
-        const sql = `
-          UPDATE maintenances
-          SET channel_id=${mysql.escape(channelId)}
-          WHERE guild_id=${mysql.escape(guildId)}
-        `
-
-        await mysql.query(sql)
-      } else {
-        // Insert
-        const sql = `
-          INSERT INTO maintenances (guild_id,channel_id)
-          VALUES (
-            ${mysql.escape(guildId)},
-            ${mysql.escape(channelId)}
-          )
-        `
-
-        await mysql.query(sql)
-      }
-      return true
-    } catch (err) {
-      console.error(
-        `[ERROR] Setting maintenance channel ID was NOT successful. Error: ${err.message}`
-      )
-      return false
-    }
-  }
-
-  static async unsetMaintenanceChannelId(guildId) {
-    try {
-      const sql = `
-        DELETE FROM maintenances
-        WHERE guild_id=${mysql.escape(guildId)}
-      `
-
-      await mysql.query(sql)
-
-      return true
-    } catch (err) {
-      console.error(
-        `[ERROR] Unsetting maintenance channel ID was NOT successful. Error: ${err.message}`
-      )
-      return false
-    }
-  }
-
-  ////////////////////////////////////////////
-  // Setup - Topic
-  ////////////////////////////////////////////
-  static async getTopicInfo() {
-    try {
-      const sql = `
-        SELECT *
-        FROM topics
-      `
-
-      const res = await mysql.query(sql)
-
-      return res?.[0]
-    } catch (err) {
-      console.error(
-        `[ERROR] Getting topic info was NOT successful. Error: ${err.message}`
-      )
-      return undefined
-    }
-  }
-
-  static async getTopicChannelId(guildId) {
-    try {
-      const sql = `
-        SELECT channel_id
-        FROM topics
-        WHERE guild_id=${mysql.escape(guildId)}
-      `
-
-      const res = await this.getMysqlResult(sql)
-      return res?.channel_id
-    } catch (err) {
-      console.error(
-        `[ERROR] Getting topic channel ID was NOT successful. Error: ${err.message}`
-      )
-      return undefined
-    }
-  }
-
-  static async setTopicChannelId(guildId, channelId) {
-    try {
-      if (await this.getTopicChannelId(guildId)) {
-        // Update
-        const sql = `
-          UPDATE topics
-          SET channel_id=${mysql.escape(channelId)}
-          WHERE guild_id=${mysql.escape(guildId)}
-        `
-
-        await mysql.query(sql)
-      } else {
-        // Insert
-        const sql = `
-          INSERT INTO topics (guild_id,channel_id)
-          VALUES (
-            ${mysql.escape(guildId)},
-            ${mysql.escape(channelId)}
-          )
-        `
-
-        await mysql.query(sql)
-      }
-      return true
-    } catch (err) {
-      console.error(
-        `[ERROR] Setting topic channel ID was NOT successful. Error: ${err.message}`
-      )
-      return false
-    }
-  }
-
-  static async unsetTopicChannelId(guildId) {
-    try {
-      const sql = `
-        DELETE FROM topics
-        WHERE guild_id=${mysql.escape(guildId)}
-      `
-
-      await mysql.query(sql)
-
-      return true
-    } catch (err) {
-      console.error(
-        `[ERROR] Unsetting topic channel ID was NOT successful. Error: ${err.message}`
+        `[ERROR] Unsetting ${type} channel ID was NOT successful. Error: ${err.message}`
       )
       return false
     }
@@ -1023,15 +1022,8 @@ module.exports = class DbUtil {
 
   static async purgeGuild(guildId) {
     try {
-      let sql = `
-        DELETE FROM fashion_reports
-        WHERE guild_id=${mysql.escape(guildId)}
-      `
-
-      await mysql.query(sql)
-
-      sql = `
-        DELETE FROM maintenances
+      const sql = `
+        DELETE FROM setups
         WHERE guild_id=${mysql.escape(guildId)}
       `
 
