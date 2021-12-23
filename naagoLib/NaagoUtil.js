@@ -89,7 +89,7 @@ module.exports = class NaagoUtil {
     let inBlock = false
 
     for (const word of textSplit) {
-      if (word === 'to') hasToDate = true
+      if (inBlock && word === 'to') hasToDate = true
 
       if (inBlock && word === '(GMT)') {
         stringBuilder += ` ${word}`
