@@ -118,7 +118,7 @@ module.exports = class TwitterUtil {
           .setTitle(myTweet.title)
           .setURL(myTweet.tweetUrl)
           .setImage(myTweet.imageUrl)
-          .setFooter('Posted at', twitterIconLink)
+          .setFooter('Twitter', twitterIconLink)
           .setTimestamp(myTweet.timestamp)
 
         await channel.send({ embeds: [embed] })

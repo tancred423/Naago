@@ -150,7 +150,7 @@ module.exports = class DiscordUtil {
       .setURL(topic.link)
       .setDescription(topic.description)
       .setImage(topic.banner)
-      .setFooter('Posted on', lodestoneIconLink)
+      .setFooter('Lodestone', lodestoneIconLink)
       .setTimestamp(topic.date)
   }
 
@@ -161,7 +161,7 @@ module.exports = class DiscordUtil {
       .setTitle(notice.title)
       .setURL(notice.link)
       .setDescription(notice.details)
-      .setFooter('Posted on', lodestoneIconLink)
+      .setFooter('Lodestone', lodestoneIconLink)
       .setTimestamp(notice.date)
   }
 
@@ -175,7 +175,7 @@ module.exports = class DiscordUtil {
       .setTitle(maint.title)
       .setURL(maint.link)
       .setDescription(maint.details)
-      .setFooter('Posted on', lodestoneIconLink)
+      .setFooter('Lodestone', lodestoneIconLink)
       .setTimestamp(maint.date)
   }
 
@@ -186,7 +186,7 @@ module.exports = class DiscordUtil {
       .setTitle(update.title)
       .setURL(update.link)
       .setDescription(update.details)
-      .setFooter('Posted on', lodestoneIconLink)
+      .setFooter('Lodestone', lodestoneIconLink)
       .setTimestamp(update.date)
   }
 
@@ -197,7 +197,7 @@ module.exports = class DiscordUtil {
       .setTitle(status.title)
       .setURL(status.link)
       .setDescription(status.details)
-      .setFooter('Posted on', lodestoneIconLink)
+      .setFooter('Lodestone', lodestoneIconLink)
       .setTimestamp(status.date)
   }
 }
