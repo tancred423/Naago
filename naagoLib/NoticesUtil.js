@@ -4,6 +4,7 @@ const moment = require('moment')
 const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const GlobalUtil = require('./GlobalUtil')
+const Parser = require('./LodestoneParser')
 
 module.exports = class NoticesUtil {
   static async getLast10() {
@@ -23,13 +24,26 @@ module.exports = class NoticesUtil {
     const newNotices = []
 
     for (const notice of latestNotices) {
-      if (
-        await DbUtil.getNoticeByTitle(
-          notice.title ? notice.title : notice.title_full,
-          notice.date * 1000
-        )
-      )
-        continue
+      if (!notice) continue
+
+      notice.title = notice.title ? notice.title : notice.title_full
+      notice.title = Parser.decodeHtmlChars(notice.title)
+      notice.date = Parser.convertTimestampToMs(notice.date)
+
+      // Only process new ones
+      if (await DbUtil.getNoticeByTitle(notice.title, notice.date)) continue
+
+      // Details
+      notice.details = notice.details?.text
+      notice.details = Parser.decodeHtmlChars(notice.details)
+      notice.details = Parser.convertHtmlToMarkdown(notice.details)
+      notice.details = Parser.convertTitles(notice.details)
+      // notice.details = Parser.convertDates('notices', notice.details)
+      notice.details = NaagoUtil.cutString(notice.details, 2500)
+
+      // Tag
+      notice.tag = Parser.convertTag('notice', notice.tag)
+
       newNotices.push(notice)
     }
 
@@ -40,22 +54,6 @@ module.exports = class NoticesUtil {
     )
 
     for (const newNotice of newNotices.reverse()) {
-      if (newNotice.details) {
-        let detailsFormatted = newNotice.details.text
-          .replaceAll('<br>', '')
-          .replaceAll('&amp;', '&')
-          .replaceAll('\n', '<br/>')
-
-        detailsFormatted = NaagoUtil.topicHtmlToMarkdown(detailsFormatted)
-        detailsFormatted = NaagoUtil.cutString(detailsFormatted, 2500)
-        newNotice.details = detailsFormatted
-        newNotice.date = newNotice.date * 1000
-        newNotice.title = newNotice.tag ? newNotice.title : newNotice.title_full
-        newNotice.tag = newNotice.tag
-          ? `Notice: ${newNotice.tag.replaceAll('[', '').replaceAll(']', '')}`
-          : 'Notice'
-      }
-
       DbUtil.addNotices(newNotice)
       await NoticesUtil.sendNotice(newNotice)
     }

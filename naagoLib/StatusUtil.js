@@ -4,6 +4,7 @@ const moment = require('moment')
 const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const GlobalUtil = require('./GlobalUtil')
+const Parser = require('./LodestoneParser')
 
 module.exports = class StatusUtil {
   static async getLast10() {
@@ -23,13 +24,26 @@ module.exports = class StatusUtil {
     const newStatuses = []
 
     for (const status of latestStatuses) {
-      if (
-        await DbUtil.getStatusByTitle(
-          status.title ? status.title : status.title_full,
-          status.date * 1000
-        )
-      )
-        continue
+      if (!status) continue
+
+      status.title = status.title ? status.title : status.title_full
+      status.title = Parser.decodeHtmlChars(status.title)
+      status.date = Parser.convertTimestampToMs(status.date)
+
+      // Only process new ones
+      if (await DbUtil.getStatusByTitle(status.title, status.date)) continue
+
+      // Details
+      status.details = status.details?.text
+      status.details = Parser.decodeHtmlChars(status.details)
+      status.details = Parser.convertHtmlToMarkdown(status.details)
+      status.details = Parser.convertTitles(status.details)
+      status.details = Parser.convertDates('status', status.details)
+      status.details = NaagoUtil.cutString(status.details, 2500)
+
+      // Tag
+      status.tag = Parser.convertTag('status', status.tag)
+
       newStatuses.push(status)
     }
 
@@ -40,23 +54,6 @@ module.exports = class StatusUtil {
     )
 
     for (const newStatus of newStatuses.reverse()) {
-      if (newStatus.details) {
-        let detailsFormatted = newStatus.details.text
-          .replaceAll('<br>', '')
-          .replaceAll('&amp;', '&')
-          .replaceAll('\n', '<br/>')
-
-        detailsFormatted = NaagoUtil.topicHtmlToMarkdown(detailsFormatted)
-        detailsFormatted = NaagoUtil.cutString(detailsFormatted, 2500)
-        const enrich = NaagoUtil.enrichDates(detailsFormatted)
-        newStatus.details = enrich.text
-        newStatus.date = newStatus.date * 1000
-        newStatus.title = newStatus.tag ? newStatus.title : newStatus.title_full
-        newStatus.tag = newStatus.tag
-          ? `Status: ${newStatus.tag.replaceAll('[', '').replaceAll(']', '')}`
-          : 'Status'
-      }
-
       DbUtil.addStatus(newStatus)
       await StatusUtil.sendStatus(newStatus)
     }

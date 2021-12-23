@@ -3,6 +3,7 @@ const NaagoUtil = require('./NaagoUtil')
 const DiscordUtil = require('./DiscordUtil')
 const DbUtil = require('./DbUtil')
 const GlobalUtil = require('./GlobalUtil')
+const Parser = require('./LodestoneParser')
 const moment = require('moment')
 
 module.exports = class TopicsUtil {
@@ -23,17 +24,25 @@ module.exports = class TopicsUtil {
     const newTopics = []
 
     for (const topic of latestTopics) {
-      topic.date = topic.date * 1000
+      if (!topic) continue
+
+      topic.title = Parser.decodeHtmlChars(topic.title)
+      topic.date = Parser.convertTimestampToMs(topic.date)
+
+      // Only process new ones
       if (await DbUtil.getTopicByTitle(topic.title, topic.date)) continue
 
-      // Enrich topic
-      let markdown = NaagoUtil.topicHtmlToMarkdown(topic.description)
-      const parsedMarkdown = NaagoUtil.parseImageLinkFromMarkdown(markdown)
-      markdown = parsedMarkdown?.markdown
-      markdown = NaagoUtil.cutString(markdown, 2500)
-      topic.description = markdown
-      const links = parsedMarkdown?.links
-      topic.banner = links?.length === 1 ? links[0] : topic.banner
+      // Description
+      topic.description = Parser.decodeHtmlChars(topic.description)
+      topic.description = Parser.convertHtmlToMarkdown(topic.description)
+      topic.description = Parser.convertTitles(topic.description)
+      const imageLinks = Parser.convertImageLinks(topic.description)
+      topic.description = imageLinks.description
+      topic.description = Parser.convertDates('topics', topic.description)
+      topic.description = NaagoUtil.cutString(topic.description, 2500)
+
+      // Image
+      if (imageLinks.links.length === 1) topic.banner = imageLinks.links[0]
 
       newTopics.push(topic)
     }

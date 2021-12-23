@@ -4,6 +4,7 @@ const moment = require('moment')
 const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const GlobalUtil = require('./GlobalUtil')
+const Parser = require('./LodestoneParser')
 
 module.exports = class UpdatesUtil {
   static async getLast10() {
@@ -23,8 +24,21 @@ module.exports = class UpdatesUtil {
     const newUpdates = []
 
     for (const update of latestUpdates) {
-      if (await DbUtil.getUpdateByTitle(update.title, update.date * 1000))
-        continue
+      if (!update) continue
+
+      update.title = Parser.decodeHtmlChars(update.title)
+      update.date = Parser.convertTimestampToMs(update.date)
+
+      // Only process new ones
+      if (await DbUtil.getUpdateByTitle(update.title, update.date)) continue
+
+      // Details
+      update.details = update.details?.text
+      update.details = Parser.decodeHtmlChars(update.details)
+      update.details = Parser.convertHtmlToMarkdown(update.details)
+      update.details = Parser.convertTitles(update.details)
+      update.details = Parser.convertDates('updates', update.details)
+      update.details = NaagoUtil.cutString(update.details, 2500)
       newUpdates.push(update)
     }
 
@@ -35,19 +49,6 @@ module.exports = class UpdatesUtil {
     )
 
     for (const newUpdate of newUpdates.reverse()) {
-      if (newUpdate.details) {
-        let detailsFormatted = newUpdate.details.text
-          .replaceAll('<br>', '')
-          .replaceAll('&amp;', '&')
-          .replaceAll('\n', '<br/>')
-
-        detailsFormatted = NaagoUtil.topicHtmlToMarkdown(detailsFormatted)
-        detailsFormatted = NaagoUtil.cutString(detailsFormatted, 2500)
-        const enrich = NaagoUtil.enrichDates(detailsFormatted)
-        newUpdate.details = enrich.text
-        newUpdate.date = newUpdate.date * 1000
-      }
-
       DbUtil.addUpdate(newUpdate)
       await UpdatesUtil.sendUpdate(newUpdate)
     }

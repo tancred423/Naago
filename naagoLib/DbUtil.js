@@ -788,12 +788,12 @@ module.exports = class DbUtil {
             ${mysql.escape(maintenance.link)},
             ${mysql.escape(maintenance.details)},
             ${mysql.escape(
-              maintenance.mFrom
+              maintenance.from
                 ?.tz('Europe/London')
                 .format('YYYY-MM-DD HH:mm:ss')
             )},
             ${mysql.escape(
-              maintenance.mTo?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+              maintenance.to?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
             )}
           )
         `

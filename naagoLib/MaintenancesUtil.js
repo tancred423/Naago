@@ -4,6 +4,7 @@ const moment = require('moment')
 const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const GlobalUtil = require('./GlobalUtil')
+const Parser = require('./LodestoneParser')
 
 module.exports = class MaintenancesUtil {
   static async getLast10() {
@@ -25,8 +26,29 @@ module.exports = class MaintenancesUtil {
     const newMaintenances = []
 
     for (const maint of latestMaintenances) {
-      if (await DbUtil.getMaintenanceByTitle(maint.title, maint.date * 1000))
-        continue
+      if (!maint) continue
+
+      maint.title = Parser.decodeHtmlChars(maint.title)
+      maint.date = Parser.convertTimestampToMs(maint.date)
+
+      // Only process new ones
+      if (await DbUtil.getMaintenanceByTitle(maint.title, maint.date)) continue
+
+      // Details
+      maint.details = maint.details?.text
+      maint.details = Parser.decodeHtmlChars(maint.details)
+      maint.details = Parser.convertHtmlToMarkdown(maint.details)
+      maint.details = Parser.convertTitles(maint.details)
+      const enrich = Parser.convertDates('maints', maint.details)
+      maint.details = enrich.details
+      maint.from = enrich.from
+      maint.to = enrich.to
+      maint.details = NaagoUtil.cutString(maint.details, 2500)
+
+      // Tag
+      maint.tag = maint.tag === '[Maintenance]' ? undefined : maint.tag
+      maint.tag = Parser.convertTag('maintenance', maint.tag)
+
       newMaintenances.push(maint)
     }
 
@@ -37,22 +59,6 @@ module.exports = class MaintenancesUtil {
     )
 
     for (const newMaint of newMaintenances.reverse()) {
-      if (newMaint.details) {
-        let detailsFormatted = newMaint.details.text
-          .replaceAll('<br>', '')
-          .replaceAll('&amp;', '&')
-          .replaceAll('\n', '<br/>')
-
-        detailsFormatted = NaagoUtil.topicHtmlToMarkdown(detailsFormatted)
-        detailsFormatted = NaagoUtil.cutString(detailsFormatted, 2500)
-        const enrich = NaagoUtil.enrichDates(detailsFormatted)
-        newMaint.details = enrich.text
-        newMaint.mFrom = enrich.mFrom
-        newMaint.mTo = enrich.mTo
-        newMaint.date = newMaint.date * 1000
-        newMaint.tag = newMaint.tag.replaceAll('[', '').replaceAll(']', '')
-      }
-
       DbUtil.addMaintenance(newMaint)
       await MaintenancesUtil.sendMaint(newMaint)
     }
