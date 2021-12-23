@@ -81,7 +81,7 @@ module.exports = class DiscordUtil {
     } else if (name === 'theme_classic') {
       return await naagoEmoteServer.emojis.fetch('922677850522390529')
     } else if (name === 'theme_final_days') {
-      return await naagoEmoteServer.emojis.fetch('922681780606230629')
+      return await naagoEmoteServer.emojis.fetch('922689049569931304')
     } else if (name === 'theme_ultima_thule') {
       return await naagoEmoteServer.emojis.fetch('922689049569931304')
     } else if (name === 'theme_moon') {

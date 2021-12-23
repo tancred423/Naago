@@ -61,16 +61,16 @@ module.exports = {
             emoji: await DiscordUtil.getEmote(client, 'theme_amaurot')
           },
           {
-            label: 'Final Days',
-            description: 'Starshowers',
-            value: 'final_days',
-            emoji: await DiscordUtil.getEmote(client, 'theme_final_days')
-          },
-          {
             label: '[EW Spoilers] Our fellow neighbour',
-            description: '(It spoilers the 3rd map)',
+            description: '(It spoilers the 4th map)',
             value: 'moon',
             emoji: await DiscordUtil.getEmote(client, 'theme_moon')
+          },
+          {
+            label: '[EW Spoilers] This is fine',
+            description: '(It spoilers events after the 4th map)',
+            value: 'final_days',
+            emoji: await DiscordUtil.getEmote(client, 'theme_final_days')
           },
           {
             label: '[EW Spoilers] Far apart',
