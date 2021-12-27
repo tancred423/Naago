@@ -119,5 +119,86 @@ module.exports = {
         }
       }
     }
+  },
+
+  async update(interaction, buttonIdSplit) {
+    // Get character
+    if (buttonIdSplit.length !== 3)
+      throw new Error('[/find - button] button id length is !== 3')
+
+    const characterId = buttonIdSplit[2]
+    const character = await DbUtil.fetchCharacter(interaction, characterId)
+
+    if (!character) {
+      const embed = DiscordUtil.getErrorEmbed(
+        `Could not fetch this character.\nPlease try again later.`
+      )
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
+      })
+      return
+    }
+
+    let profilePage = buttonIdSplit[1]
+    let subProfilePage
+    if (profilePage === 'dowdom' || profilePage === 'dohdol') {
+      subProfilePage = profilePage
+      profilePage = 'classesjobs'
+    } else if (profilePage === 'classesjobs' && !subProfilePage) {
+      subProfilePage = 'dowdom'
+    }
+
+    if (profilePage === 'socialmedia') {
+      const profileEmbed = await ProfileUtil.getEmbed(
+        interaction,
+        character,
+        false,
+        profilePage,
+        subProfilePage,
+        false
+      )
+
+      const components = ProfileUtil.getComponents(
+        profilePage,
+        subProfilePage,
+        'find',
+        characterId
+      )
+
+      await interaction.editReply({
+        content: ' ',
+        files: [],
+        embeds: [profileEmbed],
+        attachments: [],
+        components: components
+      })
+    } else {
+      const profileImage = await ProfileUtil.getImage(
+        interaction,
+        character,
+        false,
+        profilePage,
+        subProfilePage
+      )
+      if (!profileImage) throw new Error('profileImage is undefined')
+
+      const file = new MessageAttachment(profileImage)
+
+      const components = ProfileUtil.getComponents(
+        profilePage,
+        subProfilePage,
+        'find',
+        characterId
+      )
+
+      await interaction.editReply({
+        content: ' ',
+        files: [file],
+        embeds: [],
+        attachments: [],
+        components: components
+      })
+    }
   }
 }

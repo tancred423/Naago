@@ -108,5 +108,94 @@ module.exports = {
         ephemeral: true
       })
     }
+  },
+
+  async update(interaction, buttonIdSplit) {
+    const userId = interaction.user.id
+    const verification = await DbUtil.getCharacterVerification(userId)
+
+    if (verification?.is_verified) {
+      // Get character
+      const characterId = verification.character_id
+      const character = await DbUtil.fetchCharacter(interaction, characterId)
+
+      if (!character) {
+        const embed = DiscordUtil.getErrorEmbed(
+          `Could not fetch your character.\nPlease try again later.`
+        )
+        await interaction.followUp({
+          embeds: [embed],
+          ephemeral: true
+        })
+        return
+      }
+
+      if (buttonIdSplit.length !== 3)
+        throw new Error('[/me - button] button id length is !== 3')
+
+      let profilePage = buttonIdSplit[1]
+      let subProfilePage
+      if (profilePage === 'dowdom' || profilePage === 'dohdol') {
+        subProfilePage = profilePage
+        profilePage = 'classesjobs'
+      } else if (profilePage === 'classesjobs' && !subProfilePage) {
+        subProfilePage = 'dowdom'
+      }
+
+      // Update profile page
+      DbUtil.updateProfilePage(userId, profilePage, subProfilePage)
+
+      if (profilePage === 'socialmedia') {
+        const profileEmbed = await ProfileUtil.getEmbed(
+          interaction,
+          character,
+          true,
+          profilePage,
+          subProfilePage,
+          true
+        )
+
+        const components = ProfileUtil.getComponents(
+          profilePage,
+          subProfilePage,
+          'me',
+          characterId
+        )
+
+        await interaction.editReply({
+          content: ' ',
+          files: [],
+          embeds: [profileEmbed],
+          attachments: [],
+          components: components
+        })
+      } else {
+        const profileImage = await ProfileUtil.getImage(
+          interaction,
+          character,
+          true,
+          profilePage,
+          subProfilePage
+        )
+        if (!profileImage) throw new Error('profileImage is undefined')
+
+        const file = new MessageAttachment(profileImage)
+
+        const components = ProfileUtil.getComponents(
+          profilePage,
+          subProfilePage,
+          'me',
+          characterId
+        )
+
+        await interaction.editReply({
+          content: ' ',
+          files: [file],
+          embeds: [],
+          attachments: [],
+          components: components
+        })
+      }
+    }
   }
 }

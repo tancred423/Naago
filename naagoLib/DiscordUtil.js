@@ -54,55 +54,58 @@ module.exports = class DiscordUtil {
     const naagoEmoteServer = await client.guilds.fetch(naagoEmoteServerId)
     if (!naagoEmoteServer) return null
 
-    if (name === 'github')
-      return await naagoEmoteServer.emojis.fetch('921485435346251797')
-    else if (name === 'instagram')
-      return await naagoEmoteServer.emojis.fetch('921485626006700043')
-    else if (name === 'reddit')
-      return await naagoEmoteServer.emojis.fetch('921485728251260959')
-    else if (name === 'spotify')
-      return await naagoEmoteServer.emojis.fetch('921485793531408415')
-    else if (name === 'steamcommunity')
-      return await naagoEmoteServer.emojis.fetch('921485862506745857')
-    else if (name === 'tiktok')
-      return await naagoEmoteServer.emojis.fetch('921485973186031696')
-    else if (name === 'twitch')
-      return await naagoEmoteServer.emojis.fetch('915541076763365427')
-    else if (name === 'youtube')
-      return await naagoEmoteServer.emojis.fetch('915541076977254411')
-    else if (name === 'twitter')
-      return await naagoEmoteServer.emojis.fetch('915541076989861908')
-    else if (name === 'loading')
-      return await naagoEmoteServer.emojis.fetch('918998950885875762')
-    else if (name === 'theme_dark') {
-      return await naagoEmoteServer.emojis.fetch('922677850543357982')
-    } else if (name === 'theme_light') {
-      return await naagoEmoteServer.emojis.fetch('922677850480467979')
-    } else if (name === 'theme_classic') {
-      return await naagoEmoteServer.emojis.fetch('922677850522390529')
-    } else if (name === 'theme_final_days') {
-      return await naagoEmoteServer.emojis.fetch('922689049569931304')
-    } else if (name === 'theme_ultima_thule') {
-      return await naagoEmoteServer.emojis.fetch('922689049569931304')
-    } else if (name === 'theme_moon') {
-      return await naagoEmoteServer.emojis.fetch('922689049569931304')
-    } else if (name === 'theme_amaurot') {
-      return await naagoEmoteServer.emojis.fetch('922699017337597952')
-    } else if (name === 'theme_character_selection') {
-      return await naagoEmoteServer.emojis.fetch('922709333639311422')
-    } else if (name === 'maintenances') {
-      return await naagoEmoteServer.emojis.fetch('922959045193793557')
-    } else if (name === 'notices') {
-      return await naagoEmoteServer.emojis.fetch('922959045256679444')
-    } else if (name === 'status') {
-      return await naagoEmoteServer.emojis.fetch('922959045378326578')
-    } else if (name === 'topics') {
-      return await naagoEmoteServer.emojis.fetch('922959045277650994')
-    } else if (name === 'updates') {
-      return await naagoEmoteServer.emojis.fetch('922959045466398770')
-    } else if (name === 'doggo_smile') {
-      return await naagoEmoteServer.emojis.fetch('924901318718521415')
-    } else return null
+    switch (name) {
+      case 'github':
+        return await naagoEmoteServer.emojis.fetch('921485435346251797')
+      case 'instagram':
+        return await naagoEmoteServer.emojis.fetch('921485626006700043')
+      case 'reddit':
+        return await naagoEmoteServer.emojis.fetch('921485728251260959')
+      case 'spotify':
+        return await naagoEmoteServer.emojis.fetch('921485793531408415')
+      case 'steamcommunity':
+        return await naagoEmoteServer.emojis.fetch('921485862506745857')
+      case 'tiktok':
+        return await naagoEmoteServer.emojis.fetch('921485973186031696')
+      case 'twitch':
+        return await naagoEmoteServer.emojis.fetch('915541076763365427')
+      case 'youtube':
+        return await naagoEmoteServer.emojis.fetch('915541076977254411')
+      case 'twitter':
+        return await naagoEmoteServer.emojis.fetch('915541076989861908')
+      case 'loading':
+        return await naagoEmoteServer.emojis.fetch('918998950885875762')
+      case 'theme_dark':
+        return await naagoEmoteServer.emojis.fetch('922677850543357982')
+      case 'theme_light':
+        return await naagoEmoteServer.emojis.fetch('922677850480467979')
+      case 'theme_classic':
+        return await naagoEmoteServer.emojis.fetch('922677850522390529')
+      case 'theme_final_days':
+        return await naagoEmoteServer.emojis.fetch('922689049569931304')
+      case 'theme_ultima_thule':
+        return await naagoEmoteServer.emojis.fetch('922689049569931304')
+      case 'theme_moon':
+        return await naagoEmoteServer.emojis.fetch('922689049569931304')
+      case 'theme_amaurot':
+        return await naagoEmoteServer.emojis.fetch('922699017337597952')
+      case 'theme_character_selection':
+        return await naagoEmoteServer.emojis.fetch('922709333639311422')
+      case 'maintenances':
+        return await naagoEmoteServer.emojis.fetch('922959045193793557')
+      case 'notices':
+        return await naagoEmoteServer.emojis.fetch('922959045256679444')
+      case 'status':
+        return await naagoEmoteServer.emojis.fetch('922959045378326578')
+      case 'topics':
+        return await naagoEmoteServer.emojis.fetch('922959045277650994')
+      case 'updates':
+        return await naagoEmoteServer.emojis.fetch('922959045466398770')
+      case 'doggo_smile':
+        return await naagoEmoteServer.emojis.fetch('924901318718521415')
+      default:
+        return null
+    }
   }
 
   static async hasAllPermissions(interaction, member, ...permissions) {

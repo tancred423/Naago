@@ -11,6 +11,7 @@ module.exports = {
     .setType(ApplicationCommandType.User),
   async execute(interaction) {
     const target = interaction.options.getMember('user')
+    const isVerified = target.id === interaction.user.id
 
     const characterCache = await DbUtil.getCharacter(target.id)
 
@@ -38,7 +39,7 @@ module.exports = {
       const profileImage = await ProfileUtil.getImage(
         interaction,
         character,
-        false,
+        isVerified,
         'profile'
       )
       if (!profileImage)

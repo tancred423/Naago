@@ -1,10 +1,29 @@
 const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
 const { getBotColorByInteraction } = require('./DiscordUtil')
 const { twitterUsername } = require('../config.json')
-const NaagoUtil = require('./NaagoUtil')
 const DiscordUtil = require('./DiscordUtil')
 
 module.exports = class HelpUtil {
+  static async update(interaction, buttonIdSplit) {
+    const page = buttonIdSplit[1]
+    switch (page) {
+      case 'profiles':
+        await interaction.editReply(await this.getProfiles(interaction))
+        break
+      case 'news':
+        await interaction.editReply(await this.getNews(interaction))
+        break
+      case 'setup':
+        await interaction.editReply(await this.getSetup(interaction))
+        break
+      case 'technical':
+        await interaction.editReply(await this.getTechnical(interaction))
+        break
+      default:
+        throw new Error(`Help button with ID '${page}' doesn't exist.`)
+    }
+  }
+
   static async getProfiles(interaction) {
     const client = interaction.client
 
@@ -136,19 +155,19 @@ module.exports = class HelpUtil {
     return new MessageActionRow().addComponents(
       new MessageButton()
         .setLabel('Character Profiles')
-        .setCustomId('help-profiles')
+        .setCustomId('help.profiles')
         .setStyle(currentPage === 'profiles' ? 'PRIMARY' : 'SECONDARY'),
       new MessageButton()
         .setLabel('Current News')
-        .setCustomId('help-news')
+        .setCustomId('help.news')
         .setStyle(currentPage === 'news' ? 'PRIMARY' : 'SECONDARY'),
       new MessageButton()
         .setLabel('Setup')
-        .setCustomId('help-setup')
+        .setCustomId('help.setup')
         .setStyle(currentPage === 'setup' ? 'PRIMARY' : 'SECONDARY'),
       new MessageButton()
         .setLabel('Technical')
-        .setCustomId('help-technical')
+        .setCustomId('help.technical')
         .setStyle(currentPage === 'technical' ? 'PRIMARY' : 'SECONDARY')
     )
   }

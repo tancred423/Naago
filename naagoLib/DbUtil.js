@@ -122,7 +122,7 @@ module.exports = class DbUtil {
         if (now - lastUpdate > 2 * 60 * 60 * 1000) {
           // Last update was for >= 2 hours. Update data now.
           await interaction.editReply({
-            content: `${loadingEmote} *Updating lodestone data. This might take several seconds.*`,
+            content: `${loadingEmote} Updating lodestone data. This might take several seconds.`,
             components: [],
             files: [],
             embeds: [],
@@ -155,7 +155,7 @@ module.exports = class DbUtil {
       } else {
         // No character data yet. Cache now.
         await interaction.editReply({
-          content: `${loadingEmote} *Updating lodestone data. This might take several seconds.*`,
+          content: `${loadingEmote} Updating lodestone data. This might take several seconds.`,
           components: [],
           files: [],
           embeds: [],
@@ -406,7 +406,7 @@ module.exports = class DbUtil {
       `
 
       const res = await this.getMysqlResult(sql)
-      return res?.theme
+      return res?.theme ?? 'dark'
     } catch (err) {
       console.error(
         `[ERROR] Getting theme was NOT successful. Error: ${err.message}`

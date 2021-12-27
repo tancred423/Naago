@@ -1,10 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { MessageActionRow, MessageButton, MessageEmbed } = require('discord.js')
-const {
-  getEmote,
-  getBotColorByInteraction
-} = require('../naagoLib/DiscordUtil')
-const GlobalUtil = require('../naagoLib/GlobalUtil')
+const { MessageEmbed } = require('discord.js')
+const { getBotColorByInteraction } = require('../naagoLib/DiscordUtil')
 const NaagoUtil = require('../naagoLib/NaagoUtil')
 
 module.exports = {

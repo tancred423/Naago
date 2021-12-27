@@ -114,7 +114,7 @@ module.exports = {
       }
 
       const embed = DiscordUtil.getSuccessEmbed(
-        `${channel.toString()} was set up for ${typeName} notifications.`
+        `${typeName} notifications will now be posted in ${channel.toString()}.`
       )
 
       await interaction.reply({
@@ -124,11 +124,11 @@ module.exports = {
     } else if (interaction.options.getSubcommand() === 'purge') {
       const row = new MessageActionRow().addComponents(
         new MessageButton()
-          .setCustomId('unsetup.cancel')
+          .setCustomId('setup.purge.cancel')
           .setLabel('No, cancel.')
           .setStyle('SECONDARY'),
         new MessageButton()
-          .setCustomId(`unsetup.confirm`)
+          .setCustomId(`setup.purge.confirm`)
           .setLabel('Yes, delete it.')
           .setStyle('DANGER')
       )
@@ -142,22 +142,11 @@ module.exports = {
     }
   },
 
-  unset: async (interaction) => {
-    const idSplit = interaction.component.customId.split('.')
-    if (idSplit.length !== 3) {
-      const embeds = DiscordUtil.getErrorEmbed(
-        `Could not fetch your answer. Please try again later.`
-      )
+  async unset(interaction, buttonIdSplit) {
+    if (buttonIdSplit.length !== 3)
+      throw new Error('[setup: unset - button] button id length is !== 3')
 
-      await interaction.editReply({
-        embeds: [embeds],
-        ephemeral: true
-      })
-
-      return
-    }
-
-    const type = idSplit[2]
+    const type = buttonIdSplit[2]
     const typeName = NaagoUtil.capitalizeFirstLetter(type)
 
     if (type === 'cancel') {
@@ -197,22 +186,11 @@ module.exports = {
     })
   },
 
-  unsetup: async (interaction) => {
-    const idSplit = interaction.component.customId.split('.')
-    if (idSplit.length !== 2) {
-      const embeds = DiscordUtil.getErrorEmbed(
-        `Could not fetch your answer. Please try again later.`
-      )
+  async purge(interaction, buttonIdSplit) {
+    if (buttonIdSplit.length !== 3)
+      throw new Error('[setup: purge - button] button id length is !== 3')
 
-      await interaction.editReply({
-        embeds: [embeds],
-        ephemeral: true
-      })
-
-      return
-    }
-
-    const action = idSplit[1]
+    const action = buttonIdSplit[2]
 
     if (action === 'cancel') {
       const embed = DiscordUtil.getSuccessEmbed('Cancelled.')

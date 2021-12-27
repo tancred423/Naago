@@ -1,7 +1,3 @@
-const { from } = require('form-data')
-const moment = require('moment')
-const TurndownService = require('turndown')
-
 module.exports = class NaagoUtil {
   static convertMsToDigitalClock(ms) {
     const days = Math.floor(ms / (24 * 60 * 60 * 1000))
@@ -51,15 +47,26 @@ module.exports = class NaagoUtil {
   }
 
   static getWebsiteName(hostname) {
-    if (hostname === 'github.com') return 'GitHub'
-    else if (hostname === 'instagram.com') return 'Instagram'
-    else if (hostname === 'reddit.com') return 'Reddit'
-    else if (hostname === 'spotify.com') return 'Spotify'
-    else if (hostname === 'steamcommunity.com') return 'Steam'
-    else if (hostname === 'tiktok.com') return 'TikTok'
-    else if (hostname === 'twitch.tv') return 'Twitch'
-    else if (hostname === 'twitter.com') return 'Twitter'
-    else return 'YouTube'
+    switch (hostname) {
+      case 'github.com':
+        return 'GitHub'
+      case 'instagram.com':
+        return 'Instagram'
+      case 'reddit.com':
+        return 'Reddit'
+      case 'spotify.com':
+        return 'Spotify'
+      case 'steamcommunity.com':
+        return 'Steam'
+      case 'tiktok.com':
+        return 'TikTok'
+      case 'twitch.tv':
+        return 'Twitch'
+      case 'twitter.com':
+        return 'Twitter'
+      default:
+        return 'YouTube'
+    }
   }
 
   static cutString(string, length) {

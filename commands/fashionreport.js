@@ -13,12 +13,15 @@ module.exports = {
     const myTweet = await DbUtil.getFashionReportData()
 
     // Check if report is from this week
+    moment.locale('de')
     const now = moment()
-    const cwNow = now.week()
+    let cwNow = now.week()
     const tweetTime = moment(myTweet?.timestamp)
     let cwTweet = tweetTime?.week()
-    if (tweetTime?.day() === 1) cwTweet === 1 ? (cwTweet = 52) : (cwTweet -= 1)
+    const nowDay = now?.day()
+    if (nowDay === 1) cwNow === 1 ? (cwNow = 52) : (cwNow -= 1)
     const isFromThisWeek = cwTweet === cwNow
+    moment.locale('en')
 
     // Only output data from the current week
     if (!myTweet || !isFromThisWeek) {

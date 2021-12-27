@@ -15,9 +15,6 @@ module.exports = {
 
     let character = await DbUtil.getCharacter(target.id)
 
-    if (!character?.name)
-      character = await DbUtil.fetchCharacter(interaction, character.ID)
-
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
         'This user does not have a verified character.'

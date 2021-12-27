@@ -129,7 +129,7 @@ client.on('interactionCreate', async (interaction) => {
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
-        'There was an error while executing this command.'
+        'There was an error while executing this button.'
       )
       await interaction.followUp({
         embeds: [embed],
@@ -142,7 +142,7 @@ client.on('interactionCreate', async (interaction) => {
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
-        'There was an error while executing this command.'
+        'There was an error while executing this menu.'
       )
       await interaction.followUp({
         embeds: [embed],

@@ -1,8 +1,14 @@
 const { SlashCommandBuilder } = require('@discordjs/builders')
-const { MessageActionRow, MessageSelectMenu } = require('discord.js')
+const {
+  MessageActionRow,
+  MessageSelectMenu,
+  MessageButton,
+  MessageAttachment
+} = require('discord.js')
 const DbUtil = require('../naagoLib/DbUtil')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
 const FfxivUtil = require('../naagoLib/FfxivUtil')
+const ProfileUtil = require('../naagoLib/ProfileUtil')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -229,34 +235,105 @@ module.exports = {
     }
   },
 
-  async unfavoriteUser(interaction) {
-    const idSplit = interaction.component.customId.split('.')
+  async get(interaction) {
+    const characterId = interaction.values[0]
+    const character = await DbUtil.fetchCharacter(interaction, characterId)
 
-    if (idSplit.length === 2 && idSplit[1] === 'cancel') {
-      const embed = DiscordUtil.getSuccessEmbed('Cancelled.')
-      await interaction.editReply({
-        content: ' ',
-        components: [],
-        embeds: [embed]
-      })
-      return
-    }
-
-    if (idSplit.length !== 3) {
+    if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
-        `Could not fetch your character. Please try again later.`
+        `Could not fetch your character.\nPlease try again later.`
       )
+      await interaction.deleteReply()
+      await interaction.followUp({
+        embeds: [embed],
+        ephemeral: true
+      })
+    } else {
+      try {
+        const profileImage = await ProfileUtil.getImage(
+          interaction,
+          character,
+          false,
+          'profile'
+        )
+        if (!profileImage)
+          throw new Error('[/favorite] profileImage is undefined')
+
+        const file = new MessageAttachment(profileImage)
+
+        const components = ProfileUtil.getComponents(
+          'profile',
+          null,
+          'find',
+          characterId
+        )
+
+        await interaction.editReply({
+          content: ' ',
+          files: [file],
+          embeds: [],
+          attachments: [],
+          components: components
+        })
+      } catch (error) {
+        console.error(error)
+
+        await interaction.deleteReply()
+        await interaction.followUp({
+          embeds: [
+            DiscordUtil.getErrorEmbed(
+              'There was an error while executing this command.'
+            )
+          ],
+          ephemeral: true
+        })
+      }
+    }
+  },
+
+  async remove(interaction) {
+    const characterId = interaction.values[0]
+    const characterName =
+      interaction.message.components[0].components[0].options.find(
+        (o) => o.value === characterId
+      )?.label ?? characterId
+
+    const row = new MessageActionRow().addComponents(
+      new MessageButton()
+        .setCustomId('favorite.unset.cancel')
+        .setLabel('No, cancel.')
+        .setStyle('SECONDARY'),
+      new MessageButton()
+        .setCustomId(`favorite.unset.${characterId}.${characterName}`)
+        .setLabel('Yes, remove them.')
+        .setStyle('DANGER')
+    )
+
+    await interaction.editReply({
+      content: `Are you sure you want to remove \`${characterName}\` from your favorites?`,
+      components: [row]
+    })
+  },
+
+  async confirmRemove(interaction, buttonIdSplit) {
+    if (buttonIdSplit.length === 3 && buttonIdSplit[2] === 'cancel') {
+      const embed = DiscordUtil.getSuccessEmbed('Cancelled.')
+
       await interaction.editReply({
         content: ' ',
         components: [],
         embeds: [embed]
       })
+
       return
     }
+
+    if (buttonIdSplit.length !== 4)
+      throw new Error('[favorite.js#remove] button id length is !== 4')
 
     const userId = interaction.user.id
-    const characterId = idSplit[1]
-    const characterName = idSplit[2]
+    const characterId = buttonIdSplit[2]
+    const characterName = buttonIdSplit[3]
 
     const successful = await DbUtil.removeFavorite(userId, characterId)
 

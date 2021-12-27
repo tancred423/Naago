@@ -47,23 +47,23 @@ module.exports = class ProfileUtil {
       new MessageActionRow().addComponents(
         new MessageButton()
           .setLabel('Profile')
-          .setCustomId(`${commandName}-profile-${characterId}`)
+          .setCustomId(`${commandName}.profile.${characterId}`)
           .setStyle(profilePage === 'profile' ? 'PRIMARY' : 'SECONDARY'),
         new MessageButton()
           .setLabel('Classes/Jobs')
-          .setCustomId(`${commandName}-classesjobs-${characterId}`)
+          .setCustomId(`${commandName}.classesjobs.${characterId}`)
           .setStyle(profilePage === 'classesjobs' ? 'PRIMARY' : 'SECONDARY'),
         new MessageButton()
           .setLabel('Equipment')
-          .setCustomId(`${commandName}-equipment-${characterId}`)
+          .setCustomId(`${commandName}.equipment.${characterId}`)
           .setStyle(profilePage === 'equipment' ? 'PRIMARY' : 'SECONDARY'),
         new MessageButton()
           .setLabel('Attributes')
-          .setCustomId(`${commandName}-attributes-${characterId}`)
+          .setCustomId(`${commandName}.attributes.${characterId}`)
           .setStyle(profilePage === 'attributes' ? 'PRIMARY' : 'SECONDARY'),
         new MessageButton()
           .setLabel('Social Media')
-          .setCustomId(`${commandName}-socialmedia-${characterId}`)
+          .setCustomId(`${commandName}.socialmedia.${characterId}`)
           .setStyle(profilePage === 'socialmedia' ? 'PRIMARY' : 'SECONDARY')
       )
     )
@@ -73,11 +73,11 @@ module.exports = class ProfileUtil {
         new MessageActionRow().addComponents(
           new MessageButton()
             .setLabel('DoW/DoM')
-            .setCustomId(`${commandName}-dowdom-${characterId}`)
+            .setCustomId(`${commandName}.dowdom.${characterId}`)
             .setStyle(subProfilePage === 'dowdom' ? 'PRIMARY' : 'SECONDARY'),
           new MessageButton()
             .setLabel('DoH/DoL')
-            .setCustomId(`${commandName}-dohdol-${characterId}`)
+            .setCustomId(`${commandName}.dohdol.${characterId}`)
             .setStyle(subProfilePage === 'dohdol' ? 'PRIMARY' : 'SECONDARY')
         )
       )
@@ -1666,282 +1666,297 @@ class Gear {
   }
 
   getDefaultIcon(type) {
-    if (type === 'head') return this.theme['no_head']
-    else if (type === 'body') return this.theme['no_body']
-    else if (type === 'hands') return this.theme['no_hands']
-    else if (type === 'legs') return this.theme['no_legs']
-    else if (type === 'feet') return this.theme['no_feet']
-    else if (type === 'earrings') return this.theme['no_earrings']
-    else if (type === 'necklace') return this.theme['no_necklace']
-    else if (type === 'bracelets') return this.theme['no_bracelets']
-    else if (type === 'ring') return this.theme['no_ring']
-    else if (type === 'soulcrystal') return this.theme['no_soulcrystal']
-    else return this.theme['no_weapon']
+    switch (type) {
+      case 'head':
+        return this.theme['no_head']
+      case 'body':
+        return this.theme['no_body']
+      case 'hands':
+        return this.theme['no_hands']
+      case 'legs':
+        return this.theme['no_legs']
+      case 'feet':
+        return this.theme['no_feet']
+      case 'earrings':
+        return this.theme['no_earrings']
+      case 'necklace':
+        return this.theme['no_necklace']
+      case 'bracelets':
+        return this.theme['no_bracelets']
+      case 'ring':
+        return this.theme['no_ring']
+      case 'soulcrystal':
+        return this.theme['no_soulcrystal']
+      default:
+        return this.theme['no_weapon']
+    }
   }
 
   getMateriaIcon(materia) {
-    if (materia === 'Savage Aim Materia I') return './images/materia/crt_1.png'
-    else if (materia === 'Savage Aim Materia II')
-      return './images/materia/crt_2.png'
-    else if (materia === 'Savage Aim Materia III')
-      return './images/materia/crt_3.png'
-    else if (materia === 'Savage Aim Materia IV')
-      return './images/materia/crt_4.png'
-    else if (materia === 'Savage Aim Materia V')
-      return './images/materia/crt_5.png'
-    else if (materia === 'Savage Aim Materia VI')
-      return './images/materia/crt_6.png'
-    else if (materia === 'Savage Aim Materia VII')
-      return './images/materia/crt_7.png'
-    else if (materia === 'Savage Aim Materia VIII')
-      return './images/materia/crt_8.png'
-    else if (materia === 'Savage Aim Materia IX')
-      return './images/materia/crt_9.png'
-    else if (materia === 'Savage Aim Materia X')
-      return './images/materia/crt_10.png'
-    else if (materia === "Heavens' Eye Materia I")
-      return './images/materia/dh_1.png'
-    else if (materia === "Heavens' Eye Materia II")
-      return './images/materia/dh_2.png'
-    else if (materia === "Heavens' Eye Materia III")
-      return './images/materia/dh_3.png'
-    else if (materia === "Heavens' Eye Materia IV")
-      return './images/materia/dh_4.png'
-    else if (materia === "Heavens' Eye Materia V")
-      return './images/materia/dh_5.png'
-    else if (materia === "Heavens' Eye Materia VI")
-      return './images/materia/dh_6.png'
-    else if (materia === "Heavens' Eye Materia VII")
-      return './images/materia/dh_7.png'
-    else if (materia === "Heavens' Eye Materia VIII")
-      return './images/materia/dh_8.png'
-    else if (materia === "Heavens' Eye Materia IX")
-      return './images/materia/dh_9.png'
-    else if (materia === "Heavens' Eye Materia X")
-      return './images/materia/dh_10.png'
-    else if (materia === 'Savage Might Materia I')
-      return './images/materia/det_1.png'
-    else if (materia === 'Savage Might Materia II')
-      return './images/materia/det_2.png'
-    else if (materia === 'Savage Might Materia III')
-      return './images/materia/det_3.png'
-    else if (materia === 'Savage Might Materia IV')
-      return './images/materia/det_4.png'
-    else if (materia === 'Savage Might Materia V')
-      return './images/materia/det_5.png'
-    else if (materia === 'Savage Might Materia VI')
-      return './images/materia/det_6.png'
-    else if (materia === 'Savage Might Materia VII')
-      return './images/materia/det_7.png'
-    else if (materia === 'Savage Might Materia VIII')
-      return './images/materia/det_8.png'
-    else if (materia === 'Savage Might Materia IX')
-      return './images/materia/det_9.png'
-    else if (materia === 'Savage Might Materia X')
-      return './images/materia/det_10.png'
-    else if (materia === 'Quickarm Materia I')
-      return './images/materia/sks_1.png'
-    else if (materia === 'Quickarm Materia II')
-      return './images/materia/sks_2.png'
-    else if (materia === 'Quickarm Materia III')
-      return './images/materia/sks_3.png'
-    else if (materia === 'Quickarm Materia VI')
-      return './images/materia/sks_4.png'
-    else if (materia === 'Quickarm Materia V')
-      return './images/materia/sks_5.png'
-    else if (materia === 'Quickarm Materia VI')
-      return './images/materia/sks_6.png'
-    else if (materia === 'Quickarm Materia VII')
-      return './images/materia/sks_7.png'
-    else if (materia === 'Quickarm Materia VIII')
-      return './images/materia/sks_8.png'
-    else if (materia === 'Quickarm Materia IX')
-      return './images/materia/sks_9.png'
-    else if (materia === 'Quickarm Materia X')
-      return './images/materia/sks_10.png'
-    else if (materia === 'Quicktongue Materia I')
-      return './images/materia/sps_1.png'
-    else if (materia === 'Quicktongue Materia II')
-      return './images/materia/sps_2.png'
-    else if (materia === 'Quicktongue Materia III')
-      return './images/materia/sps_3.png'
-    else if (materia === 'Quicktongue Materia IV')
-      return './images/materia/sps_4.png'
-    else if (materia === 'Quicktongue Materia V')
-      return './images/materia/sps_5.png'
-    else if (materia === 'Quicktongue Materia VI')
-      return './images/materia/sps_6.png'
-    else if (materia === 'Quicktongue Materia VII')
-      return './images/materia/sps_7.png'
-    else if (materia === 'Quicktongue Materia VIII')
-      return './images/materia/sps_8.png'
-    else if (materia === 'Quicktongue Materia IX')
-      return './images/materia/sps_9.png'
-    else if (materia === 'Quicktongue Materia X')
-      return './images/materia/sps_10.png'
-    else if (materia === 'Battledance Materia I')
-      return './images/materia/tenacity_1.png'
-    else if (materia === 'Battledance Materia II')
-      return './images/materia/tenacity_2.png'
-    else if (materia === 'Battledance Materia III')
-      return './images/materia/tenacity_3.png'
-    else if (materia === 'Battledance Materia IV')
-      return './images/materia/tenacity_4.png'
-    else if (materia === 'Battledance Materia V')
-      return './images/materia/tenacity_5.png'
-    else if (materia === 'Battledance Materia VI')
-      return './images/materia/tenacity_6.png'
-    else if (materia === 'Battledance Materia VII')
-      return './images/materia/tenacity_7.png'
-    else if (materia === 'Battledance Materia VIII')
-      return './images/materia/tenacity_8.png'
-    else if (materia === 'Battledance Materia IX')
-      return './images/materia/tenacity_9.png'
-    else if (materia === 'Battledance Materia X')
-      return './images/materia/tenacity_10.png'
-    else if (materia === 'Piety Materia I')
-      return './images/materia/piety_1.png'
-    else if (materia === 'Piety Materia II')
-      return './images/materia/piety_2.png'
-    else if (materia === 'Piety Materia III')
-      return './images/materia/piety_3.png'
-    else if (materia === 'Piety Materia IV')
-      return './images/materia/piety_4.png'
-    else if (materia === 'Piety Materia V')
-      return './images/materia/piety_5.png'
-    else if (materia === 'Piety Materia VI')
-      return './images/materia/piety_6.png'
-    else if (materia === 'Piety Materia VII')
-      return './images/materia/piety_7.png'
-    else if (materia === 'Piety Materia VIII')
-      return './images/materia/piety_8.png'
-    else if (materia === 'Piety Materia IX')
-      return './images/materia/piety_9.png'
-    else if (materia === 'Piety Materia X')
-      return './images/materia/piety_10.png'
-    else if (materia === "Craftsman's Command Materia I")
-      return './images/materia/control_1.png'
-    else if (materia === "Craftsman's Command Materia II")
-      return './images/materia/control_2.png'
-    else if (materia === "Craftsman's Command Materia III")
-      return './images/materia/control_3.png'
-    else if (materia === "Craftsman's Command Materia IV")
-      return './images/materia/control_4.png'
-    else if (materia === "Craftsman's Command Materia V")
-      return './images/materia/control_5.png'
-    else if (materia === "Craftsman's Command Materia VI")
-      return './images/materia/control_6.png'
-    else if (materia === "Craftsman's Command Materia VII")
-      return './images/materia/control_7.png'
-    else if (materia === "Craftsman's Command Materia VIII")
-      return './images/materia/control_8.png'
-    else if (materia === "Craftsman's Command Materia IX")
-      return './images/materia/control_9.png'
-    else if (materia === "Craftsman's Command Materia X")
-      return './images/materia/control_10.png'
-    else if (materia === "Craftsman's Cunning Materia I")
-      return './images/materia/cp_1.png'
-    else if (materia === "Craftsman's Cunning Materia II")
-      return './images/materia/cp_2.png'
-    else if (materia === "Craftsman's Cunning Materia III")
-      return './images/materia/cp_3.png'
-    else if (materia === "Craftsman's Cunning Materia IV")
-      return './images/materia/cp_4.png'
-    else if (materia === "Craftsman's Cunning Materia V")
-      return './images/materia/cp_5.png'
-    else if (materia === "Craftsman's Cunning Materia VI")
-      return './images/materia/cp_6.png'
-    else if (materia === "Craftsman's Cunning Materia VII")
-      return './images/materia/cp_7.png'
-    else if (materia === "Craftsman's Cunning Materia VIII")
-      return './images/materia/cp_8.png'
-    else if (materia === "Craftsman's Cunning Materia IX")
-      return './images/materia/cp_9.png'
-    else if (materia === "Craftsman's Cunning Materia X")
-      return './images/materia/cp_10.png'
-    else if (materia === "Craftsman's Competence Materia I")
-      return './images/materia/cms_1.png'
-    else if (materia === "Craftsman's Competence Materia II")
-      return './images/materia/cms_2.png'
-    else if (materia === "Craftsman's Competence Materia III")
-      return './images/materia/cms_3.png'
-    else if (materia === "Craftsman's Competence Materia IV")
-      return './images/materia/cms_4.png'
-    else if (materia === "Craftsman's Competence Materia V")
-      return './images/materia/cms_5.png'
-    else if (materia === "Craftsman's Competence Materia VI")
-      return './images/materia/cms_6.png'
-    else if (materia === "Craftsman's Competence Materia VII")
-      return './images/materia/cms_7.png'
-    else if (materia === "Craftsman's Competence Materia VIII")
-      return './images/materia/cms_8.png'
-    else if (materia === "Craftsman's Competence Materia IX")
-      return './images/materia/cms_9.png'
-    else if (materia === "Craftsman's Competence Materia X")
-      return './images/materia/cms_10.png'
-    else if (materia === "Gatherer's Grasp Materia I")
-      return './images/materia/gp_1.png'
-    else if (materia === "Gatherer's Grasp Materia II")
-      return './images/materia/gp_2.png'
-    else if (materia === "Gatherer's Grasp Materia III")
-      return './images/materia/gp_3.png'
-    else if (materia === "Gatherer's Grasp Materia IV")
-      return './images/materia/gp_4.png'
-    else if (materia === "Gatherer's Grasp Materia V")
-      return './images/materia/gp_5.png'
-    else if (materia === "Gatherer's Grasp Materia VI")
-      return './images/materia/gp_6.png'
-    else if (materia === "Gatherer's Grasp Materia VII")
-      return './images/materia/gp_7.png'
-    else if (materia === "Gatherer's Grasp Materia VIII")
-      return './images/materia/gp_8.png'
-    else if (materia === "Gatherer's Grasp Materia IX")
-      return './images/materia/gp_9.png'
-    else if (materia === "Gatherer's Grasp Materia X")
-      return './images/materia/gp_10.png'
-    else if (materia === "Gatherer's Guerdon Materia I")
-      return './images/materia/gathering_1.png'
-    else if (materia === "Gatherer's Guerdon Materia II")
-      return './images/materia/gathering_2.png'
-    else if (materia === "Gatherer's Guerdon Materia III")
-      return './images/materia/gathering_3.png'
-    else if (materia === "Gatherer's Guerdon Materia IV")
-      return './images/materia/gathering_4.png'
-    else if (materia === "Gatherer's Guerdon Materia V")
-      return './images/materia/gathering_5.png'
-    else if (materia === "Gatherer's Guerdon Materia VI")
-      return './images/materia/gathering_6.png'
-    else if (materia === "Gatherer's Guerdon Materia VII")
-      return './images/materia/gathering_7.png'
-    else if (materia === "Gatherer's Guerdon Materia VIII")
-      return './images/materia/gathering_8.png'
-    else if (materia === "Gatherer's Guerdon Materia IX")
-      return './images/materia/gathering_9.png'
-    else if (materia === "Gatherer's Guerdon Materia X")
-      return './images/materia/gathering_10.png'
-    else if (materia === "Gatherer's Guile Materia I")
-      return './images/materia/perception_1.png'
-    else if (materia === "Gatherer's Guile Materia II")
-      return './images/materia/perception_2.png'
-    else if (materia === "Gatherer's Guile Materia III")
-      return './images/materia/perception_3.png'
-    else if (materia === "Gatherer's Guile Materia IV")
-      return './images/materia/perception_4.png'
-    else if (materia === "Gatherer's Guile Materia V")
-      return './images/materia/perception_5.png'
-    else if (materia === "Gatherer's Guile Materia VI")
-      return './images/materia/perception_6.png'
-    else if (materia === "Gatherer's Guile Materia VII")
-      return './images/materia/perception_7.png'
-    else if (materia === "Gatherer's Guile Materia VIII")
-      return './images/materia/perception_8.png'
-    else if (materia === "Gatherer's Guile Materia IX")
-      return './images/materia/perception_9.png'
-    else if (materia === "Gatherer's Guile Materia X")
-      return './images/materia/perception_10.png'
-    else {
-      console.log(`[ERROR] Materia '${materia}' doesn't exist.'`)
-      return './images/materia/fallback.png'
+    switch (materia) {
+      case 'Savage Aim Materia I':
+        return './images/materia/crt_1.png'
+      case 'Savage Aim Materia II':
+        return './images/materia/crt_2.png'
+      case 'Savage Aim Materia III':
+        return './images/materia/crt_3.png'
+      case 'Savage Aim Materia IV':
+        return './images/materia/crt_4.png'
+      case 'Savage Aim Materia V':
+        return './images/materia/crt_5.png'
+      case 'Savage Aim Materia VI':
+        return './images/materia/crt_6.png'
+      case 'Savage Aim Materia VII':
+        return './images/materia/crt_7.png'
+      case 'Savage Aim Materia VIII':
+        return './images/materia/crt_8.png'
+      case 'Savage Aim Materia IX':
+        return './images/materia/crt_9.png'
+      case 'Savage Aim Materia X':
+        return './images/materia/crt_10.png'
+      case "Heavens' Eye Materia I":
+        return './images/materia/dh_1.png'
+      case "Heavens' Eye Materia II":
+        return './images/materia/dh_2.png'
+      case "Heavens' Eye Materia III":
+        return './images/materia/dh_3.png'
+      case "Heavens' Eye Materia IV":
+        return './images/materia/dh_4.png'
+      case "Heavens' Eye Materia V":
+        return './images/materia/dh_5.png'
+      case "Heavens' Eye Materia VI":
+        return './images/materia/dh_6.png'
+      case "Heavens' Eye Materia VII":
+        return './images/materia/dh_7.png'
+      case "Heavens' Eye Materia VIII":
+        return './images/materia/dh_8.png'
+      case "Heavens' Eye Materia IX":
+        return './images/materia/dh_9.png'
+      case "Heavens' Eye Materia X":
+        return './images/materia/dh_10.png'
+      case 'Savage Might Materia I':
+        return './images/materia/det_1.png'
+      case 'Savage Might Materia II':
+        return './images/materia/det_2.png'
+      case 'Savage Might Materia III':
+        return './images/materia/det_3.png'
+      case 'Savage Might Materia IV':
+        return './images/materia/det_4.png'
+      case 'Savage Might Materia V':
+        return './images/materia/det_5.png'
+      case 'Savage Might Materia VI':
+        return './images/materia/det_6.png'
+      case 'Savage Might Materia VII':
+        return './images/materia/det_7.png'
+      case 'Savage Might Materia VIII':
+        return './images/materia/det_8.png'
+      case 'Savage Might Materia IX':
+        return './images/materia/det_9.png'
+      case 'Savage Might Materia X':
+        return './images/materia/det_10.png'
+      case 'Quickarm Materia I':
+        return './images/materia/sks_1.png'
+      case 'Quickarm Materia II':
+        return './images/materia/sks_2.png'
+      case 'Quickarm Materia III':
+        return './images/materia/sks_3.png'
+      case 'Quickarm Materia VI':
+        return './images/materia/sks_4.png'
+      case 'Quickarm Materia V':
+        return './images/materia/sks_5.png'
+      case 'Quickarm Materia VI':
+        return './images/materia/sks_6.png'
+      case 'Quickarm Materia VII':
+        return './images/materia/sks_7.png'
+      case 'Quickarm Materia VIII':
+        return './images/materia/sks_8.png'
+      case 'Quickarm Materia IX':
+        return './images/materia/sks_9.png'
+      case 'Quickarm Materia X':
+        return './images/materia/sks_10.png'
+      case 'Quicktongue Materia I':
+        return './images/materia/sps_1.png'
+      case 'Quicktongue Materia II':
+        return './images/materia/sps_2.png'
+      case 'Quicktongue Materia III':
+        return './images/materia/sps_3.png'
+      case 'Quicktongue Materia IV':
+        return './images/materia/sps_4.png'
+      case 'Quicktongue Materia V':
+        return './images/materia/sps_5.png'
+      case 'Quicktongue Materia VI':
+        return './images/materia/sps_6.png'
+      case 'Quicktongue Materia VII':
+        return './images/materia/sps_7.png'
+      case 'Quicktongue Materia VIII':
+        return './images/materia/sps_8.png'
+      case 'Quicktongue Materia IX':
+        return './images/materia/sps_9.png'
+      case 'Quicktongue Materia X':
+        return './images/materia/sps_10.png'
+      case 'Battledance Materia I':
+        return './images/materia/tenacity_1.png'
+      case 'Battledance Materia II':
+        return './images/materia/tenacity_2.png'
+      case 'Battledance Materia III':
+        return './images/materia/tenacity_3.png'
+      case 'Battledance Materia IV':
+        return './images/materia/tenacity_4.png'
+      case 'Battledance Materia V':
+        return './images/materia/tenacity_5.png'
+      case 'Battledance Materia VI':
+        return './images/materia/tenacity_6.png'
+      case 'Battledance Materia VII':
+        return './images/materia/tenacity_7.png'
+      case 'Battledance Materia VIII':
+        return './images/materia/tenacity_8.png'
+      case 'Battledance Materia IX':
+        return './images/materia/tenacity_9.png'
+      case 'Battledance Materia X':
+        return './images/materia/tenacity_10.png'
+      case 'Piety Materia I':
+        return './images/materia/piety_1.png'
+      case 'Piety Materia II':
+        return './images/materia/piety_2.png'
+      case 'Piety Materia III':
+        return './images/materia/piety_3.png'
+      case 'Piety Materia IV':
+        return './images/materia/piety_4.png'
+      case 'Piety Materia V':
+        return './images/materia/piety_5.png'
+      case 'Piety Materia VI':
+        return './images/materia/piety_6.png'
+      case 'Piety Materia VII':
+        return './images/materia/piety_7.png'
+      case 'Piety Materia VIII':
+        return './images/materia/piety_8.png'
+      case 'Piety Materia IX':
+        return './images/materia/piety_9.png'
+      case 'Piety Materia X':
+        return './images/materia/piety_10.png'
+      case "Craftsman's Command Materia I":
+        return './images/materia/control_1.png'
+      case "Craftsman's Command Materia II":
+        return './images/materia/control_2.png'
+      case "Craftsman's Command Materia III":
+        return './images/materia/control_3.png'
+      case "Craftsman's Command Materia IV":
+        return './images/materia/control_4.png'
+      case "Craftsman's Command Materia V":
+        return './images/materia/control_5.png'
+      case "Craftsman's Command Materia VI":
+        return './images/materia/control_6.png'
+      case "Craftsman's Command Materia VII":
+        return './images/materia/control_7.png'
+      case "Craftsman's Command Materia VIII":
+        return './images/materia/control_8.png'
+      case "Craftsman's Command Materia IX":
+        return './images/materia/control_9.png'
+      case "Craftsman's Command Materia X":
+        return './images/materia/control_10.png'
+      case "Craftsman's Cunning Materia I":
+        return './images/materia/cp_1.png'
+      case "Craftsman's Cunning Materia II":
+        return './images/materia/cp_2.png'
+      case "Craftsman's Cunning Materia III":
+        return './images/materia/cp_3.png'
+      case "Craftsman's Cunning Materia IV":
+        return './images/materia/cp_4.png'
+      case "Craftsman's Cunning Materia V":
+        return './images/materia/cp_5.png'
+      case "Craftsman's Cunning Materia VI":
+        return './images/materia/cp_6.png'
+      case "Craftsman's Cunning Materia VII":
+        return './images/materia/cp_7.png'
+      case "Craftsman's Cunning Materia VIII":
+        return './images/materia/cp_8.png'
+      case "Craftsman's Cunning Materia IX":
+        return './images/materia/cp_9.png'
+      case "Craftsman's Cunning Materia X":
+        return './images/materia/cp_10.png'
+      case "Craftsman's Competence Materia I":
+        return './images/materia/cms_1.png'
+      case "Craftsman's Competence Materia II":
+        return './images/materia/cms_2.png'
+      case "Craftsman's Competence Materia III":
+        return './images/materia/cms_3.png'
+      case "Craftsman's Competence Materia IV":
+        return './images/materia/cms_4.png'
+      case "Craftsman's Competence Materia V":
+        return './images/materia/cms_5.png'
+      case "Craftsman's Competence Materia VI":
+        return './images/materia/cms_6.png'
+      case "Craftsman's Competence Materia VII":
+        return './images/materia/cms_7.png'
+      case "Craftsman's Competence Materia VIII":
+        return './images/materia/cms_8.png'
+      case "Craftsman's Competence Materia IX":
+        return './images/materia/cms_9.png'
+      case "Craftsman's Competence Materia X":
+        return './images/materia/cms_10.png'
+      case "Gatherer's Grasp Materia I":
+        return './images/materia/gp_1.png'
+      case "Gatherer's Grasp Materia II":
+        return './images/materia/gp_2.png'
+      case "Gatherer's Grasp Materia III":
+        return './images/materia/gp_3.png'
+      case "Gatherer's Grasp Materia IV":
+        return './images/materia/gp_4.png'
+      case "Gatherer's Grasp Materia V":
+        return './images/materia/gp_5.png'
+      case "Gatherer's Grasp Materia VI":
+        return './images/materia/gp_6.png'
+      case "Gatherer's Grasp Materia VII":
+        return './images/materia/gp_7.png'
+      case "Gatherer's Grasp Materia VIII":
+        return './images/materia/gp_8.png'
+      case "Gatherer's Grasp Materia IX":
+        return './images/materia/gp_9.png'
+      case "Gatherer's Grasp Materia X":
+        return './images/materia/gp_10.png'
+      case "Gatherer's Guerdon Materia I":
+        return './images/materia/gathering_1.png'
+      case "Gatherer's Guerdon Materia II":
+        return './images/materia/gathering_2.png'
+      case "Gatherer's Guerdon Materia III":
+        return './images/materia/gathering_3.png'
+      case "Gatherer's Guerdon Materia IV":
+        return './images/materia/gathering_4.png'
+      case "Gatherer's Guerdon Materia V":
+        return './images/materia/gathering_5.png'
+      case "Gatherer's Guerdon Materia VI":
+        return './images/materia/gathering_6.png'
+      case "Gatherer's Guerdon Materia VII":
+        return './images/materia/gathering_7.png'
+      case "Gatherer's Guerdon Materia VIII":
+        return './images/materia/gathering_8.png'
+      case "Gatherer's Guerdon Materia IX":
+        return './images/materia/gathering_9.png'
+      case "Gatherer's Guerdon Materia X":
+        return './images/materia/gathering_10.png'
+      case "Gatherer's Guile Materia I":
+        return './images/materia/perception_1.png'
+      case "Gatherer's Guile Materia II":
+        return './images/materia/perception_2.png'
+      case "Gatherer's Guile Materia III":
+        return './images/materia/perception_3.png'
+      case "Gatherer's Guile Materia IV":
+        return './images/materia/perception_4.png'
+      case "Gatherer's Guile Materia V":
+        return './images/materia/perception_5.png'
+      case "Gatherer's Guile Materia VI":
+        return './images/materia/perception_6.png'
+      case "Gatherer's Guile Materia VII":
+        return './images/materia/perception_7.png'
+      case "Gatherer's Guile Materia VIII":
+        return './images/materia/perception_8.png'
+      case "Gatherer's Guile Materia IX":
+        return './images/materia/perception_9.png'
+      case "Gatherer's Guile Materia X":
+        return './images/materia/perception_10.png'
+      default:
+        console.log(`[ERROR] Materia '${materia}' doesn't exist.'`)
+        return './images/materia/fallback.png'
     }
   }
 }

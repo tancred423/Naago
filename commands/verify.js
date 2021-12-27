@@ -204,11 +204,11 @@ module.exports = {
       if (verification) {
         const row = new MessageActionRow().addComponents(
           new MessageButton()
-            .setCustomId('unverify.cancel')
+            .setCustomId('verify.unset.cancel')
             .setLabel('No, cancel.')
             .setStyle('SECONDARY'),
           new MessageButton()
-            .setCustomId(`unverify.${verification.character_id}`)
+            .setCustomId(`verify.unset.${verification.character_id}`)
             .setLabel('Yes, delete it.')
             .setStyle('DANGER')
         )
@@ -227,23 +227,13 @@ module.exports = {
     }
   },
 
-  verifyUser: async (interaction) => {
-    const idSplit = interaction.component.customId.split('.')
-    if (idSplit.length !== 3) {
-      await interaction.editReply({
-        embeds: [
-          DiscordUtil.getErrorEmbed(
-            `Could not fetch your character. Please try again later.`
-          )
-        ],
-        ephemeral: true
-      })
-      return
-    }
+  async verify(interaction, buttonIdSplit) {
+    if (buttonIdSplit.length !== 3)
+      throw new Error('[verify - button] button id length is !== 3')
 
     const userId = interaction.user.id
-    const verificationCode = idSplit[1]
-    const characterId = idSplit[2]
+    const verificationCode = buttonIdSplit[1]
+    const characterId = buttonIdSplit[2]
 
     // Check if already verified
     const verification = await DbUtil.getCharacterVerification(userId)
@@ -309,22 +299,12 @@ module.exports = {
     }
   },
 
-  unverifyUser: async (interaction) => {
-    const idSplit = interaction.component.customId.split('.')
-    if (idSplit.length !== 2) {
-      await interaction.editReply({
-        embeds: [
-          DiscordUtil.getErrorEmbed(
-            `Could not fetch your character. Please try again later.`
-          )
-        ],
-        ephemeral: true
-      })
-      return
-    }
+  async unverify(interaction, buttonIdSplit) {
+    if (buttonIdSplit.length !== 3)
+      throw new Error('[unverify - button] button id length is !== 3')
 
     const userId = interaction.user.id
-    const characterId = idSplit[1]
+    const characterId = buttonIdSplit[2]
 
     if (characterId === 'cancel') {
       const embed = DiscordUtil.getSuccessEmbed('Cancelled.')
