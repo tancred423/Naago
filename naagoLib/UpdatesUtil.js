@@ -12,14 +12,12 @@ module.exports = class UpdatesUtil {
       const res = await axios.get('http://localhost:8081/lodestone/updates')
       return res?.data?.Updates ?? []
     } catch (err) {
-      console.log(err)
+      console.log(`Getting updates failed: ${err.message}`)
       return []
     }
   }
 
   static async updateDb() {
-    console.log(`[${moment().format('YYYY-MM-DD HH:mm')}] Checking for updates`)
-
     const latestUpdates = await this.getLast10()
     const newUpdates = []
 
@@ -42,16 +40,12 @@ module.exports = class UpdatesUtil {
       newUpdates.push(update)
     }
 
-    console.log(
-      `[${moment().format('YYYY-MM-DD HH:mm')}] New updates: ${
-        newUpdates.length
-      }`
-    )
-
     for (const newUpdate of newUpdates.reverse()) {
       DbUtil.addUpdate(newUpdate)
       await UpdatesUtil.sendUpdate(newUpdate)
     }
+
+    return newUpdates.length
   }
 
   static async sendUpdate(update) {
@@ -73,7 +67,11 @@ module.exports = class UpdatesUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[UPDATES] Sending update to ${setup.guild_id} was NOT successful: ${err.message}`
+          `[${moment().format(
+            'YYYY-MM-DD HH:mm'
+          )}] [UPDATES] Sending update to ${
+            setup.guild_id
+          } was NOT successful: ${err.message}`
         )
         continue
       }

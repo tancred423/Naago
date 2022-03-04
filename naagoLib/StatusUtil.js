@@ -12,14 +12,12 @@ module.exports = class StatusUtil {
       const res = await axios.get('http://localhost:8081/lodestone/status')
       return res?.data?.Status ?? []
     } catch (err) {
-      console.log(err)
+      console.log(`Getting status failed: ${err.message}`)
       return []
     }
   }
 
   static async updateDb() {
-    console.log(`[${moment().format('YYYY-MM-DD HH:mm')}] Checking for status`)
-
     const latestStatuses = await this.getLast10()
     const newStatuses = []
 
@@ -47,16 +45,12 @@ module.exports = class StatusUtil {
       newStatuses.push(status)
     }
 
-    console.log(
-      `[${moment().format('YYYY-MM-DD HH:mm')}] New statuses: ${
-        newStatuses.length
-      }`
-    )
-
     for (const newStatus of newStatuses.reverse()) {
       DbUtil.addStatus(newStatus)
       await StatusUtil.sendStatus(newStatus)
     }
+
+    return newStatuses.length
   }
 
   static async sendStatus(status) {
@@ -78,7 +72,11 @@ module.exports = class StatusUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[STATUS] Sending status to ${setup.guild_id} was NOT successful: ${err.message}`
+          `[${moment().format(
+            'YYYY-MM-DD HH:mm'
+          )}] [STATUS] Sending status to ${
+            setup.guild_id
+          } was NOT successful: ${err.message}`
         )
         continue
       }

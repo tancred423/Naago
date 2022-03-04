@@ -12,14 +12,12 @@ module.exports = class TopicsUtil {
       const res = await axios.get('http://localhost:8081/lodestone/topics')
       return res?.data?.Topics ?? []
     } catch (err) {
-      console.log(err)
+      console.log(`Getting topics failed: ${err.message}`)
       return []
     }
   }
 
   static async updateDb() {
-    console.log(`[${moment().format('YYYY-MM-DD HH:mm')}] Checking for topics`)
-
     const latestTopics = await this.getLast10()
     const newTopics = []
 
@@ -51,14 +49,12 @@ module.exports = class TopicsUtil {
       newTopics.push(topic)
     }
 
-    console.log(
-      `[${moment().format('YYYY-MM-DD HH:mm')}] New topics: ${newTopics.length}`
-    )
-
     for (const newTopic of newTopics.reverse()) {
       DbUtil.addTopic(newTopic)
       await TopicsUtil.sentTopic(newTopic)
     }
+
+    return newTopics.length
   }
 
   static async sentTopic(topic) {
@@ -80,7 +76,9 @@ module.exports = class TopicsUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[TOPICS] Sending topic to ${setup.guild_id} was NOT successful: ${err.message}`
+          `[${moment().format('YYYY-MM-DD HH:mm')}] [TOPICS] Sending topic to ${
+            setup.guild_id
+          } was NOT successful: ${err.message}`
         )
         continue
       }

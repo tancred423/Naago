@@ -12,16 +12,12 @@ module.exports = class MaintenancesUtil {
       const res = await axios.get('http://localhost:8081/lodestone/maintenance')
       return res?.data?.Maintenances ?? []
     } catch (err) {
-      console.log(err)
+      console.log(`Getting maintenances failed: ${err.message}`)
       return []
     }
   }
 
   static async updateDb() {
-    console.log(
-      `[${moment().format('YYYY-MM-DD HH:mm')}] Checking for maintenances`
-    )
-
     const latestMaintenances = await this.getLast10()
     const newMaintenances = []
 
@@ -52,16 +48,12 @@ module.exports = class MaintenancesUtil {
       newMaintenances.push(maint)
     }
 
-    console.log(
-      `[${moment().format('YYYY-MM-DD HH:mm')}] New maintenances: ${
-        newMaintenances.length
-      }`
-    )
-
     for (const newMaint of newMaintenances.reverse()) {
       DbUtil.addMaintenance(newMaint)
       await MaintenancesUtil.sendMaint(newMaint)
     }
+
+    return newMaintenances.length
   }
 
   static async sendMaint(maint) {
@@ -83,7 +75,11 @@ module.exports = class MaintenancesUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[MAINTENANCES] Sending maintenance to ${setup.guild_id} was NOT successful: ${err.message}`
+          `[${moment().format(
+            'YYYY-MM-DD HH:mm'
+          )}] [MAINTENANCES] Sending maintenance to ${
+            setup.guild_id
+          } was NOT successful: ${err.message}`
         )
         continue
       }

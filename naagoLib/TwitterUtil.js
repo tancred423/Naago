@@ -101,27 +101,35 @@ module.exports = class TwitterUtil {
       if (!setups || setups?.length < 1) return
 
       for (const setup of setups) {
-        const guild = await client.guilds.fetch(setup.guild_id)
-        if (!guild) continue
-        const channel = await guild.channels.fetch(setup.channel_id)
-        if (!channel) continue
+        try {
+          const guild = await client.guilds.fetch(setup.guild_id)
+          if (!guild) continue
+          const channel = await guild.channels.fetch(setup.channel_id)
+          if (!channel) continue
 
-        const embed = new MessageEmbed()
-          .setColor(colorTwitter)
-          .setAuthor(
-            `${myTweet.nickname}${myTweet.verified ? ' ✅' : ''} (@${
-              myTweet.username
-            })`,
-            myTweet.avatar,
-            myTweet.profileUrl
+          const embed = new MessageEmbed()
+            .setColor(colorTwitter)
+            .setAuthor(
+              `${myTweet.nickname}${myTweet.verified ? ' ✅' : ''} (@${
+                myTweet.username
+              })`,
+              myTweet.avatar,
+              myTweet.profileUrl
+            )
+            .setTitle(myTweet.title)
+            .setURL(myTweet.tweetUrl)
+            .setImage(myTweet.imageUrl)
+            .setFooter('Twitter', twitterIconLink)
+            .setTimestamp(myTweet.timestamp)
+
+          await channel.send({ embeds: [embed] })
+        } catch (err) {
+          console.log(
+            `[${moment().format(
+              'YYYY-MM-DD HH:mm'
+            )}] [TWITTER] An error occured: ${err.message}`
           )
-          .setTitle(myTweet.title)
-          .setURL(myTweet.tweetUrl)
-          .setImage(myTweet.imageUrl)
-          .setFooter('Twitter', twitterIconLink)
-          .setTimestamp(myTweet.timestamp)
-
-        await channel.send({ embeds: [embed] })
+        }
       }
     })
   }

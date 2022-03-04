@@ -94,11 +94,16 @@ client.once('ready', () => {
 })
 
 async function checkLodestone() {
-  await TopicsUtil.updateDb()
-  await NoticesUtil.updateDb()
-  await MaintenancesUtil.updateDb()
-  await UpdatesUtil.updateDb()
-  await StatusUtil.updateDb()
+  const topics = await TopicsUtil.updateDb()
+  const notices = await NoticesUtil.updateDb()
+  const maintenances = await MaintenancesUtil.updateDb()
+  const updates = await UpdatesUtil.updateDb()
+  const status = await StatusUtil.updateDb()
+  console.log(
+    `[${moment().format(
+      'YYYY-MM-DD HH:mm'
+    )}] Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${status} status.`
+  )
 }
 
 async function updateOwnerCommands(client) {

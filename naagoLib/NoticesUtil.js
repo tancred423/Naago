@@ -12,14 +12,12 @@ module.exports = class NoticesUtil {
       const res = await axios.get('http://localhost:8081/lodestone/notices')
       return res?.data?.Notices ?? []
     } catch (err) {
-      console.log(err)
+      console.log(`Getting notices failed: ${err.message}`)
       return []
     }
   }
 
   static async updateDb() {
-    console.log(`[${moment().format('YYYY-MM-DD HH:mm')}] Checking for notices`)
-
     const latestNotices = await this.getLast10()
     const newNotices = []
 
@@ -47,16 +45,12 @@ module.exports = class NoticesUtil {
       newNotices.push(notice)
     }
 
-    console.log(
-      `[${moment().format('YYYY-MM-DD HH:mm')}] New notices: ${
-        newNotices.length
-      }`
-    )
-
     for (const newNotice of newNotices.reverse()) {
       DbUtil.addNotices(newNotice)
       await NoticesUtil.sendNotice(newNotice)
     }
+
+    return newNotices.length
   }
 
   static async sendNotice(notice) {
@@ -78,7 +72,11 @@ module.exports = class NoticesUtil {
         await channel.send({ embeds: [embed] })
       } catch (err) {
         console.log(
-          `[NOTICES] Sending notice to ${setup.guild_id} was NOT successful: ${err.message}`
+          `[${moment().format(
+            'YYYY-MM-DD HH:mm'
+          )}] [NOTICES] Sending notice to ${
+            setup.guild_id
+          } was NOT successful: ${err.message}`
         )
         continue
       }

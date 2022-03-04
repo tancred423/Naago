@@ -117,7 +117,8 @@ module.exports = class LodestoneParser {
     paragraphs.forEach((item, index, arr) => {
       item = this.cleanItem(item)
 
-      if (inBlock && item.endsWith('GMT')) {
+      if (inBlock && (item.endsWith('AEDT') || item.endsWith('AEST'))) {
+        item = item.split('/')[0].trim()
         let fromDate
         let toDate
         const isToDate = item.includes(' to ')
@@ -151,7 +152,7 @@ module.exports = class LodestoneParser {
       }
     })
 
-    return paragraphs.join('\n')
+    return paragraphs.join('\n').replaceAll(/\_\_\*\*\n+/g, '__**\n')
   }
 
   static convertDatesNotices(markdown) {
@@ -191,20 +192,22 @@ module.exports = class LodestoneParser {
 
   static convertDatesMaints(markdown) {
     const paragraphs = markdown.split('\n')
+    const newParagraphs = []
 
     let fromDate
     let toDate
 
-    paragraphs.forEach((item, index, arr) => {
-      item = this.cleanItem(item)
+    paragraphs.forEach((item) => {
+      const cleanItem = this.cleanItem(item)
+      let altered = false
 
-      if (item.endsWith('GMT')) {
+      if (cleanItem.endsWith('GMT')) {
         fromDate = undefined
         toDate = undefined
-        const isToDate = item.includes(' to ')
+        const isToDate = cleanItem.includes(' to ')
 
         if (isToDate) {
-          const fromTo = item.split(' ')
+          const fromTo = cleanItem.split(' ')
           const from = NaagoUtil.removeIndicesFromArray([...fromTo], 4, 5, 6)
           const to = NaagoUtil.removeIndicesFromArray([...fromTo], 3, 4, 6)
 
@@ -213,20 +216,29 @@ module.exports = class LodestoneParser {
 
           if (fromDate.isAfter(toDate)) toDate = toDate.add(1, 'days')
         } else {
-          fromDate = moment.utc(item.replaceAll('GMT', ''), 'MMM D YYYY H:mm')
+          fromDate = moment.utc(
+            cleanItem.replaceAll('GMT', ''),
+            'MMM D YYYY H:mm'
+          )
         }
 
-        if (fromDate.isValid())
-          arr[index] = this.getFormattedDate(fromDate, toDate)
-        else {
+        if (fromDate.isValid()) {
+          newParagraphs.push(this.getFormattedDate(fromDate, toDate))
+          altered = true
+        } else {
           fromDate = undefined
           toDate = undefined
         }
+      } else if (cleanItem.endsWith('AEDT') || cleanItem.endsWith('AEST')) {
+        // Do not append line. Skip original AEDT/AEST line as we create our own.
+        altered = true
       }
+
+      if (!altered) newParagraphs.push(item)
     })
 
     return {
-      details: paragraphs.join('\n'),
+      details: newParagraphs.join('\n'),
       from: fromDate,
       to: toDate
     }
@@ -234,17 +246,19 @@ module.exports = class LodestoneParser {
 
   static convertDatesUpdatesStatus(markdown) {
     const paragraphs = markdown.split('\n')
+    const newParagraphs = []
 
-    paragraphs.forEach((item, index, arr) => {
-      item = this.cleanItem(item)
+    paragraphs.forEach((item) => {
+      const cleanItem = this.cleanItem(item)
+      let altered = false
 
-      if (item.endsWith('GMT')) {
+      if (cleanItem.endsWith('GMT')) {
         let fromDate
         let toDate
-        const isToDate = item.includes(' to ')
+        const isToDate = cleanItem.includes(' to ')
 
         if (isToDate) {
-          const fromTo = item.split(' ')
+          const fromTo = cleanItem.split(' ')
           const from = NaagoUtil.removeIndicesFromArray([...fromTo], 4, 5, 6)
           const to = NaagoUtil.removeIndicesFromArray([...fromTo], 3, 4, 6)
 
@@ -253,15 +267,25 @@ module.exports = class LodestoneParser {
 
           if (fromDate.isAfter(toDate)) toDate = toDate.add(1, 'days')
         } else {
-          fromDate = moment.utc(item.replaceAll('GMT', ''), 'MMM D YYYY H:mm')
+          fromDate = moment.utc(
+            cleanItem.replaceAll('GMT', ''),
+            'MMM D YYYY H:mm'
+          )
         }
 
-        if (fromDate.isValid())
-          arr[index] = this.getFormattedDate(fromDate, toDate)
+        if (fromDate.isValid()) {
+          newParagraphs.push(this.getFormattedDate(fromDate, toDate))
+          altered = true
+        }
+      } else if (cleanItem.endsWith('AEDT') || cleanItem.endsWith('AEST')) {
+        // Do not append line. Skip original AEDT/AEST line as we create our own.
+        altered = true
       }
+
+      if (!altered) newParagraphs.push(item)
     })
 
-    return paragraphs.join('\n')
+    return newParagraphs.join('\n')
   }
 
   static cleanItem(item) {
@@ -299,18 +323,8 @@ module.exports = class LodestoneParser {
 
   static getFormattedDate(from, to, withHours = true) {
     if (withHours) {
-      // Europe
-      let formatted = `🇪🇺 ${from
-        .tz('Europe/Berlin')
-        .format('MMM. DD **HH:mm z**')}`
-
-      if (to)
-        formatted += ` - ${to
-          .tz('Europe/Berlin')
-          .format('MMM. DD **HH:mm z**')}`
-
       // GMT/UTC
-      formatted += `\n🇬🇧 ${from
+      let formatted = `🇬🇧 ${from
         .tz('Europe/London')
         .format('MMM. DD **HH:mm z**')}`
 
@@ -319,14 +333,36 @@ module.exports = class LodestoneParser {
           .tz('Europe/London')
           .format('MMM. DD **HH:mm z**')}`
 
+      // Europe
+      formatted += `\n🇪🇺 ${from
+        .tz('Europe/Berlin')
+        .format('MMM. DD **HH:mm z**')}`
+
+      if (to)
+        formatted += ` - ${to
+          .tz('Europe/Berlin')
+          .format('MMM. DD **HH:mm z**')}`
+
       // Japan
-      formatted += `\n🇯🇵 ${from.tz('Asia/Tokyo').format('MMM. DD **HH:mm z**')}`
+      formatted += `\n---\n🇯🇵 ${from
+        .tz('Asia/Tokyo')
+        .format('MMM. DD **HH:mm z**')}`
 
       if (to)
         formatted += ` - ${to.tz('Asia/Tokyo').format('MMM. DD **HH:mm z**')}`
 
+      // Oceania
+      formatted += `\n🇦🇺 ${from
+        .tz('Australia/Sydney')
+        .format('MMM. DD **HH:mm z**')}`
+
+      if (to)
+        formatted += ` - ${to
+          .tz('Australia/Sydney')
+          .format('MMM. DD **HH:mm z**')}`
+
       // US West
-      formatted += `\n🇺🇸 ${from
+      formatted += `\n---\n🇺🇸 ${from
         .tz('America/Los_Angeles')
         .format('MMM. DD **HH:mm z**')}`
 
@@ -361,6 +397,12 @@ module.exports = class LodestoneParser {
       formatted += `\n🇯🇵 ${from.tz('Asia/Tokyo').format('**MMM. DD**')}`
 
       if (to) formatted += ` - ${to.tz('Asia/Tokyo').format('**MMM. DD**')}`
+
+      // Oceania
+      formatted += `\n🇦🇺 ${from.tz('Australia/Sydney').format('**MMM. DD**')}`
+
+      if (to)
+        formatted += ` - ${to.tz('Australia/Sydney').format('**MMM. DD**')}`
 
       // US West
       formatted += `\n🇺🇸 ${from
