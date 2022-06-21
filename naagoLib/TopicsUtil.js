@@ -5,11 +5,18 @@ const DbUtil = require('./DbUtil')
 const GlobalUtil = require('./GlobalUtil')
 const Parser = require('./LodestoneParser')
 const moment = require('moment')
+const {
+  naagostonePort,
+  saveLodestoneNews,
+  sendLodestoneNews,
+} = require('../config.json')
 
 module.exports = class TopicsUtil {
   static async getLast10() {
     try {
-      const res = await axios.get('http://localhost:8081/lodestone/topics')
+      const res = await axios.get(
+        `http://localhost:${naagostonePort}/lodestone/topics`
+      )
       return res?.data?.Topics ?? []
     } catch (err) {
       console.log(`Getting topics failed: ${err.message}`)
@@ -50,8 +57,8 @@ module.exports = class TopicsUtil {
     }
 
     for (const newTopic of newTopics.reverse()) {
-      DbUtil.addTopic(newTopic)
-      await TopicsUtil.sentTopic(newTopic)
+      if (saveLodestoneNews) DbUtil.addTopic(newTopic)
+      if (sendLodestoneNews) await TopicsUtil.sentTopic(newTopic)
     }
 
     return newTopics.length

@@ -5,11 +5,18 @@ const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const GlobalUtil = require('./GlobalUtil')
 const Parser = require('./LodestoneParser')
+const {
+  naagostonePort,
+  saveLodestoneNews,
+  sendLodestoneNews,
+} = require('../config.json')
 
 module.exports = class StatusUtil {
   static async getLast10() {
     try {
-      const res = await axios.get('http://localhost:8081/lodestone/status')
+      const res = await axios.get(
+        `http://localhost:${naagostonePort}/lodestone/status`
+      )
       return res?.data?.Status ?? []
     } catch (err) {
       console.log(`Getting status failed: ${err.message}`)
@@ -46,8 +53,8 @@ module.exports = class StatusUtil {
     }
 
     for (const newStatus of newStatuses.reverse()) {
-      DbUtil.addStatus(newStatus)
-      await StatusUtil.sendStatus(newStatus)
+      if (saveLodestoneNews) DbUtil.addStatus(newStatus)
+      if (sendLodestoneNews) await StatusUtil.sendStatus(newStatus)
     }
 
     return newStatuses.length

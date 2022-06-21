@@ -2,6 +2,7 @@ const moment = require('moment')
 const TurndownService = require('turndown')
 const { decode } = require('html-entities')
 const NaagoUtil = require('./NaagoUtil')
+const { time } = require('@discordjs/builders')
 
 module.exports = class LodestoneParser {
   static decodeHtmlChars(text) {
@@ -90,7 +91,7 @@ module.exports = class LodestoneParser {
 
     return {
       description: markdown,
-      links: imageLinks
+      links: imageLinks,
     }
   }
 
@@ -158,32 +159,26 @@ module.exports = class LodestoneParser {
   static convertDatesNotices(markdown) {
     const paragraphs = markdown.split('\n')
 
+    const regexTimeframes =
+      /.*Sometime on (?<date>.*) between (?<time1>.*) and (?<time2>.*) \(.*\) \/ \d+:\d+ and \d+:\d+ \(.*\) \/ \d+:\d+ and \d+:\d+ \(.*\)/
+
     paragraphs.forEach((item, index, arr) => {
-      item = this.cleanItem(item)
+      if (regexTimeframes.test(item)) {
+        const groups = item.match(regexTimeframes).groups
+        const start = moment.utc(
+          groups.date + ' ' + groups.time1,
+          'MMM. D, YYYY H:mm'
+        )
+        const end = moment.utc(
+          groups.date + ' ' + groups.time2,
+          'MMM. D, YYYY H:mm'
+        )
 
-      if (item.startsWith('Time Period:')) {
-        item = item.replaceAll('Time Period:', '').trim()
-
-        let fromDate
-        let toDate
-        const isToDate = item.includes(' to ')
-
-        if (isToDate) {
-          const fromTo = item.split(' to ')
-          const from = fromTo[0].trim()
-          const to = fromTo[1].trim()
-
-          fromDate = moment.utc(from, 'MMM D YYYY')
-          toDate = moment.utc(to, 'MMM D YYYY')
-
-          if (fromDate.isAfter(toDate)) toDate = toDate.add(1, 'days')
-        } else {
-          fromDate = moment.utc(item, 'MMM D YYYY')
-        }
-
-        if (fromDate.isValid())
-          arr[index] =
-            'Time Period:\n' + this.getFormattedDate(fromDate, toDate, false)
+        arr[index] =
+          '・Sometime between ' +
+          time(start.toDate()) +
+          ' and ' +
+          time(end.toDate())
       }
     })
 
@@ -229,8 +224,12 @@ module.exports = class LodestoneParser {
           fromDate = undefined
           toDate = undefined
         }
-      } else if (cleanItem.endsWith('AEDT') || cleanItem.endsWith('AEST')) {
-        // Do not append line. Skip original AEDT/AEST line as we create our own.
+      } else if (
+        cleanItem.endsWith('AEDT') ||
+        cleanItem.endsWith('AEST') ||
+        cleanItem.endsWith('BST')
+      ) {
+        // Do not append line. Skip original AEDT/AEST/BST line as we create our own.
         altered = true
       }
 
@@ -240,7 +239,7 @@ module.exports = class LodestoneParser {
     return {
       details: newParagraphs.join('\n'),
       from: fromDate,
-      to: toDate
+      to: toDate,
     }
   }
 
@@ -277,8 +276,12 @@ module.exports = class LodestoneParser {
           newParagraphs.push(this.getFormattedDate(fromDate, toDate))
           altered = true
         }
-      } else if (cleanItem.endsWith('AEDT') || cleanItem.endsWith('AEST')) {
-        // Do not append line. Skip original AEDT/AEST line as we create our own.
+      } else if (
+        cleanItem.endsWith('AEDT') ||
+        cleanItem.endsWith('AEST') ||
+        cleanItem.endsWith('BST')
+      ) {
+        // Do not append line. Skip original AEDT/AEST/BST line as we create our own.
         altered = true
       }
 
@@ -316,109 +319,121 @@ module.exports = class LodestoneParser {
       'August',
       'October',
       'November',
-      'December'
+      'December',
     ]
     return months.indexOf(month2) < months.indexOf(month1)
   }
 
-  static getFormattedDate(from, to, withHours = true) {
-    if (withHours) {
-      // GMT/UTC
-      let formatted = `🇬🇧 ${from
-        .tz('Europe/London')
-        .format('MMM. DD **HH:mm z**')}`
+  static getFormattedDate(from, to) {
+    if (to)
+      return (
+        time(from.toDate()) +
+        ' to ' +
+        time(to.toDate()) +
+        '\nStart: ' +
+        time(from.toDate(), 'R') +
+        '\nEnd: ' +
+        time(to.toDate(), 'R')
+      )
+    else return time(from.toDate()) + ' (' + time(from.toDate(), 'R') + ')'
 
-      if (to)
-        formatted += ` - ${to
-          .tz('Europe/London')
-          .format('MMM. DD **HH:mm z**')}`
+    // if (withHours) {
+    //   // GMT/UTC
+    //   let formatted = `🇬🇧 ${from
+    //     .tz('Europe/London')
+    //     .format('MMM. DD **HH:mm z**')}`
 
-      // Europe
-      formatted += `\n🇪🇺 ${from
-        .tz('Europe/Berlin')
-        .format('MMM. DD **HH:mm z**')}`
+    //   if (to)
+    //     formatted += ` - ${to
+    //       .tz('Europe/London')
+    //       .format('MMM. DD **HH:mm z**')}`
 
-      if (to)
-        formatted += ` - ${to
-          .tz('Europe/Berlin')
-          .format('MMM. DD **HH:mm z**')}`
+    //   // Europe
+    //   formatted += `\n🇪🇺 ${from
+    //     .tz('Europe/Berlin')
+    //     .format('MMM. DD **HH:mm z**')}`
 
-      // Japan
-      formatted += `\n---\n🇯🇵 ${from
-        .tz('Asia/Tokyo')
-        .format('MMM. DD **HH:mm z**')}`
+    //   if (to)
+    //     formatted += ` - ${to
+    //       .tz('Europe/Berlin')
+    //       .format('MMM. DD **HH:mm z**')}`
 
-      if (to)
-        formatted += ` - ${to.tz('Asia/Tokyo').format('MMM. DD **HH:mm z**')}`
+    //   // Japan
+    //   formatted += `\n---\n🇯🇵 ${from
+    //     .tz('Asia/Tokyo')
+    //     .format('MMM. DD **HH:mm z**')}`
 
-      // Oceania
-      formatted += `\n🇦🇺 ${from
-        .tz('Australia/Sydney')
-        .format('MMM. DD **HH:mm z**')}`
+    //   if (to)
+    //     formatted += ` - ${to.tz('Asia/Tokyo').format('MMM. DD **HH:mm z**')}`
 
-      if (to)
-        formatted += ` - ${to
-          .tz('Australia/Sydney')
-          .format('MMM. DD **HH:mm z**')}`
+    //   // Oceania
+    //   formatted += `\n🇦🇺 ${from
+    //     .tz('Australia/Sydney')
+    //     .format('MMM. DD **HH:mm z**')}`
 
-      // US West
-      formatted += `\n---\n🇺🇸 ${from
-        .tz('America/Los_Angeles')
-        .format('MMM. DD **HH:mm z**')}`
+    //   if (to)
+    //     formatted += ` - ${to
+    //       .tz('Australia/Sydney')
+    //       .format('MMM. DD **HH:mm z**')}`
 
-      if (to)
-        formatted += ` - ${to
-          .tz('America/Los_Angeles')
-          .format('MMM. DD **HH:mm z**')}`
+    //   // US West
+    //   formatted += `\n---\n🇺🇸 ${from
+    //     .tz('America/Los_Angeles')
+    //     .format('MMM. DD **HH:mm z**')}`
 
-      // US East
-      formatted += `\n🇺🇸 ${from
-        .tz('America/New_York')
-        .format('MMM. DD **HH:mm z**')}`
+    //   if (to)
+    //     formatted += ` - ${to
+    //       .tz('America/Los_Angeles')
+    //       .format('MMM. DD **HH:mm z**')}`
 
-      if (to)
-        formatted += ` - ${to
-          .tz('America/New_York')
-          .format('MMM. DD **HH:mm z**')}`
+    //   // US East
+    //   formatted += `\n🇺🇸 ${from
+    //     .tz('America/New_York')
+    //     .format('MMM. DD **HH:mm z**')}`
 
-      return formatted
-    } else {
-      // Europe
-      let formatted = `🇪🇺 ${from.tz('Europe/Berlin').format('**MMM. DD**')}`
+    //   if (to)
+    //     formatted += ` - ${to
+    //       .tz('America/New_York')
+    //       .format('MMM. DD **HH:mm z**')}`
 
-      if (to) formatted += ` - ${to.tz('Europe/Berlin').format('**MMM. DD**')}`
+    //   return formatted
+    // } else {
+    //   // Europe
+    //   let formatted = `🇪🇺 ${from.tz('Europe/Berlin').format('**MMM. DD**')}`
 
-      // GMT/UTC
-      formatted += `\n🇬🇧 ${from.tz('Europe/London').format('**MMM. DD**')}`
+    //   if (to) formatted += ` - ${to.tz('Europe/Berlin').format('**MMM. DD**')}`
 
-      if (to) formatted += ` - ${to.tz('Europe/London').format('**MMM. DD**')}`
+    //   // GMT/UTC
+    //   formatted += `\n🇬🇧 ${from.tz('Europe/London').format('**MMM. DD**')}`
 
-      // Japan
-      formatted += `\n🇯🇵 ${from.tz('Asia/Tokyo').format('**MMM. DD**')}`
+    //   if (to) formatted += ` - ${to.tz('Europe/London').format('**MMM. DD**')}`
 
-      if (to) formatted += ` - ${to.tz('Asia/Tokyo').format('**MMM. DD**')}`
+    //   // Japan
+    //   formatted += `\n🇯🇵 ${from.tz('Asia/Tokyo').format('**MMM. DD**')}`
 
-      // Oceania
-      formatted += `\n🇦🇺 ${from.tz('Australia/Sydney').format('**MMM. DD**')}`
+    //   if (to) formatted += ` - ${to.tz('Asia/Tokyo').format('**MMM. DD**')}`
 
-      if (to)
-        formatted += ` - ${to.tz('Australia/Sydney').format('**MMM. DD**')}`
+    //   // Oceania
+    //   formatted += `\n🇦🇺 ${from.tz('Australia/Sydney').format('**MMM. DD**')}`
 
-      // US West
-      formatted += `\n🇺🇸 ${from
-        .tz('America/Los_Angeles')
-        .format('**MMM. DD**')}`
+    //   if (to)
+    //     formatted += ` - ${to.tz('Australia/Sydney').format('**MMM. DD**')}`
 
-      if (to)
-        formatted += ` - ${to.tz('America/Los_Angeles').format('**MMM. DD**')}`
+    //   // US West
+    //   formatted += `\n🇺🇸 ${from
+    //     .tz('America/Los_Angeles')
+    //     .format('**MMM. DD**')}`
 
-      // US East
-      formatted += `\n🇺🇸 ${from.tz('America/New_York').format('**MMM. DD**')}`
+    //   if (to)
+    //     formatted += ` - ${to.tz('America/Los_Angeles').format('**MMM. DD**')}`
 
-      if (to)
-        formatted += ` - ${to.tz('America/New_York').format('**MMM. DD**')}`
+    //   // US East
+    //   formatted += `\n🇺🇸 ${from.tz('America/New_York').format('**MMM. DD**')}`
 
-      return formatted
-    }
+    //   if (to)
+    //     formatted += ` - ${to.tz('America/New_York').format('**MMM. DD**')}`
+
+    //   return formatted
+    // }
   }
 }

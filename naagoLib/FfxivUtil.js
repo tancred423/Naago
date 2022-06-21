@@ -1,6 +1,7 @@
 const axios = require('axios')
 const crypto = require('crypto')
 const fs = require('fs')
+const { naagostonePort } = require('../config.json')
 
 module.exports = class FfxivUtil {
   static formatName(name) {
@@ -26,14 +27,17 @@ module.exports = class FfxivUtil {
   static async getCharacterIdsByName(name, server) {
     const nameEncoded = encodeURIComponent(name)
     const res = await axios.get(
-      `http://localhost:8081/character/search?name=${nameEncoded}&worldname=${server}`
+      `http://localhost:${naagostonePort}/character/search?name=${nameEncoded}&worldname=${server}`
     )
+    const data = res.data
     if (res.status !== 200) return []
-    else return res.data.List.map((a) => a.ID)
+    else return data.List.map((a) => a.ID)
   }
 
   static async getCharacterById(id) {
-    const res = await axios.get(`http://localhost:8081/character/${id}`)
+    const res = await axios.get(
+      `http://localhost:${naagostonePort}/character/${id}`
+    )
     if (res.status !== 200) return undefined
     else return res?.data?.Character
   }

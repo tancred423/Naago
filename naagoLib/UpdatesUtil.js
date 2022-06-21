@@ -5,11 +5,18 @@ const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const GlobalUtil = require('./GlobalUtil')
 const Parser = require('./LodestoneParser')
+const {
+  naagostonePort,
+  saveLodestoneNews,
+  sendLodestoneNews,
+} = require('../config.json')
 
 module.exports = class UpdatesUtil {
   static async getLast10() {
     try {
-      const res = await axios.get('http://localhost:8081/lodestone/updates')
+      const res = await axios.get(
+        `http://localhost:${naagostonePort}/lodestone/updates`
+      )
       return res?.data?.Updates ?? []
     } catch (err) {
       console.log(`Getting updates failed: ${err.message}`)
@@ -41,8 +48,8 @@ module.exports = class UpdatesUtil {
     }
 
     for (const newUpdate of newUpdates.reverse()) {
-      DbUtil.addUpdate(newUpdate)
-      await UpdatesUtil.sendUpdate(newUpdate)
+      if (saveLodestoneNews) DbUtil.addUpdate(newUpdate)
+      if (sendLodestoneNews) await UpdatesUtil.sendUpdate(newUpdate)
     }
 
     return newUpdates.length

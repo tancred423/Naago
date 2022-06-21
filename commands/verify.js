@@ -37,18 +37,15 @@ module.exports = {
     await interaction.deferReply({ ephemeral: true })
 
     if (interaction.options.getSubcommand() === 'set') {
-      // Get options from interaction
       const name = FfxivUtil.formatName(interaction.options.getString('name'))
       const server = interaction.options.getString('server').toLowerCase()
       const userId = interaction.user.id
 
-      // Check server validity
       if (!FfxivUtil.isValidServer(server)) {
         await interaction.editReply('This server does not exist')
         return
       }
 
-      // Send authorization message
       const characterIds = await FfxivUtil.getCharacterIdsByName(name, server)
 
       if (characterIds.length > 1) {
@@ -58,11 +55,10 @@ module.exports = {
           )
         )
       } else if (characterIds.length < 1) {
-        await interaction.editReply(
-          DiscordUtil.getErrorEmbed(
-            `No characters were found for \`${name}\` on \`${server}\``
-          )
+        const embed = DiscordUtil.getErrorEmbed(
+          `No characters were found for \`${name}\` on \`${server}\``
         )
+        await interaction.editReply({ embeds: [embed] })
       } else {
         const characterId = characterIds[0]
         const character = await FfxivUtil.getCharacterById(characterId)
@@ -88,8 +84,8 @@ module.exports = {
                   embeds: [
                     DiscordUtil.getSuccessEmbed(
                       `You already verified this character.`
-                    )
-                  ]
+                    ),
+                  ],
                 })
                 return
               }
@@ -111,7 +107,7 @@ module.exports = {
                 await interaction.editReply({
                   content: '',
                   embeds: [embed],
-                  components: []
+                  components: [],
                 })
 
                 return
@@ -132,7 +128,7 @@ module.exports = {
 
               await interaction.editReply({
                 content: `Hey ${name}!\n\nYou are already verified with \`${verifiedCharacter.name}\`! If you want to change your character, follow the instructions below.\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
-                components: [row]
+                components: [row],
               })
             } else {
               const row = new MessageActionRow().addComponents(
@@ -150,7 +146,7 @@ module.exports = {
 
               await interaction.editReply({
                 content: `Hey ${name}!\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
-                components: [row]
+                components: [row],
               })
             }
           } else {
@@ -171,7 +167,7 @@ module.exports = {
               await interaction.editReply({
                 content: '',
                 embeds: [embed],
-                components: []
+                components: [],
               })
 
               return
@@ -192,7 +188,7 @@ module.exports = {
 
             await interaction.editReply({
               content: `Hey ${name}!\n\nPlease change your lodestone bio to this verification code:\n\`${verificationCode}\`\n\nAfter changing your bio, click on \`Verify me\`.`,
-              components: [row]
+              components: [row],
             })
           }
         }
@@ -216,7 +212,7 @@ module.exports = {
         await interaction.editReply({
           content:
             'Are you sure you want to unlink your character and delete all stored data of you?',
-          components: [row]
+          components: [row],
         })
       } else {
         const embed = DiscordUtil.getErrorEmbed(
@@ -245,8 +241,8 @@ module.exports = {
       ) {
         await interaction.editReply({
           embeds: [
-            DiscordUtil.getSuccessEmbed(`You already verified this character.`)
-          ]
+            DiscordUtil.getSuccessEmbed(`You already verified this character.`),
+          ],
         })
         return
       }
@@ -260,8 +256,8 @@ module.exports = {
         embeds: [
           DiscordUtil.getErrorEmbed(
             `Could not fetch your character.\nPlease try again later.`
-          )
-        ]
+          ),
+        ],
       })
     } else {
       const charBio = character.bio
@@ -274,7 +270,7 @@ module.exports = {
           )
 
           await interaction.editReply({
-            embeds: [embed]
+            embeds: [embed],
           })
 
           return
@@ -285,15 +281,15 @@ module.exports = {
         )
 
         await interaction.editReply({
-          embeds: [embed]
+          embeds: [embed],
         })
       } else {
         await interaction.editReply({
           embeds: [
             DiscordUtil.getErrorEmbed(
               `Your lodestone bio does not match your verification code.\nVerification code: \`${verificationCode}\`\nYour current bio: \`${charBio}\``
-            )
-          ]
+            ),
+          ],
         })
       }
     }
@@ -311,7 +307,7 @@ module.exports = {
       await interaction.editReply({
         content: ' ',
         embeds: [embed],
-        components: []
+        components: [],
       })
       return
     }
@@ -331,7 +327,7 @@ module.exports = {
     await interaction.editReply({
       content: ' ',
       embeds: [embed],
-      components: []
+      components: [],
     })
-  }
+  },
 }

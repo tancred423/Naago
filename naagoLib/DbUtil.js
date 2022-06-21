@@ -1,6 +1,6 @@
 const mysql = require('../naagoLib/mysql')
 const FfxivUtil = require('../naagoLib/FfxivUtil')
-const moment = require('moment')
+const moment = require('moment-timezone')
 const DiscordUtil = require('./DiscordUtil')
 
 module.exports = class DbUtil {
@@ -126,7 +126,7 @@ module.exports = class DbUtil {
             components: [],
             files: [],
             embeds: [],
-            attachments: []
+            attachments: [],
           })
 
           const character = await FfxivUtil.getCharacterById(characterId)
@@ -159,7 +159,7 @@ module.exports = class DbUtil {
           components: [],
           files: [],
           embeds: [],
-          attachments: []
+          attachments: [],
         })
 
         const character = await FfxivUtil.getCharacterById(characterId)
@@ -227,7 +227,7 @@ module.exports = class DbUtil {
       return {
         ID: characterId,
         name: characterData?.name,
-        server: characterData?.server
+        server: characterData?.server,
       }
     } catch (err) {
       console.error(
@@ -254,7 +254,7 @@ module.exports = class DbUtil {
       return res
         ? {
             profilePage: res.profile_page,
-            subProfilePage: res.sub_profile_page
+            subProfilePage: res.sub_profile_page,
           }
         : { profilePage: 'profile', subProfilePage: undefined }
     } catch (err) {

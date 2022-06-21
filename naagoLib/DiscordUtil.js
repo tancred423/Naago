@@ -13,7 +13,7 @@ const {
   maintenanceIconLink,
   updateIconLink,
   statusIconLink,
-  lodestoneIconLink
+  lodestoneIconLink,
 } = require('../config.json')
 const NaagoUtil = require('./NaagoUtil')
 
@@ -140,7 +140,7 @@ module.exports = class DiscordUtil {
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
 
       return false
@@ -173,10 +173,7 @@ module.exports = class DiscordUtil {
   static getMaintenanceEmbed(maint) {
     return new MessageEmbed()
       .setColor(colorMaintenances)
-      .setAuthor(
-        maint.tag === 'Maintenance' ? maint.tag : `Maintenance: ${maint.tag}`,
-        maintenanceIconLink
-      )
+      .setAuthor(maint.tag, maintenanceIconLink)
       .setTitle(maint.title)
       .setURL(maint.link)
       .setDescription(maint.details)

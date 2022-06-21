@@ -5,9 +5,7 @@ const {
   token,
   twitterStreamEnabled,
   lodestoneCheckOnStart,
-  resendFrId,
-  shutdownId,
-  checkCommandIds
+  checkCommandIds,
 } = require('./config.json')
 const { CanvasRenderingContext2D } = require('canvas')
 const DiscordUtil = require('./naagoLib/DiscordUtil')
@@ -65,7 +63,7 @@ for (const ownerfile of ownerCommandFiles) {
 // Discord events
 client.once('ready', () => {
   console.log(`Connected: Discord (${client.user.tag})`)
-  client.user.setActivity('/help', { type: 'WATCHING' })
+  client.user.setActivity('naago.tancred.de', { type: 'PLAYING' })
 
   GlobalUtil.client = client
 
@@ -99,6 +97,7 @@ async function checkLodestone() {
   const maintenances = await MaintenancesUtil.updateDb()
   const updates = await UpdatesUtil.updateDb()
   const status = await StatusUtil.updateDb()
+
   console.log(
     `[${moment().format(
       'YYYY-MM-DD HH:mm'
@@ -115,19 +114,17 @@ async function updateOwnerCommands(client) {
       console.log(`${command.name}: ${command.id}`)
     })
   } else {
-    const resendFr = await guild?.commands.fetch(resendFrId)
-    const shutdown = await guild?.commands.fetch(shutdownId)
-
-    const permissions = [
-      {
-        id: '181896377486278657',
-        type: 'USER',
-        permission: true
-      }
-    ]
-
-    await resendFr?.permissions.set({ permissions })
-    await shutdown?.permissions.set({ permissions })
+    // const resendFr = await guild?.commands.fetch(resendFrId)
+    // const shutdown = await guild?.commands.fetch(shutdownId)
+    // const permissions = [
+    //   {
+    //     id: '181896377486278657',
+    //     type: 'USER',
+    //     permission: true
+    //   }
+    // ]
+    // await resendFr?.permissions.set({ permissions })
+    // await shutdown?.permissions.set({ permissions })
   }
 }
 
@@ -145,13 +142,13 @@ client.on('interactionCreate', async (interaction) => {
       )
       if (interaction.ephemeral) {
         await interaction.editReply({
-          embeds: [embed]
+          embeds: [embed],
         })
       } else {
         await interaction.deleteReply()
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true
+          ephemeral: true,
         })
       }
     }
@@ -165,7 +162,7 @@ client.on('interactionCreate', async (interaction) => {
       )
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
     }
   } else if (interaction.isSelectMenu()) {
@@ -178,7 +175,7 @@ client.on('interactionCreate', async (interaction) => {
       )
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
     }
   } else if (interaction.isContextMenu()) {
@@ -193,13 +190,13 @@ client.on('interactionCreate', async (interaction) => {
       )
       if (interaction.ephemeral) {
         await interaction.editReply({
-          embeds: [embed]
+          embeds: [embed],
         })
       } else {
         await interaction.deleteReply()
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true
+          ephemeral: true,
         })
       }
     }

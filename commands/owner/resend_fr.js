@@ -4,6 +4,7 @@ const DiscordUtil = require('../../naagoLib/DiscordUtil')
 const GlobalUtil = require('../../naagoLib/GlobalUtil')
 const { colorTwitter, twitterIconLink } = require('../../config.json')
 const { MessageEmbed } = require('discord.js')
+const moment = require('moment')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,12 +15,12 @@ module.exports = {
     {
       id: '181896377486278657',
       type: 'USER',
-      permission: true
-    }
+      permission: true,
+    },
   ],
   async execute(interaction) {
     await interaction.deferReply({
-      ephemeral: true
+      ephemeral: true,
     })
 
     const tweet = await DbUtil.getFashionReportData()
@@ -67,8 +68,8 @@ module.exports = {
 
     await interaction.editReply({
       embeds: [
-        DiscordUtil.getSuccessEmbed('All fashion report messages were send.')
-      ]
+        DiscordUtil.getSuccessEmbed('All fashion report messages were send.'),
+      ],
     })
-  }
+  },
 }

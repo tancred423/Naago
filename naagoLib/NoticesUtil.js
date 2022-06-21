@@ -5,11 +5,18 @@ const DiscordUtil = require('./DiscordUtil')
 const NaagoUtil = require('./NaagoUtil')
 const GlobalUtil = require('./GlobalUtil')
 const Parser = require('./LodestoneParser')
+const {
+  naagostonePort,
+  saveLodestoneNews,
+  sendLodestoneNews,
+} = require('../config.json')
 
 module.exports = class NoticesUtil {
   static async getLast10() {
     try {
-      const res = await axios.get('http://localhost:8081/lodestone/notices')
+      const res = await axios.get(
+        `http://localhost:${naagostonePort}/lodestone/notices`
+      )
       return res?.data?.Notices ?? []
     } catch (err) {
       console.log(`Getting notices failed: ${err.message}`)
@@ -36,7 +43,7 @@ module.exports = class NoticesUtil {
       notice.details = Parser.decodeHtmlChars(notice.details)
       notice.details = Parser.convertHtmlToMarkdown(notice.details)
       notice.details = Parser.convertTitles(notice.details)
-      // notice.details = Parser.convertDates('notices', notice.details)
+      notice.details = Parser.convertDates('notices', notice.details)
       notice.details = NaagoUtil.cutString(notice.details, 2500)
 
       // Tag
@@ -46,8 +53,8 @@ module.exports = class NoticesUtil {
     }
 
     for (const newNotice of newNotices.reverse()) {
-      DbUtil.addNotices(newNotice)
-      await NoticesUtil.sendNotice(newNotice)
+      if (saveLodestoneNews) DbUtil.addNotices(newNotice)
+      if (sendLodestoneNews) await NoticesUtil.sendNotice(newNotice)
     }
 
     return newNotices.length
