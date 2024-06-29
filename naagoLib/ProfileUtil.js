@@ -1648,77 +1648,81 @@ class Gear {
     }
 
     if (this.isLeft && !this.isFirst) {
-      // Color name
-      if (!gear.color_name) gear.color_name = 'Undyed'
-      if (!gear.color_code) gear.color_code = '#00000000'
+      if (gear.amount_dye_slots > 0) {
+        // Color name
+        if (!gear.color_name) gear.color_name = 'Undyed'
+        if (!gear.color_code) gear.color_code = '#00000000'
 
-      this.ctx.lineWidth = 2
-      this.ctx.strokeStyle = this.theme.mirage_border_color
-      this.ctx
-        .roundRect(
-          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
-          this.y + 51,
-          12,
-          12,
-          0.5
+        this.ctx.lineWidth = 2
+        this.ctx.strokeStyle = this.theme.mirage_border_color
+        this.ctx
+          .roundRect(
+            this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
+            this.y + 51,
+            12,
+            12,
+            0.5
+          )
+          .stroke()
+
+        this.ctx.fillStyle = gear.color_code
+        this.ctx
+          .roundRect(
+            this.isLeft ? this.x - 45 - 12 - 2 : this.x + 45 + 2,
+            this.y + 52,
+            10,
+            10,
+            0.5
+          )
+          .fill()
+
+        this.ctx.font = `normal 14px roboto condensed`
+        this.ctx.fillStyle = this.theme.block_content
+        this.ctx.fillText(
+          gear.color_name,
+          this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
+          this.y + 50,
+          this.fWidth - 19
         )
-        .stroke()
+      }
 
-      this.ctx.fillStyle = gear.color_code
-      this.ctx
-        .roundRect(
-          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
-          this.y + 51,
-          12,
-          12,
-          0.5
+      if (gear.amount_dye_slots > 1) {
+        // Color name 2
+        if (!gear.color_name2) gear.color_name2 = 'Undyed'
+        if (!gear.color_code2) gear.color_code2 = '#00000000'
+
+        this.ctx.lineWidth = 2
+        this.ctx.strokeStyle = this.theme.mirage_border_color
+        this.ctx
+          .roundRect(
+            this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
+            this.y + 68,
+            12,
+            12,
+            0.5
+          )
+          .stroke()
+
+        this.ctx.fillStyle = gear.color_code2
+        this.ctx
+          .roundRect(
+            this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
+            this.y + 68,
+            12,
+            12,
+            0.5
+          )
+          .fill()
+
+        this.ctx.font = `normal 14px roboto condensed`
+        this.ctx.fillStyle = this.theme.block_content
+        this.ctx.fillText(
+          gear.color_name2,
+          this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
+          this.y + 67,
+          this.fWidth - 19
         )
-        .fill()
-
-      this.ctx.font = `normal 14px roboto condensed`
-      this.ctx.fillStyle = this.theme.block_content
-      this.ctx.fillText(
-        gear.color_name,
-        this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
-        this.y + 50,
-        this.fWidth - 19
-      )
-
-      // Color name 2
-      if (!gear.color_name2) gear.color_name2 = 'Undyed'
-      if (!gear.color_code2) gear.color_code2 = '#00000000'
-
-      this.ctx.lineWidth = 2
-      this.ctx.strokeStyle = this.theme.mirage_border_color
-      this.ctx
-        .roundRect(
-          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
-          this.y + 68,
-          12,
-          12,
-          0.5
-        )
-        .stroke()
-
-      this.ctx.fillStyle = gear.color_code2
-      this.ctx
-        .roundRect(
-          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
-          this.y + 68,
-          12,
-          12,
-          0.5
-        )
-        .fill()
-
-      this.ctx.font = `normal 14px roboto condensed`
-      this.ctx.fillStyle = this.theme.block_content
-      this.ctx.fillText(
-        gear.color_name2,
-        this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
-        this.y + 67,
-        this.fWidth - 19
-      )
+      }
     }
 
     this.x = this.isLeft ? this.x + 10 : this.x - 10
