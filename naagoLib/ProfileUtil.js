@@ -940,7 +940,7 @@ class Profile {
     await gear.add(this.character.bracelets, 'bracelets')
     await gear.add(this.character.ring1, 'ring')
     await gear.add(this.character.ring2, 'ring')
-    if (this.character.facewear) await gear.add(this.character.facewear, 'facewear')
+    await gear.add(this.character.facewear, 'facewear')
     await gear.add(this.character.soulcrystal, 'soulcrystal')
 
     ////////////////////////////////////////////
@@ -1503,11 +1503,11 @@ class Gear {
         this.isLeft ? 5 : this.x + 5,
         this.y,
         this.width,
-        this.isLeft || isFirst 
-        ? this.height 
-        : type === 'facewear' || type === 'soulcrystal'
-        ? this.height - 50
-        : this.height - 15,
+        this.isLeft || isFirst
+          ? this.height
+          : type === 'facewear' || type === 'soulcrystal'
+            ? this.height - 50
+            : this.height - 15,
         borderRadius
       )
       .fill()
@@ -1529,7 +1529,7 @@ class Gear {
 
     if (!gear) {
       this.x = this.isLeft ? this.x + 10 : this.x - 10
-      this.y -= 5
+      this.y -= this.isLeft ? 4 : type === 'facewear' ? 54 : 20
 
       return
     }
@@ -1722,7 +1722,7 @@ class Gear {
     }
 
     this.x = this.isLeft ? this.x + 10 : this.x - 10
-    this.y -= this.isLeft ? 4 : type === 'facewear' ? 56 : 20
+    this.y -= this.isLeft ? 4 : type === 'facewear' ? 54 : 20
   }
 
   getDefaultIcon(type) {
@@ -1745,6 +1745,8 @@ class Gear {
         return this.theme['no_bracelets']
       case 'ring':
         return this.theme['no_ring']
+      case 'facewear':
+        return this.theme['no_facewear']
       case 'soulcrystal':
         return this.theme['no_soulcrystal']
       default:
