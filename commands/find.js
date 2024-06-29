@@ -4,6 +4,7 @@ const DiscordUtil = require('../naagoLib/DiscordUtil')
 const DbUtil = require('../naagoLib/DbUtil')
 const ProfileUtil = require('../naagoLib/ProfileUtil')
 const FfxivUtil = require('../naagoLib/FfxivUtil')
+const axios = require('axios')
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -129,15 +130,10 @@ module.exports = {
       subProfilePage = 'dowdom'
     }
 
-    if (profilePage === 'socialmedia') {
-      const profileEmbed = await ProfileUtil.getEmbed(
-        interaction,
-        character,
-        false,
-        profilePage,
-        subProfilePage,
-        false
-      )
+    if (profilePage === 'portrait') {
+      const response = await axios.get(character.portrait, { responseType: 'arraybuffer' })
+      const buffer = Buffer.from(response.data, "utf-8")
+      const file = new MessageAttachment(buffer)
 
       const components = ProfileUtil.getComponents(
         profilePage,
@@ -147,9 +143,9 @@ module.exports = {
       )
 
       await interaction.editReply({
-        content: ' ',
-        files: [],
-        embeds: [profileEmbed],
+        content: `${character.name}🌸${character.server.world}`,
+        files: [file],
+        embeds: [],
         attachments: [],
         components: components
       })
