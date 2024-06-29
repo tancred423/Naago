@@ -1502,13 +1502,13 @@ class Gear {
         this.isLeft ? 5 : this.x + 5,
         this.y,
         this.width,
-        this.height,
+        this.isLeft || isFirst ? this.height : this.height - 15,
         borderRadius
       )
       .fill()
 
     this.x = this.isLeft ? this.x - 10 : this.x + 10
-    this.y += 5
+    this.y += 3
 
     // Gear icon
     const gearIcon = await loadImage(
@@ -1516,10 +1516,10 @@ class Gear {
     )
     this.ctx.drawImage(
       gearIcon,
-      this.isLeft ? this.x - 40 : this.x,
+      this.isLeft ? this.x - 35 : this.x + 5,
       this.y,
-      40,
-      40
+      30,
+      30
     )
 
     if (!gear) {
@@ -1530,7 +1530,7 @@ class Gear {
     }
 
     // Item level
-    this.ctx.font = `normal 20px roboto condensed`
+    this.ctx.font = `normal 18px roboto condensed`
     this.ctx.fillStyle = this.theme.block_title
     this.ctx.fillText(
       gear.item_level,
@@ -1545,9 +1545,9 @@ class Gear {
       this.ctx.drawImage(
         materiaIcon,
         this.isLeft ? this.x - 80 - 20 : this.x + 80,
-        this.y + 2,
-        20,
-        20
+        this.y,
+        16,
+        16
       )
     }
 
@@ -1555,10 +1555,10 @@ class Gear {
       const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_2))
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 25 : this.x + 80 + 25,
-        this.y + 2,
-        20,
-        20
+        this.isLeft ? this.x - 80 - 20 - 20 : this.x + 80 + 20,
+        this.y,
+        16,
+        16
       )
     }
 
@@ -1566,10 +1566,10 @@ class Gear {
       const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_3))
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 25 * 2 : this.x + 80 + 25 * 2,
-        this.y + 2,
-        20,
-        20
+        this.isLeft ? this.x - 80 - 20 - 20 * 2 : this.x + 80 + 20 * 2,
+        this.y,
+        16,
+        16
       )
     }
 
@@ -1577,10 +1577,10 @@ class Gear {
       const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_4))
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 25 * 3 : this.x + 80 + 25 * 3,
-        this.y + 2,
-        20,
-        20
+        this.isLeft ? this.x - 80 - 20 - 20 * 3 : this.x + 80 + 20 * 3,
+        this.y,
+        16,
+        16
       )
     }
 
@@ -1588,22 +1588,22 @@ class Gear {
       const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_5))
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 25 * 4 : this.x + 80 + 25 * 4,
-        this.y + 2,
-        20,
-        20
+        this.isLeft ? this.x - 80 - 20 - 20 * 4 : this.x + 80 + 20 * 4,
+        this.y,
+        16,
+        16
       )
     }
 
     // Item name
-    this.ctx.font = `bold 17px roboto condensed`
+    this.ctx.font = `bold 15px roboto condensed`
     this.ctx.fillStyle = gear.rarity
       ? this.theme[gear.rarity] ?? this.theme.block_content
       : this.theme.block_content
     this.ctx.fillText(
       gear.name?.split('<')[0],
       this.isLeft ? this.x - 45 : this.x + 45,
-      this.y + 20 + 2,
+      this.y + 17,
       this.fWidth
     )
 
@@ -1612,10 +1612,10 @@ class Gear {
       const glamourIcon = await loadImage('./images/glamour.png')
       this.ctx.drawImage(
         glamourIcon,
-        this.isLeft ? this.x - 45 - 18 : this.x + 45,
-        this.y + 20 + 19 + 4,
-        18,
-        18
+        this.isLeft ? this.x - 62 : this.x + 45,
+        this.y + 33,
+        16,
+        16
       )
 
       this.ctx.font = `normal 14px roboto condensed`
@@ -1623,7 +1623,7 @@ class Gear {
       this.ctx.fillText(
         gear.mirage_name,
         this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
-        this.y + 20 + 19 + 5,
+        this.y + 35,
         this.fWidth - 19
       )
     }
@@ -1634,20 +1634,23 @@ class Gear {
       this.ctx.drawImage(
         mirageIcon,
         this.isLeft ? this.x - 35 : this.x + 5,
-        this.y + 45,
+        this.y + 35,
         30,
         30
       )
     }
 
-    // Color name
-    if (gear.color_name && gear.color_code) {
+    if (this.isLeft && !this.isFirst) {
+      // Color name
+      if (!gear.color_name) gear.color_name = 'Undyed'
+      if (!gear.color_code) gear.color_code = '#00000000'
+
       this.ctx.lineWidth = 2
       this.ctx.strokeStyle = this.theme.mirage_border_color
       this.ctx
         .roundRect(
           this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
-          this.y + 20 + 19 + 19 + 7,
+          this.y + 51,
           12,
           12,
           0.5
@@ -1658,7 +1661,7 @@ class Gear {
       this.ctx
         .roundRect(
           this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
-          this.y + 20 + 19 + 19 + 7,
+          this.y + 51,
           12,
           12,
           0.5
@@ -1670,13 +1673,49 @@ class Gear {
       this.ctx.fillText(
         gear.color_name,
         this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
-        this.y + 20 + 19 + 19 + 5,
+        this.y + 50,
+        this.fWidth - 19
+      )
+
+      // Color name 2
+      if (!gear.color_name2) gear.color_name2 = 'Undyed'
+      if (!gear.color_code2) gear.color_code2 = '#00000000'
+
+      this.ctx.lineWidth = 2
+      this.ctx.strokeStyle = this.theme.mirage_border_color
+      this.ctx
+        .roundRect(
+          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
+          this.y + 68,
+          12,
+          12,
+          0.5
+        )
+        .stroke()
+
+      this.ctx.fillStyle = gear.color_code2
+      this.ctx
+        .roundRect(
+          this.isLeft ? this.x - 45 - 12 - 3 : this.x + 45 + 3,
+          this.y + 68,
+          12,
+          12,
+          0.5
+        )
+        .fill()
+
+      this.ctx.font = `normal 14px roboto condensed`
+      this.ctx.fillStyle = this.theme.block_content
+      this.ctx.fillText(
+        gear.color_name2,
+        this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
+        this.y + 67,
         this.fWidth - 19
       )
     }
 
     this.x = this.isLeft ? this.x + 10 : this.x - 10
-    this.y -= 5
+    this.y -= this.isLeft ? 5 : 20
   }
 
   getDefaultIcon(type) {
