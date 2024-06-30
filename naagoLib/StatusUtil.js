@@ -15,7 +15,7 @@ module.exports = class StatusUtil {
   static async getLast10() {
     try {
       const res = await axios.get(
-        `http://localhost:${naagostonePort}/lodestone/status`
+        `http://localhost:${naagostonePort}/lodestone/status`,
       )
       return res?.data?.Status ?? []
     } catch (err) {
@@ -80,10 +80,10 @@ module.exports = class StatusUtil {
       } catch (err) {
         console.log(
           `[${moment().format(
-            'YYYY-MM-DD HH:mm'
+            'YYYY-MM-DD HH:mm',
           )}] [STATUS] Sending status to ${
             setup.guild_id
-          } was NOT successful: ${err.message}`
+          } was NOT successful: ${err.message}`,
         )
         continue
       }

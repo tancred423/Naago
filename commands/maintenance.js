@@ -27,7 +27,7 @@ module.exports = {
     } else
       await interaction.reply({
         ephemeral: true,
-        content: 'There is no active maintenance.'
+        content: 'There is no active maintenance.',
       })
-  }
+  },
 }

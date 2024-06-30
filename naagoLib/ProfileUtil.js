@@ -22,7 +22,7 @@ module.exports = class ProfileUtil {
     character,
     isVerified,
     profilePage,
-    subProfilePage = null
+    subProfilePage = null,
   ) {
     const profile = new Profile(interaction, character, isVerified)
 
@@ -59,8 +59,8 @@ module.exports = class ProfileUtil {
         new MessageButton()
           .setLabel('Portrait')
           .setCustomId(`${commandName}.portrait.${characterId}`)
-          .setStyle(profilePage === 'portrait' ? 'PRIMARY' : 'SECONDARY')
-      )
+          .setStyle(profilePage === 'portrait' ? 'PRIMARY' : 'SECONDARY'),
+      ),
     )
 
     if (subProfilePage) {
@@ -73,8 +73,8 @@ module.exports = class ProfileUtil {
           new MessageButton()
             .setLabel('DoH/DoL')
             .setCustomId(`${commandName}.dohdol.${characterId}`)
-            .setStyle(subProfilePage === 'dohdol' ? 'PRIMARY' : 'SECONDARY')
-        )
+            .setStyle(subProfilePage === 'dohdol' ? 'PRIMARY' : 'SECONDARY'),
+        ),
       )
     }
 
@@ -229,7 +229,7 @@ class Profile {
       this.character.name,
       450 / 2,
       40 + (this.character.title ? 0 : 20),
-      410
+      410,
     )
     ctx.textAlign = 'left'
 
@@ -243,20 +243,20 @@ class Profile {
       'World',
       `${this.character.server.world} (${this.character.server.dc})`,
       null,
-      true
+      true,
     )
     await profileBlock.add(
       'Started',
       this.character.started === 'Private'
         ? 'Private'
-        : moment(this.character.started * 1000).format('Do MMM Y')
+        : moment(this.character.started * 1000).format('Do MMM Y'),
     )
     await profileBlock.add(
       'City-state',
       this.character.town.name,
       this.character.town.icon,
       false,
-      true
+      true,
     )
     await profileBlock.add(
       'Characteristics',
@@ -264,14 +264,14 @@ class Profile {
       this.character.characteristics.gender == '♀'
         ? theme['emoji_female']
         : theme['emoji_male'],
-      true
+      true,
     )
     await profileBlock.add('Nameday', this.character.nameday, null, true)
     await profileBlock.add(
       `Grand Company: ${this.character.grand_company?.name ?? '-'}`,
       this.character.grand_company?.rank ?? '-',
       this.character.grand_company?.icon,
-      true
+      true,
     )
     await profileBlock.add(
       'Free Company',
@@ -281,26 +281,26 @@ class Profile {
         this.character.free_company?.icon_layer_1,
         this.character.free_company?.icon_layer_2,
       ],
-      true
+      true,
     )
     await profileBlock.add(
       'Guardian',
       this.character.guardian_deity.name,
       this.character.guardian_deity.icon,
-      true
+      true,
     )
     await profileBlock.add(
       'Achievements',
       this.character.amount_achievements === 'Private'
         ? 'Private'
         : `${Math.round(
-          (this.character.amount_achievements / maxAchievements) * 100
-        )} % (${this.character.ap} AP)`,
+            (this.character.amount_achievements / maxAchievements) * 100,
+          )} % (${this.character.ap} AP)`,
       './images/achievements.png',
       false,
       false,
       true,
-      1
+      1,
     )
     ctx.textAlign = 'center'
     await profileBlock.add(
@@ -312,7 +312,7 @@ class Profile {
       false,
       true,
       true,
-      2
+      2,
     )
     await profileBlock.add(
       'Minions',
@@ -323,7 +323,7 @@ class Profile {
       false,
       true,
       true,
-      3
+      3,
     )
     ctx.textAlign = 'left'
 
@@ -758,11 +758,11 @@ class Profile {
     ctx.fillText(
       bozja
         ? `${bozja.name}: ${bozja.level}` +
-        (bozja.Mettle !== '--' ? ` (${bozja.Mettle} mettle)` : '')
+            (bozja.Mettle !== '--' ? ` (${bozja.Mettle} mettle)` : '')
         : '-',
       x + 10,
       yAdd + 30,
-      fWidth - 10
+      fWidth - 10,
     )
 
     ////////////////////////////////////////////
@@ -786,13 +786,13 @@ class Profile {
     ctx.fillText(
       eureka
         ? `${eureka.name}: ${eureka.level}` +
-        (eureka.CurrentEXP !== '--'
-          ? ` (${eureka.CurrentEXP} / ${eureka.MaxEXP} exp)`
-          : '')
+            (eureka.CurrentEXP !== '--'
+              ? ` (${eureka.CurrentEXP} / ${eureka.MaxEXP} exp)`
+              : '')
         : '-',
       x + 10,
       yAdd + 30,
-      fWidth - 10
+      fWidth - 10,
     )
 
     ////////////////////////////////////////////
@@ -1088,7 +1088,7 @@ class Profile {
     ctx.fillText(
       this.character.mp_gp_cp_parameter_name,
       fWidth / 2 + 40,
-      yAdd + 40
+      yAdd + 40,
     )
 
     ctx.textAlign = 'right'
@@ -1291,27 +1291,30 @@ class Profile {
       .setColor(await DiscordUtil.getBotColorByInteraction(this.interaction))
       .setTitle(
         `${this.character.name}${NaagoUtil.getApostropheS(
-          this.character.name
-        )} social media`
+          this.character.name,
+        )} social media`,
       )
       .setThumbnail(this.character.avatar)
       .setDescription('')
 
     if (socialMedias.length === 0) {
       embed.setDescription(
-        `No social medias were linked yet. ${isMe ? 'You' : 'They'
-        } can do so with \`/socialmedia add\`.`
+        `No social medias were linked yet. ${
+          isMe ? 'You' : 'They'
+        } can do so with \`/socialmedia add\`.`,
       )
     } else {
       for (const socialMedia of socialMedias) {
         embed.setDescription(
           embed.description +
-          `\n${(await DiscordUtil.getEmote(
-            client,
-            socialMedia.platform.split('.')[0]
-          )) ?? ''
-          } [${NaagoUtil.getWebsiteName(socialMedia.platform)}](${socialMedia.url
-          })`
+            `\n${
+              (await DiscordUtil.getEmote(
+                client,
+                socialMedia.platform.split('.')[0],
+              )) ?? ''
+            } [${NaagoUtil.getWebsiteName(socialMedia.platform)}](${
+              socialMedia.url
+            })`,
         )
       }
     }
@@ -1334,7 +1337,7 @@ class ProfileBlock {
     fullWidth = false,
     rightSide = false,
     triple = false,
-    slot = null
+    slot = null,
   ) {
     let x = rightSide ? 230 : 20
     if (triple && slot === 2) x = 265
@@ -1356,7 +1359,7 @@ class ProfileBlock {
       title,
       x + 10 + (triple && slot > 1 ? 30 : 0),
       this.yAdd + 3,
-      maxWidth
+      maxWidth,
     )
 
     this.ctx.fillStyle = this.theme.block_content
@@ -1365,7 +1368,7 @@ class ProfileBlock {
       content,
       x + 10 + (triple && slot > 1 ? 30 : 0),
       this.yAdd + 18,
-      maxWidth
+      maxWidth,
     )
 
     if (iconLink instanceof Array) {
@@ -1382,7 +1385,7 @@ class ProfileBlock {
         fWidth - 32 / 2 - 5 + (rightSide ? fWidth + 10 : 0),
         this.yAdd + 10,
         32,
-        32
+        32,
       )
     } catch (err) {
       console.log(err)
@@ -1430,7 +1433,7 @@ class ClassJobBlock {
         this.yAdd + 47,
         this.getLevelPercent(job),
         5,
-        borderRadius
+        borderRadius,
       )
       .fill()
   }
@@ -1468,7 +1471,7 @@ class Stats {
     this.ctx.fillText(
       content ?? '0',
       this.x > 200 ? this.fWidth : this.fWidth / 2,
-      this.yAdd + 23
+      this.yAdd + 23,
     )
   }
 }
@@ -1503,7 +1506,7 @@ class Gear {
           : type === 'facewear' || type === 'soulcrystal'
             ? this.height - 50
             : this.height - 15,
-        borderRadius
+        borderRadius,
       )
       .fill()
 
@@ -1512,14 +1515,14 @@ class Gear {
 
     // Gear icon
     const gearIcon = await loadImage(
-      gear ? gear.icon : this.getDefaultIcon(type)
+      gear ? gear.icon : this.getDefaultIcon(type),
     )
     this.ctx.drawImage(
       gearIcon,
       this.isLeft ? this.x - 35 : this.x + 5,
       this.y,
       30,
-      30
+      30,
     )
 
     if (!gear) {
@@ -1537,7 +1540,7 @@ class Gear {
         gear.item_level,
         this.isLeft ? this.x - 45 : this.x + 45,
         this.y,
-        30
+        30,
       )
     }
 
@@ -1549,7 +1552,7 @@ class Gear {
         this.isLeft ? this.x - 80 - 20 : this.x + 80,
         this.y,
         16,
-        16
+        16,
       )
     }
 
@@ -1560,7 +1563,7 @@ class Gear {
         this.isLeft ? this.x - 80 - 20 - 20 : this.x + 80 + 20,
         this.y,
         16,
-        16
+        16,
       )
     }
 
@@ -1571,7 +1574,7 @@ class Gear {
         this.isLeft ? this.x - 80 - 20 - 20 * 2 : this.x + 80 + 20 * 2,
         this.y,
         16,
-        16
+        16,
       )
     }
 
@@ -1582,7 +1585,7 @@ class Gear {
         this.isLeft ? this.x - 80 - 20 - 20 * 3 : this.x + 80 + 20 * 3,
         this.y,
         16,
-        16
+        16,
       )
     }
 
@@ -1593,7 +1596,7 @@ class Gear {
         this.isLeft ? this.x - 80 - 20 - 20 * 4 : this.x + 80 + 20 * 4,
         this.y,
         16,
-        16
+        16,
       )
     }
 
@@ -1606,7 +1609,7 @@ class Gear {
       gear.name?.split('<')[0],
       this.isLeft ? this.x - 45 : this.x + 45,
       type === 'facewear' || type === 'soulcrystal' ? this.y + 7 : this.y + 17,
-      this.fWidth
+      this.fWidth,
     )
 
     // Mirage name
@@ -1617,7 +1620,7 @@ class Gear {
         this.isLeft ? this.x - 62 : this.x + 45,
         this.y + 33,
         16,
-        16
+        16,
       )
 
       this.ctx.font = `normal 14px roboto condensed`
@@ -1626,7 +1629,7 @@ class Gear {
         gear.mirage_name,
         this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
         this.y + 35,
-        this.fWidth - 19
+        this.fWidth - 19,
       )
     }
 
@@ -1638,7 +1641,7 @@ class Gear {
         this.isLeft ? this.x - 35 : this.x + 5,
         this.y + 35,
         30,
-        30
+        30,
       )
     }
 
@@ -1656,7 +1659,7 @@ class Gear {
             this.y + 51,
             12,
             12,
-            0.5
+            0.5,
           )
           .stroke()
 
@@ -1667,7 +1670,7 @@ class Gear {
             this.y + 52,
             10,
             10,
-            0.5
+            0.5,
           )
           .fill()
 
@@ -1677,7 +1680,7 @@ class Gear {
           gear.color_name,
           this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
           this.y + 50,
-          this.fWidth - 19
+          this.fWidth - 19,
         )
       }
 
@@ -1694,7 +1697,7 @@ class Gear {
             this.y + 68,
             12,
             12,
-            0.5
+            0.5,
           )
           .stroke()
 
@@ -1705,7 +1708,7 @@ class Gear {
             this.y + 68,
             12,
             12,
-            0.5
+            0.5,
           )
           .fill()
 
@@ -1715,7 +1718,7 @@ class Gear {
           gear.color_name2,
           this.isLeft ? this.x - 45 - 18 - 2 : this.x + 45 + 18 + 2,
           this.y + 67,
-          this.fWidth - 19
+          this.fWidth - 19,
         )
       }
     }

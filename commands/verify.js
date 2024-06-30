@@ -16,21 +16,21 @@ module.exports = {
           option
             .setName('name')
             .setDescription('Your character name.')
-            .setRequired(true)
+            .setRequired(true),
         )
         .addStringOption((option) =>
           option
             .setName('server')
             .setDescription('The server your character is on.')
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName('delete')
         .setDescription(
-          'Unlink your character and delete all stored data of you.'
-        )
+          'Unlink your character and delete all stored data of you.',
+        ),
     ),
   async execute(interaction) {
     // API request will take a while, so defer the interaction
@@ -51,12 +51,12 @@ module.exports = {
       if (characterIds.length > 1) {
         await interaction.editReply(
           DiscordUtil.getErrorEmbed(
-            `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`
-          )
+            `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`,
+          ),
         )
       } else if (characterIds.length < 1) {
         const embed = DiscordUtil.getErrorEmbed(
-          `No characters were found for \`${name}\` on \`${server}\``
+          `No characters were found for \`${name}\` on \`${server}\``,
         )
         await interaction.editReply({ embeds: [embed] })
       } else {
@@ -65,7 +65,7 @@ module.exports = {
 
         if (!character) {
           const embed = DiscordUtil.getErrorEmbed(
-            `:x: Character could not be retrieved.\nPlease try again later.`
+            `:x: Character could not be retrieved.\nPlease try again later.`,
           )
           await interaction.editReply({ embeds: [embed] })
         } else {
@@ -76,14 +76,14 @@ module.exports = {
 
             if (verification.is_verified) {
               const verifiedCharacter = await FfxivUtil.getCharacterById(
-                verification.character_id
+                verification.character_id,
               )
 
               if (character.ID === verifiedCharacter.ID) {
                 await interaction.editReply({
                   embeds: [
                     DiscordUtil.getSuccessEmbed(
-                      `You already verified this character.`
+                      `You already verified this character.`,
                     ),
                   ],
                 })
@@ -96,12 +96,12 @@ module.exports = {
               const successful = await DbUtil.setVerificationCode(
                 userId,
                 characterId,
-                verificationCode
+                verificationCode,
               )
 
               if (!successful) {
                 const embed = DiscordUtil.getErrorEmbed(
-                  'An error occured during verification process. Please contact Tancred#0001 for help.'
+                  'An error occured during verification process. Please contact Tancred#0001 for help.',
                 )
 
                 await interaction.editReply({
@@ -121,9 +121,9 @@ module.exports = {
                 new MessageButton()
                   .setLabel(`Lodestone: ${character.name}`)
                   .setURL(
-                    `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
+                    `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`,
                   )
-                  .setStyle('LINK')
+                  .setStyle('LINK'),
               )
 
               await interaction.editReply({
@@ -139,9 +139,9 @@ module.exports = {
                 new MessageButton()
                   .setLabel(`Lodestone: ${name}`)
                   .setURL(
-                    `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
+                    `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`,
                   )
-                  .setStyle('LINK')
+                  .setStyle('LINK'),
               )
 
               await interaction.editReply({
@@ -156,12 +156,12 @@ module.exports = {
             const successful = await DbUtil.setVerificationCode(
               userId,
               characterId,
-              verificationCode
+              verificationCode,
             )
 
             if (!successful) {
               const embed = DiscordUtil.getErrorEmbed(
-                'An error occured during verification process. Please contact Tancred#0001 for help.'
+                'An error occured during verification process. Please contact Tancred#0001 for help.',
               )
 
               await interaction.editReply({
@@ -181,9 +181,9 @@ module.exports = {
               new MessageButton()
                 .setLabel(`Lodestone: ${character.name}`)
                 .setURL(
-                  `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`
+                  `https://eu.finalfantasyxiv.com/lodestone/character/${characterId}/`,
                 )
-                .setStyle('LINK')
+                .setStyle('LINK'),
             )
 
             await interaction.editReply({
@@ -206,7 +206,7 @@ module.exports = {
           new MessageButton()
             .setCustomId(`verify.unset.${verification.character_id}`)
             .setLabel('Yes, delete it.')
-            .setStyle('DANGER')
+            .setStyle('DANGER'),
         )
 
         await interaction.editReply({
@@ -216,7 +216,7 @@ module.exports = {
         })
       } else {
         const embed = DiscordUtil.getErrorEmbed(
-          'Please verify your character first. See `/verify set`.'
+          'Please verify your character first. See `/verify set`.',
         )
         await interaction.editReply({ embeds: [embed] })
       }
@@ -255,7 +255,7 @@ module.exports = {
       await interaction.editReply({
         embeds: [
           DiscordUtil.getErrorEmbed(
-            `Could not fetch your character.\nPlease try again later.`
+            `Could not fetch your character.\nPlease try again later.`,
           ),
         ],
       })
@@ -266,7 +266,7 @@ module.exports = {
 
         if (!successful) {
           const embed = DiscordUtil.getErrorEmbed(
-            `Character could not be verified. Please contact Tancred#0001 for help.`
+            `Character could not be verified. Please contact Tancred#0001 for help.`,
           )
 
           await interaction.editReply({
@@ -277,7 +277,7 @@ module.exports = {
         }
 
         const embed = DiscordUtil.getSuccessEmbed(
-          `Congratulations, ${character.name}! You are now verified.\nYou no longer have to keep the verification code in your bio.`
+          `Congratulations, ${character.name}! You are now verified.\nYou no longer have to keep the verification code in your bio.`,
         )
 
         await interaction.editReply({
@@ -287,7 +287,7 @@ module.exports = {
         await interaction.editReply({
           embeds: [
             DiscordUtil.getErrorEmbed(
-              `Your lodestone bio does not match your verification code.\nVerification code: \`${verificationCode}\`\nYour current bio: \`${charBio}\``
+              `Your lodestone bio does not match your verification code.\nVerification code: \`${verificationCode}\`\nYour current bio: \`${charBio}\``,
             ),
           ],
         })
@@ -316,11 +316,11 @@ module.exports = {
     let embed
     if (successful) {
       embed = DiscordUtil.getSuccessEmbed(
-        'Your character was unlinked and all your data has been erased.'
+        'Your character was unlinked and all your data has been erased.',
       )
     } else {
       embed = DiscordUtil.getErrorEmbed(
-        'Your data could not be (fully) deleted. Please contact Tancred#0001 for help.'
+        'Your data could not be (fully) deleted. Please contact Tancred#0001 for help.',
       )
     }
 

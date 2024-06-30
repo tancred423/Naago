@@ -17,12 +17,12 @@ module.exports = {
 
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
-        'This user does not have a verified character.'
+        'This user does not have a verified character.',
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
@@ -32,17 +32,17 @@ module.exports = {
       invoker.id,
       character.ID,
       character.name,
-      `${character.server.world} (${character.server.dc})`
+      `${character.server.world} (${character.server.dc})`,
     )
 
     if (successful === 'capped') {
       const embed = DiscordUtil.getErrorEmbed(
-        `\`${character.name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.`
+        `\`${character.name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.`,
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
@@ -50,12 +50,12 @@ module.exports = {
 
     if (successful === 'existant') {
       const embed = DiscordUtil.getSuccessEmbed(
-        `\`${character.name}\` is already a favorite.`
+        `\`${character.name}\` is already a favorite.`,
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
@@ -63,22 +63,22 @@ module.exports = {
 
     if (successful) {
       const embed = DiscordUtil.getSuccessEmbed(
-        `\`${character.name}\` was added as favorite.`
+        `\`${character.name}\` was added as favorite.`,
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
     } else {
       const embed = DiscordUtil.getErrorEmbed(
-        `\`${character.name}\` could not be added to your favorites. Please contact Tancred#0001 for help.`
+        `\`${character.name}\` could not be added to your favorites. Please contact Tancred#0001 for help.`,
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
     }
-  }
+  },
 }

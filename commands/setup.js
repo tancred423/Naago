@@ -21,36 +21,36 @@ module.exports = {
             .addChoice('Topics (Latest news and patch notes)', 'topics')
             .addChoice(
               'Notices (Secondary news and letters from Naoki Yoshida)',
-              'notices'
+              'notices',
             )
             .addChoice(
               'Maintenances (All kind of maintenances and their durations)',
-              'maintenances'
+              'maintenances',
             )
             .addChoice('Updates (Outcome from maintenances)', 'updates')
             .addChoice(
               'Status (Technical difficulties and server statuses)',
-              'status'
+              'status',
             )
             .addChoice(
               'Fashion Report (Solutions by Kaiyoko)',
-              'fashion_report'
-            )
+              'fashion_report',
+            ),
         )
         .addChannelOption((option) =>
           option
             .setName('channel')
             .setDescription(
-              'The channel to post the notifications in. Provide the current one to unset it.'
+              'The channel to post the notifications in. Provide the current one to unset it.',
             )
             .setRequired(true)
-            .addChannelType(ChannelType.GuildText)
-        )
+            .addChannelType(ChannelType.GuildText),
+        ),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName('purge')
-        .setDescription('Delete all saved data of this server.')
+        .setDescription('Delete all saved data of this server.'),
     ),
   async execute(interaction) {
     if (
@@ -58,7 +58,7 @@ module.exports = {
         interaction,
         interaction.member,
         Permissions.FLAGS.MANAGE_CHANNELS,
-        Permissions.FLAGS.MANAGE_GUILD
+        Permissions.FLAGS.MANAGE_GUILD,
       ))
     )
       return
@@ -81,13 +81,13 @@ module.exports = {
           new MessageButton()
             .setCustomId(`setup.unset.${type}`)
             .setLabel('Yes, unset it.')
-            .setStyle('DANGER')
+            .setStyle('DANGER'),
         )
 
         await interaction.reply({
           ephemeral: true,
           content: `${channel.toString()} is already set as ${typeName} notification channel. Do you want to unset it?`,
-          components: [row]
+          components: [row],
         })
 
         return
@@ -97,29 +97,29 @@ module.exports = {
       const successful = await DbUtil.setSetupChannelId(
         guildId,
         type,
-        channel.id
+        channel.id,
       )
 
       if (!successful) {
         const embed = DiscordUtil.getErrorEmbed(
-          `Could not set ${typeName} notification channel. Please contact Tancred#0001 for help.`
+          `Could not set ${typeName} notification channel. Please contact Tancred#0001 for help.`,
         )
 
         await interaction.reply({
           embeds: [embed],
-          ephemeral: true
+          ephemeral: true,
         })
 
         return
       }
 
       const embed = DiscordUtil.getSuccessEmbed(
-        `${typeName} notifications will now be posted in ${channel.toString()}.`
+        `${typeName} notifications will now be posted in ${channel.toString()}.`,
       )
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
     } else if (interaction.options.getSubcommand() === 'purge') {
       const row = new MessageActionRow().addComponents(
@@ -130,14 +130,14 @@ module.exports = {
         new MessageButton()
           .setCustomId(`setup.purge.confirm`)
           .setLabel('Yes, delete it.')
-          .setStyle('DANGER')
+          .setStyle('DANGER'),
       )
 
       await interaction.reply({
         ephemeral: true,
         content:
           'Are you sure you want to delete all stored data from this server?',
-        components: [row]
+        components: [row],
       })
     }
   },
@@ -155,7 +155,7 @@ module.exports = {
       await interaction.editReply({
         content: ' ',
         embeds: [embed],
-        components: []
+        components: [],
       })
 
       return
@@ -165,24 +165,24 @@ module.exports = {
 
     if (!successful) {
       const embed = DiscordUtil.getErrorEmbed(
-        `The channel for ${typeName} notifications could not be unset. Please contact Tancred#0001 for help.`
+        `The channel for ${typeName} notifications could not be unset. Please contact Tancred#0001 for help.`,
       )
 
       await interaction.editReply({
         content: ' ',
         embeds: [embed],
-        components: []
+        components: [],
       })
     }
 
     const embed = DiscordUtil.getSuccessEmbed(
-      `${typeName} notifications will no longer be posted in that channel.`
+      `${typeName} notifications will no longer be posted in that channel.`,
     )
 
     await interaction.editReply({
       content: ' ',
       embeds: [embed],
-      components: []
+      components: [],
     })
   },
 
@@ -198,7 +198,7 @@ module.exports = {
       await interaction.editReply({
         content: ' ',
         embeds: [embed],
-        components: []
+        components: [],
       })
 
       return
@@ -208,26 +208,26 @@ module.exports = {
 
     if (!successful) {
       const embed = DiscordUtil.getErrorEmbed(
-        "This guild's data could not be (fully) deleted. Please contact Tancred#0001 for help."
+        "This guild's data could not be (fully) deleted. Please contact Tancred#0001 for help.",
       )
 
       await interaction.editReply({
         content: ' ',
         embeds: [embed],
-        components: []
+        components: [],
       })
 
       return
     }
 
     const embed = DiscordUtil.getSuccessEmbed(
-      'All data from this guild has been deleted.'
+      'All data from this guild has been deleted.',
     )
 
     await interaction.editReply({
       content: ' ',
       embeds: [embed],
-      components: []
+      components: [],
     })
-  }
+  },
 }

@@ -7,7 +7,7 @@ const {
   neededHashtags,
   twitterUsername,
   colorTwitter,
-  twitterIconLink
+  twitterIconLink,
 } = require('../config.json')
 const DbUtil = require('./DbUtil')
 
@@ -17,13 +17,15 @@ module.exports = class TwitterUtil {
     const rules = await client.v2.streamRules()
     if (rules.data?.length) {
       await client.v2.updateStreamRules({
-        delete: { ids: rules.data.map((rule) => rule.id) }
+        delete: { ids: rules.data.map((rule) => rule.id) },
       })
     }
 
     // Add our rules
     await client.v2.updateStreamRules({
-      add: [{ value: `from:${twitterUsername} has:images fashion report week` }]
+      add: [
+        { value: `from:${twitterUsername} has:images fashion report week` },
+      ],
     })
 
     GlobalUtil.stream = await client.v2.searchStream({
@@ -32,15 +34,15 @@ module.exports = class TwitterUtil {
         'author_id',
         'attachments',
         'created_at',
-        'entities'
+        'entities',
       ],
       expansions: [
         'referenced_tweets.id',
         'attachments.media_keys',
-        'author_id'
+        'author_id',
       ],
       'media.fields': ['preview_image_url', 'url'],
-      'user.fields': ['profile_image_url', 'name', 'username', 'verified']
+      'user.fields': ['profile_image_url', 'name', 'username', 'verified'],
     })
 
     // Enable auto reconnect
@@ -88,7 +90,7 @@ module.exports = class TwitterUtil {
         title: title,
         imageUrl: url,
         timestamp: createdAt,
-        week: week
+        week: week,
       }
 
       // Save data
@@ -114,7 +116,7 @@ module.exports = class TwitterUtil {
                 myTweet.username
               })`,
               myTweet.avatar,
-              myTweet.profileUrl
+              myTweet.profileUrl,
             )
             .setTitle(myTweet.title)
             .setURL(myTweet.tweetUrl)
@@ -126,10 +128,10 @@ module.exports = class TwitterUtil {
         } catch (err) {
           console.log(
             `[${moment().format(
-              'YYYY-MM-DD HH:mm'
+              'YYYY-MM-DD HH:mm',
             )}] [TWITTER] Sending fashion report to ${
               setup.guild_id
-            } was NOT successful: ${err.message}`
+            } was NOT successful: ${err.message}`,
           )
           continue
         }

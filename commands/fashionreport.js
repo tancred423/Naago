@@ -26,12 +26,12 @@ module.exports = {
     // Only output data from the current week
     if (!myTweet || !isFromThisWeek) {
       const embed = DiscordUtil.getErrorEmbed(
-        'No fashion report data found for this week (yet).'
+        'No fashion report data found for this week (yet).',
       )
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
 
       return
@@ -45,7 +45,7 @@ module.exports = {
           myTweet.username
         })`,
         myTweet.avatar,
-        myTweet.profile_url
+        myTweet.profile_url,
       )
       .setTitle(myTweet.title)
       .setURL(myTweet.tweet_url)
@@ -54,7 +54,7 @@ module.exports = {
       .setTimestamp(myTweet.timestamp)
 
     await interaction.reply({
-      embeds: [embed]
+      embeds: [embed],
     })
-  }
+  },
 }

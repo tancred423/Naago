@@ -7,5 +7,5 @@ module.exports = {
     .setDescription('Command overview and explanations.'),
   async execute(interaction) {
     await interaction.reply(await HelpUtil.getProfiles(interaction))
-  }
+  },
 }

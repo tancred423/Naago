@@ -167,11 +167,11 @@ module.exports = class LodestoneParser {
         const groups = item.match(regexTimeframes).groups
         const start = moment.utc(
           groups.date + ' ' + groups.time1,
-          'MMM. D, YYYY H:mm'
+          'MMM. D, YYYY H:mm',
         )
         const end = moment.utc(
           groups.date + ' ' + groups.time2,
-          'MMM. D, YYYY H:mm'
+          'MMM. D, YYYY H:mm',
         )
 
         arr[index] =
@@ -213,7 +213,7 @@ module.exports = class LodestoneParser {
         } else {
           fromDate = moment.utc(
             cleanItem.replaceAll('GMT', ''),
-            'MMM D YYYY H:mm'
+            'MMM D YYYY H:mm',
           )
         }
 
@@ -268,7 +268,7 @@ module.exports = class LodestoneParser {
         } else {
           fromDate = moment.utc(
             cleanItem.replaceAll('GMT', ''),
-            'MMM D YYYY H:mm'
+            'MMM D YYYY H:mm',
           )
         }
 

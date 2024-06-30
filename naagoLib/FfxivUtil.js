@@ -27,7 +27,7 @@ module.exports = class FfxivUtil {
   static async getCharacterIdsByName(name, server) {
     const nameEncoded = encodeURIComponent(name)
     const res = await axios.get(
-      `http://localhost:${naagostonePort}/character/search?name=${nameEncoded}&worldname=${server}`
+      `http://localhost:${naagostonePort}/character/search?name=${nameEncoded}&worldname=${server}`,
     )
     const data = res.data
     if (res.status !== 200) return []
@@ -36,7 +36,7 @@ module.exports = class FfxivUtil {
 
   static async getCharacterById(id) {
     const res = await axios.get(
-      `http://localhost:${naagostonePort}/character/${id}`
+      `http://localhost:${naagostonePort}/character/${id}`,
     )
     if (res.status !== 200) return undefined
     else return res?.data?.Character

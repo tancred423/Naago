@@ -45,7 +45,7 @@ module.exports = {
               tweet.username
             })`,
             tweet.avatar,
-            tweet.profile_url
+            tweet.profile_url,
           )
           .setTitle(tweet.title)
           .setURL(tweet.tweet_url)
@@ -57,10 +57,10 @@ module.exports = {
       } catch (err) {
         console.log(
           `[${moment().format(
-            'YYYY-MM-DD HH:mm'
+            'YYYY-MM-DD HH:mm',
           )}] [TWITTER] Sending fashion report to ${
             setup.guild_id
-          } was NOT successful: ${err.message}`
+          } was NOT successful: ${err.message}`,
         )
         continue
       }

@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon ./index.js",
     "coms": "node ./deploy-commands.js",
-    "start": "node ./index.js"
+    "start": "node ./index.js",
+    "check-prettier": "npx prettier . --check",
+    "write-prettier": "npx prettier . --write"
   },
   "keywords": [
     "ffxiv",
@@ -32,6 +34,7 @@
     "twitter-api-v2": "^1.7.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "prettier": "3.3.2"
   }
 }

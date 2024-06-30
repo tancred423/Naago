@@ -12,7 +12,7 @@ module.exports = {
     const client = interaction.client
     const uptimeFormatted = time(
       moment().subtract(client.uptime, 'ms').toDate(),
-      'R'
+      'R',
     )
 
     const embed = new MessageEmbed()

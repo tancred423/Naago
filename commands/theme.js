@@ -14,7 +14,7 @@ module.exports = {
 
     if (!verification?.is_verified) {
       const embed = DiscordUtil.getErrorEmbed(
-        'Please verify your character first. See `/verify set`.'
+        'Please verify your character first. See `/verify set`.',
       )
       await interaction.reply({ ephemeral: true, embeds: [embed] })
       return
@@ -57,7 +57,7 @@ module.exports = {
             value: 'character_selection',
             emoji: await DiscordUtil.getEmote(
               client,
-              'theme_character_selection'
+              'theme_character_selection',
             ),
           },
           {
@@ -84,7 +84,7 @@ module.exports = {
             value: 'ultima_thule',
             emoji: await DiscordUtil.getEmote(client, 'theme_ultima_thule'),
           },
-        ])
+        ]),
     )
 
     await interaction.editReply({
@@ -98,14 +98,14 @@ module.exports = {
     const theme = interaction.values[0]
     const themeName =
       interaction.message.components[0].components[0].options.find(
-        (o) => o.value === theme
+        (o) => o.value === theme,
       )?.label ?? theme
 
     const successful = await DbUtil.setTheme(userId, theme)
 
     if (!successful) {
       const embed = DiscordUtil.getErrorEmbed(
-        `Theme could not be set to \`${themeName}\`. Please contact Tancred#0001 for help.`
+        `Theme could not be set to \`${themeName}\`. Please contact Tancred#0001 for help.`,
       )
 
       interaction.editReply({
@@ -118,7 +118,7 @@ module.exports = {
     }
 
     const embed = DiscordUtil.getSuccessEmbed(
-      `Your theme was set to \`${themeName}\`.`
+      `Your theme was set to \`${themeName}\`.`,
     )
 
     interaction.editReply({

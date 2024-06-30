@@ -3,7 +3,7 @@ const {
   MessageActionRow,
   MessageSelectMenu,
   MessageButton,
-  MessageAttachment
+  MessageAttachment,
 } = require('discord.js')
 const DbUtil = require('../naagoLib/DbUtil')
 const DiscordUtil = require('../naagoLib/DiscordUtil')
@@ -22,24 +22,24 @@ module.exports = {
           option
             .setName('name')
             .setDescription('A full character name.')
-            .setRequired(true)
+            .setRequired(true),
         )
         .addStringOption((option) =>
           option
             .setName('server')
             .setDescription('The server the character is on.')
-            .setRequired(true)
-        )
+            .setRequired(true),
+        ),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName('remove')
-        .setDescription('Remove a character from your favorites.')
+        .setDescription('Remove a character from your favorites.'),
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName('get')
-        .setDescription("Get your favorite's FFXIV profile.")
+        .setDescription("Get your favorite's FFXIV profile."),
     ),
   async execute(interaction) {
     const userId = interaction.user.id
@@ -58,7 +58,7 @@ module.exports = {
           await interaction.deleteReply()
           await interaction.followUp({
             embeds: [embed],
-            ephemeral: true
+            ephemeral: true,
           })
           return
         }
@@ -68,52 +68,52 @@ module.exports = {
 
         if (characterIds.length > 1) {
           const embed = DiscordUtil.getErrorEmbed(
-            `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`
+            `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`,
           )
           await interaction.editReply({
             embeds: [embed],
-            ephemeral: true
+            ephemeral: true,
           })
         } else if (characterIds.length < 1) {
           const embed = DiscordUtil.getErrorEmbed(
-            `No characters were found for \`${name}\` on \`${server}\``
+            `No characters were found for \`${name}\` on \`${server}\``,
           )
           await interaction.editReply({
             embeds: [embed],
-            ephemeral: true
+            ephemeral: true,
           })
         } else {
           const characterId = characterIds[0]
           const character = await DbUtil.fetchCharacter(
             interaction,
-            characterId
+            characterId,
           )
 
           if (!character) {
             const embed = DiscordUtil.getErrorEmbed(
-              `Could not fetch the character.\nPlease try again later.`
+              `Could not fetch the character.\nPlease try again later.`,
             )
             await interaction.editReply({
               embeds: [embed],
-              ephemeral: true
+              ephemeral: true,
             })
           } else {
             const successful = await DbUtil.addFavorite(
               userId,
               characterId,
               character.name,
-              `${character.server.world} (${character.server.dc})`
+              `${character.server.world} (${character.server.dc})`,
             )
 
             if (successful === 'capped') {
               const embed = DiscordUtil.getErrorEmbed(
-                `\`${name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.`
+                `\`${name}\` was NOT added as favorite as you already reached the maximum of 25.\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.`,
               )
 
               await interaction.editReply({
                 content: ' ',
                 components: [],
-                embeds: [embed]
+                embeds: [embed],
               })
 
               return
@@ -121,13 +121,13 @@ module.exports = {
 
             if (!successful) {
               const embed = DiscordUtil.getErrorEmbed(
-                `\`${name}\` could not be added as favorite. Please contact Tancred#0001 for help.`
+                `\`${name}\` could not be added as favorite. Please contact Tancred#0001 for help.`,
               )
 
               await interaction.editReply({
                 content: ' ',
                 components: [],
-                embeds: [embed]
+                embeds: [embed],
               })
 
               return
@@ -135,13 +135,13 @@ module.exports = {
 
             if (successful) {
               const embed = DiscordUtil.getSuccessEmbed(
-                `\`${name}\` was added as favorite.`
+                `\`${name}\` was added as favorite.`,
               )
 
               await interaction.editReply({
                 content: ' ',
                 components: [],
-                embeds: [embed]
+                embeds: [embed],
               })
             }
           }
@@ -153,10 +153,10 @@ module.exports = {
 
         if (favorites?.length === 0) {
           const embed = DiscordUtil.getErrorEmbed(
-            `Please add favorites first. See \`/favorites add\``
+            `Please add favorites first. See \`/favorites add\``,
           )
           await interaction.editReply({
-            embeds: [embed]
+            embeds: [embed],
           })
           return
         }
@@ -166,7 +166,7 @@ module.exports = {
           options.push({
             label: favorite.character_name,
             description: favorite.server,
-            value: favorite.character_id
+            value: favorite.character_id,
           })
         }
 
@@ -174,12 +174,12 @@ module.exports = {
           new MessageSelectMenu()
             .setCustomId('favorite.remove')
             .setPlaceholder('Select a character...')
-            .addOptions(options)
+            .addOptions(options),
         )
 
         await interaction.editReply({
           content: 'Which character would you like to remove?',
-          components: [row]
+          components: [row],
         })
       } else {
         await interaction.deferReply()
@@ -188,12 +188,12 @@ module.exports = {
 
         if (favorites?.length === 0) {
           const embed = DiscordUtil.getErrorEmbed(
-            `Please add favorites first. See \`/favorites add\``
+            `Please add favorites first. See \`/favorites add\``,
           )
           await interaction.deleteReply()
           await interaction.followUp({
             embeds: [embed],
-            ephemeral: true
+            ephemeral: true,
           })
           return
         }
@@ -203,7 +203,7 @@ module.exports = {
           options.push({
             label: favorite.character_name,
             description: favorite.server,
-            value: favorite.character_id
+            value: favorite.character_id,
           })
         }
 
@@ -211,17 +211,17 @@ module.exports = {
           new MessageSelectMenu()
             .setCustomId('favorite.get')
             .setPlaceholder('Select a character...')
-            .addOptions(options)
+            .addOptions(options),
         )
 
         await interaction.editReply({
           content: 'Whose FFXIV profile would you like to see?',
-          components: [row]
+          components: [row],
         })
       }
     } else {
       const embed = DiscordUtil.getErrorEmbed(
-        'Please verify your character first. See `/verify set`.'
+        'Please verify your character first. See `/verify set`.',
       )
       await interaction.reply({ ephemeral: true, embeds: [embed] })
     }
@@ -233,19 +233,19 @@ module.exports = {
 
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
-        `Could not fetch your character.\nPlease try again later.`
+        `Could not fetch your character.\nPlease try again later.`,
       )
       await interaction.deleteReply()
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
     } else {
       const profileImage = await ProfileUtil.getImage(
         interaction,
         character,
         false,
-        'profile'
+        'profile',
       )
       if (!profileImage)
         throw new Error('[/favorite] profileImage is undefined')
@@ -256,7 +256,7 @@ module.exports = {
         'profile',
         null,
         'find',
-        characterId
+        characterId,
       )
 
       await interaction.editReply({
@@ -264,7 +264,7 @@ module.exports = {
         files: [file],
         embeds: [],
         attachments: [],
-        components: components
+        components: components,
       })
     }
   },
@@ -273,7 +273,7 @@ module.exports = {
     const characterId = interaction.values[0]
     const characterName =
       interaction.message.components[0].components[0].options.find(
-        (o) => o.value === characterId
+        (o) => o.value === characterId,
       )?.label ?? characterId
 
     const row = new MessageActionRow().addComponents(
@@ -284,12 +284,12 @@ module.exports = {
       new MessageButton()
         .setCustomId(`favorite.unset.${characterId}.${characterName}`)
         .setLabel('Yes, remove them.')
-        .setStyle('DANGER')
+        .setStyle('DANGER'),
     )
 
     await interaction.editReply({
       content: `Are you sure you want to remove \`${characterName}\` from your favorites?`,
-      components: [row]
+      components: [row],
     })
   },
 
@@ -300,7 +300,7 @@ module.exports = {
       await interaction.editReply({
         content: ' ',
         components: [],
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
@@ -317,24 +317,24 @@ module.exports = {
 
     if (!successful) {
       const embed = DiscordUtil.getErrorEmbed(
-        `\`${characterName}\` could not be removed from your favorites. Please contact Tancred#0001 for help.`
+        `\`${characterName}\` could not be removed from your favorites. Please contact Tancred#0001 for help.`,
       )
       await interaction.editReply({
         content: ' ',
         components: [],
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
     }
 
     const embed = DiscordUtil.getSuccessEmbed(
-      `\`${characterName}\` has been removed from your favorites.`
+      `\`${characterName}\` has been removed from your favorites.`,
     )
     await interaction.editReply({
       content: ' ',
       components: [],
-      embeds: [embed]
+      embeds: [embed],
     })
-  }
+  },
 }

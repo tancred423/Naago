@@ -17,12 +17,12 @@ module.exports = {
 
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
-        'This user does not have a verified character.'
+        'This user does not have a verified character.',
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
@@ -32,12 +32,12 @@ module.exports = {
 
     if (successful === 'notfound') {
       const embed = DiscordUtil.getSuccessEmbed(
-        `\`${character.name}\` is not a favorite already.`
+        `\`${character.name}\` is not a favorite already.`,
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
@@ -45,24 +45,24 @@ module.exports = {
 
     if (!successful) {
       const embed = DiscordUtil.getErrorEmbed(
-        `\`${character.name}\` could not be removed from your favorites. Please contact Tancred#0001 for help.`
+        `\`${character.name}\` could not be removed from your favorites. Please contact Tancred#0001 for help.`,
       )
 
       await interaction.editReply({
         content: ' ',
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
     }
 
     const embed = DiscordUtil.getSuccessEmbed(
-      `\`${character.name}\` has been removed from your favorites.`
+      `\`${character.name}\` has been removed from your favorites.`,
     )
 
     await interaction.editReply({
       content: ' ',
-      embeds: [embed]
+      embeds: [embed],
     })
-  }
+  },
 }

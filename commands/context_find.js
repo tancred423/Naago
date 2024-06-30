@@ -17,12 +17,12 @@ module.exports = {
 
     if (!characterCache) {
       const embed = DiscordUtil.getErrorEmbed(
-        'This user does not have a verified character.'
+        'This user does not have a verified character.',
       )
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
 
       return
@@ -32,14 +32,14 @@ module.exports = {
 
     const character = await DbUtil.fetchCharacter(
       interaction,
-      characterCache.ID
+      characterCache.ID,
     )
 
     const profileImage = await ProfileUtil.getImage(
       interaction,
       character,
       isVerified,
-      'profile'
+      'profile',
     )
 
     if (!profileImage)
@@ -51,7 +51,7 @@ module.exports = {
       'profile',
       null,
       'find',
-      character.ID
+      character.ID,
     )
 
     await interaction.editReply({
@@ -59,7 +59,7 @@ module.exports = {
       files: [file],
       embeds: [],
       attachments: [],
-      components: components
+      components: components,
     })
-  }
+  },
 }

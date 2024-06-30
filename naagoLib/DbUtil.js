@@ -26,7 +26,7 @@ module.exports = class DbUtil {
       return await this.getMysqlResult(sql)
     } catch (err) {
       console.error(
-        `[ERROR] Getting verification code was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting verification code was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -61,7 +61,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Setting verification code was NOT successful. Error: ${err.message}`
+        `[ERROR] Setting verification code was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -81,7 +81,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Verifying character was NOT successful. Error: ${err.message}`
+        `[ERROR] Verifying character was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -95,7 +95,7 @@ module.exports = class DbUtil {
     try {
       const loadingEmote = await DiscordUtil.getEmote(
         interaction.client,
-        'loading'
+        'loading',
       )
 
       // Get character data
@@ -193,7 +193,7 @@ module.exports = class DbUtil {
       }
     } catch (err) {
       console.error(
-        `[ERROR] Fetching character was NOT successful. Error: ${err.message}`
+        `[ERROR] Fetching character was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -231,7 +231,7 @@ module.exports = class DbUtil {
       }
     } catch (err) {
       console.error(
-        `[ERROR] Getting character was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting character was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -259,7 +259,7 @@ module.exports = class DbUtil {
         : { profilePage: 'profile', subProfilePage: undefined }
     } catch (err) {
       console.error(
-        `[ERROR] Getting profile page was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting profile page was NOT successful. Error: ${err.message}`,
       )
       return { profilePage: 'profile', subProfilePage: undefined }
     }
@@ -302,7 +302,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Updating profile page was NOT successful. Error: ${err.message}`
+        `[ERROR] Updating profile page was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -324,7 +324,7 @@ module.exports = class DbUtil {
       return res?.theme ?? 'dark'
     } catch (err) {
       console.error(
-        `[ERROR] Getting theme was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting theme was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -365,7 +365,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Setting theme was NOT successful. Error: ${err.message}`
+        `[ERROR] Setting theme was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -387,7 +387,7 @@ module.exports = class DbUtil {
       return res?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting favorites was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting favorites was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -419,7 +419,7 @@ module.exports = class DbUtil {
       return 'existant'
     } catch (err) {
       console.error(
-        `[ERROR] Adding favorite was NOT successful. Error: ${err.message}`
+        `[ERROR] Adding favorite was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -444,7 +444,7 @@ module.exports = class DbUtil {
       return 'notfound'
     } catch (err) {
       console.error(
-        `[ERROR] Removing favorite was NOT successful. Error: ${err.message}`
+        `[ERROR] Removing favorite was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -467,7 +467,7 @@ module.exports = class DbUtil {
       return res?.[0]?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting fashion report data was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting fashion report data was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -518,7 +518,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Setting fashion report data was NOT successful. Error: ${err.message}`
+        `[ERROR] Setting fashion report data was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -534,7 +534,7 @@ module.exports = class DbUtil {
         FROM topic_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
         )}
       `
 
@@ -543,7 +543,7 @@ module.exports = class DbUtil {
       return res?.[0]?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting topic by title was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting topic by title was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -560,7 +560,7 @@ module.exports = class DbUtil {
             ${mysql.escape(
               moment(topic.date)
                 .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
+                .format('YYYY-MM-DD HH:mm:ss'),
             )}
           )
         `
@@ -571,7 +571,7 @@ module.exports = class DbUtil {
       } else return 'existant'
     } catch (err) {
       console.error(
-        `[ERROR] Adding topic was NOT successful. Error: ${err.message}`
+        `[ERROR] Adding topic was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -587,7 +587,7 @@ module.exports = class DbUtil {
         FROM notice_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
         )}
       `
 
@@ -596,7 +596,7 @@ module.exports = class DbUtil {
       return res?.[0]?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting notices by title was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting notices by title was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -614,7 +614,7 @@ module.exports = class DbUtil {
             ${mysql.escape(
               moment(notice.date)
                 .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
+                .format('YYYY-MM-DD HH:mm:ss'),
             )},
             ${mysql.escape(notice.link)},
             ${mysql.escape(notice.details)}
@@ -627,7 +627,7 @@ module.exports = class DbUtil {
       } else return 'existant'
     } catch (err) {
       console.error(
-        `[ERROR] Adding notice was NOT successful. Error: ${err.message}`
+        `[ERROR] Adding notice was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -656,7 +656,7 @@ module.exports = class DbUtil {
       return res
     } catch (err) {
       console.error(
-        `[ERROR] Getting current maintenance was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting current maintenance was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -669,7 +669,7 @@ module.exports = class DbUtil {
         FROM maintenance_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
         )}
       `
 
@@ -678,7 +678,7 @@ module.exports = class DbUtil {
       return res?.[0]?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting maintenance by title was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting maintenance by title was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -698,17 +698,17 @@ module.exports = class DbUtil {
             ${mysql.escape(
               moment(maintenance.date)
                 .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
+                .format('YYYY-MM-DD HH:mm:ss'),
             )},
             ${mysql.escape(maintenance.link)},
             ${mysql.escape(maintenance.details)},
             ${mysql.escape(
               maintenance.from
                 ?.tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
+                .format('YYYY-MM-DD HH:mm:ss'),
             )},
             ${mysql.escape(
-              maintenance.to?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+              maintenance.to?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
             )}
           )
         `
@@ -719,7 +719,7 @@ module.exports = class DbUtil {
       } else return 'existant'
     } catch (err) {
       console.error(
-        `[ERROR] Adding maintenance was NOT successful. Error: ${err.message}`
+        `[ERROR] Adding maintenance was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -735,7 +735,7 @@ module.exports = class DbUtil {
         FROM update_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
         )}
       `
 
@@ -744,7 +744,7 @@ module.exports = class DbUtil {
       return res?.[0]?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting update by title was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting update by title was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -761,7 +761,7 @@ module.exports = class DbUtil {
             ${mysql.escape(
               moment(update.date)
                 .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
+                .format('YYYY-MM-DD HH:mm:ss'),
             )},
             ${mysql.escape(update.link)},
             ${mysql.escape(update.details)}
@@ -774,7 +774,7 @@ module.exports = class DbUtil {
       } else return 'existant'
     } catch (err) {
       console.error(
-        `[ERROR] Adding update was NOT successful. Error: ${err.message}`
+        `[ERROR] Adding update was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -790,7 +790,7 @@ module.exports = class DbUtil {
         FROM status_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss')
+          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
         )}
       `
 
@@ -799,7 +799,7 @@ module.exports = class DbUtil {
       return res?.[0]?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting status by title was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting status by title was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -817,7 +817,7 @@ module.exports = class DbUtil {
             ${mysql.escape(
               moment(status.date)
                 .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss')
+                .format('YYYY-MM-DD HH:mm:ss'),
             )},
             ${mysql.escape(status.link)},
             ${mysql.escape(status.details)}
@@ -830,7 +830,7 @@ module.exports = class DbUtil {
       } else return 'existant'
     } catch (err) {
       console.error(
-        `[ERROR] Adding status was NOT successful. Error: ${err.message}`
+        `[ERROR] Adding status was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -852,7 +852,7 @@ module.exports = class DbUtil {
       return res?.[0]
     } catch (err) {
       console.error(
-        `[ERROR] Getting ${type} channel IDs was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting ${type} channel IDs was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -872,7 +872,7 @@ module.exports = class DbUtil {
       return res?.channel_id
     } catch (err) {
       console.error(
-        `[ERROR] Getting ${type} channel ID was NOT successful. Error: ${err.message}`
+        `[ERROR] Getting ${type} channel ID was NOT successful. Error: ${err.message}`,
       )
       return undefined
     }
@@ -906,7 +906,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Setting ${type} channel ID was NOT successful. Error: ${err.message}`
+        `[ERROR] Setting ${type} channel ID was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -925,7 +925,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Unsetting ${type} channel ID was NOT successful. Error: ${err.message}`
+        `[ERROR] Unsetting ${type} channel ID was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -947,7 +947,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] Guild purge was NOT successful. Error: ${err.message}`
+        `[ERROR] Guild purge was NOT successful. Error: ${err.message}`,
       )
       return false
     }
@@ -1005,7 +1005,7 @@ module.exports = class DbUtil {
       return true
     } catch (err) {
       console.error(
-        `[ERROR] User purge was NOT successful. Error: ${err.message}`
+        `[ERROR] User purge was NOT successful. Error: ${err.message}`,
       )
       return false
     }

@@ -38,8 +38,8 @@ module.exports = class NaagoUtil {
       const split = element.split('_')
       pretty.push(
         `${this.capitalizeFirstLetter(split[0])} ${this.capitalizeFirstLetter(
-          split[1]
-        )}`
+          split[1],
+        )}`,
       )
     })
 

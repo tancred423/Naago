@@ -9,11 +9,11 @@ module.exports = class SelectMenuUtil {
 
     if (userId !== messageAuthorId) {
       const embed = DiscordUtil.getErrorEmbed(
-        'You cannot interact with menus from someone else.'
+        'You cannot interact with menus from someone else.',
       )
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
       return
     }
@@ -39,7 +39,7 @@ module.exports = class SelectMenuUtil {
             break
           default:
             throw new Error(
-              "SelectMenuUtil#execute: Favorite action was not 'get' or 'remove'."
+              "SelectMenuUtil#execute: Favorite action was not 'get' or 'remove'.",
             )
         }
         break

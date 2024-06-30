@@ -11,19 +11,19 @@ module.exports = {
     {
       id: '181896377486278657',
       type: 'USER',
-      permission: true
-    }
+      permission: true,
+    },
   ],
   async execute(interaction) {
     GlobalUtil.closeStream()
 
     await interaction.reply({
       embeds: [DiscordUtil.getSuccessEmbed('Bot will be shutdown.')],
-      ephemeral: true
+      ephemeral: true,
     })
 
     await interaction.client.destroy()
 
     process.exit(1)
-  }
+  },
 }

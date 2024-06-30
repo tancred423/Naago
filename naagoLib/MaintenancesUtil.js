@@ -15,7 +15,7 @@ module.exports = class MaintenancesUtil {
   static async getLast10() {
     try {
       const res = await axios.get(
-        `http://localhost:${naagostonePort}/lodestone/maintenance`
+        `http://localhost:${naagostonePort}/lodestone/maintenance`,
       )
       return res?.data?.Maintenances ?? []
     } catch (err) {
@@ -83,10 +83,10 @@ module.exports = class MaintenancesUtil {
       } catch (err) {
         console.log(
           `[${moment().format(
-            'YYYY-MM-DD HH:mm'
+            'YYYY-MM-DD HH:mm',
           )}] [MAINTENANCES] Sending maintenance to ${
             setup.guild_id
-          } was NOT successful: ${err.message}`
+          } was NOT successful: ${err.message}`,
         )
         continue
       }

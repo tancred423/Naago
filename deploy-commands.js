@@ -31,16 +31,16 @@ if (isProd) {
   rest
     .put(Routes.applicationCommands(clientId), { body: commands })
     .then(() =>
-      console.log('Successfully registered global application commands.')
+      console.log('Successfully registered global application commands.'),
     )
     .catch(console.error)
 
   rest
     .put(Routes.applicationGuildCommands(clientId, guildId), {
-      body: ownerCommands
+      body: ownerCommands,
     })
     .then(() =>
-      console.log('Successfully registered owner application commands.')
+      console.log('Successfully registered owner application commands.'),
     )
     .catch(console.error)
 } else {
@@ -70,7 +70,7 @@ if (isProd) {
   rest
     .put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
     .then(() =>
-      console.log('Successfully registered guild application commands.')
+      console.log('Successfully registered guild application commands.'),
     )
     .catch(console.error)
 }

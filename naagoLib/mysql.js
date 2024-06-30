@@ -13,7 +13,7 @@ const pool = mysql.createPool({
   timezone: '+00:00',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 })
 
 const promisePool = pool.promise()

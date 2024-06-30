@@ -15,7 +15,7 @@ module.exports = class NoticesUtil {
   static async getLast10() {
     try {
       const res = await axios.get(
-        `http://localhost:${naagostonePort}/lodestone/notices`
+        `http://localhost:${naagostonePort}/lodestone/notices`,
       )
       return res?.data?.Notices ?? []
     } catch (err) {
@@ -80,10 +80,10 @@ module.exports = class NoticesUtil {
       } catch (err) {
         console.log(
           `[${moment().format(
-            'YYYY-MM-DD HH:mm'
+            'YYYY-MM-DD HH:mm',
           )}] [NOTICES] Sending notice to ${
             setup.guild_id
-          } was NOT successful: ${err.message}`
+          } was NOT successful: ${err.message}`,
         )
         continue
       }
