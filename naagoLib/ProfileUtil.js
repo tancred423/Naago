@@ -7,7 +7,7 @@ const {
   maxLevelLimited,
   maxMounts,
   maxMinions,
-  maxAchievements
+  maxAchievements,
 } = require('../config.json')
 const DbUtil = require('./DbUtil')
 const DiscordUtil = require('./DiscordUtil')
@@ -32,12 +32,7 @@ module.exports = class ProfileUtil {
       else return await profile.getDowDom()
     } else if (profilePage === 'equipment') return await profile.getEquipment()
     else if (profilePage === 'attributes') return await profile.getAttributes()
-  }
-
-  static getEmbed(interaction, character, isVerified, profilePage, isMe) {
-    const profile = new Profile(interaction, character, isVerified)
-
-    if (profilePage === 'socialmedia') return profile.getSocialMedia(isMe)
+    else if (profilePage === 'portrait') return character.portrait
   }
 
   static getComponents(profilePage, subProfilePage, commandName, characterId) {
@@ -284,7 +279,7 @@ class Profile {
       [
         this.character.free_company?.icon_layer_0,
         this.character.free_company?.icon_layer_1,
-        this.character.free_company?.icon_layer_2
+        this.character.free_company?.icon_layer_2,
       ],
       true
     )

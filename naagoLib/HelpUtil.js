@@ -48,7 +48,7 @@ module.exports = class HelpUtil {
 
     return {
       embeds: [embed],
-      components: [component]
+      components: [component],
     }
   }
 
@@ -72,7 +72,7 @@ module.exports = class HelpUtil {
 
     return {
       embeds: [embed],
-      components: [component]
+      components: [component],
     }
   }
 
@@ -85,11 +85,11 @@ module.exports = class HelpUtil {
       .setThumbnail(client.user.displayAvatarURL())
       .addField(
         '/verify set',
-        '● Links your FFXIV character to your Discord account.\n● You will have to verify it by changing the bio of your Lodestone profile.\n● Verification is needed to use `/theme`, `/favorite` and `/socialmedia`.'
+        '● Links your FFXIV character to your Discord account.\n● You will have to verify it by changing the bio of your Lodestone profile.\n● Verification is needed to use `/theme` and `/favorite`.'
       )
       .addField(
         '/verify delete',
-        '● Unlinks your FFXIV character from your Discord account.\n● Also removes any other information stored of you including `/theme`, `/favorite` and `socialmedia`.'
+        '● Unlinks your FFXIV character from your Discord account.\n● Also removes any other information stored of you including `/theme` and `/favorite`.'
       )
       .addField(
         '/theme',
@@ -100,14 +100,6 @@ module.exports = class HelpUtil {
         '● Save any character as favorite.\n● You can then access them quickly with `/favorite get`.\n● You can have up to 25 favorites.'
       )
       .addField('/favorite remove', '● Remove one of your favorites.')
-      .addField(
-        '/socialmedia add',
-        '● Save your social media links.\n● They will then be publicly displayed in the `Social Media` section of your profile.'
-      )
-      .addField(
-        '/socialmedia remove',
-        '● Remove one of your social media links.\n● It will then no longer be displayed on your profile.'
-      )
       .addField(
         '/setup notifications',
         `● Set up automated notifications for Lodestone posts and weekly fashion report solutions kindly provided by [Kaiyoko](https://twitter.com/${twitterUsername}).\n● Lodestone posts include:\n   ○ Topics (Latest news and patch notes)\n   ○ Notices (Secondary news and letters from Naoki Yoshida)\n   ○ Maintenances (All kind of maintenances and their durations)\n   ○ Updates (Outcome from maintenances)\n   ○ Status (Technical difficulties and server statuses)`
@@ -121,7 +113,7 @@ module.exports = class HelpUtil {
 
     return {
       embeds: [embed],
-      components: [component]
+      components: [component],
     }
   }
 
@@ -147,7 +139,7 @@ module.exports = class HelpUtil {
 
     return {
       embeds: [embed],
-      components: [component]
+      components: [component],
     }
   }
 

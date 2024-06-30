@@ -16,6 +16,7 @@ const {
   lodestoneIconLink,
 } = require('../config.json')
 const NaagoUtil = require('./NaagoUtil')
+const moment = require('moment')
 
 module.exports = class DiscordUtil {
   static getSuccessEmbed(message) {
@@ -81,6 +82,8 @@ module.exports = class DiscordUtil {
         return await naagoEmoteServer.emojis.fetch('922677850480467979')
       case 'theme_classic':
         return await naagoEmoteServer.emojis.fetch('922677850522390529')
+      case 'theme_clear_blue':
+        return await naagoEmoteServer.emojis.fetch('1063108616502120458')
       case 'theme_final_days':
         return await naagoEmoteServer.emojis.fetch('922681780606230629')
       case 'theme_ultima_thule':
@@ -126,16 +129,16 @@ module.exports = class DiscordUtil {
     if (hasAllPermissions) return true
     else {
       const embed = DiscordUtil.getErrorEmbed(
-        'Not enough permissions to execute this command.'
+        'Not enough permissions to execute this command.',
       )
         .addField(
           'For this command you will need',
-          NaagoUtil.prettifyPermissionArray(neededPerms, false)
+          NaagoUtil.prettifyPermissionArray(neededPerms, false),
         )
         .addField(
           'But you are missing',
           NaagoUtil.prettifyPermissionArray(missingPerms),
-          false
+          false,
         )
 
       await interaction.reply({
@@ -150,56 +153,86 @@ module.exports = class DiscordUtil {
   static getTopicEmbed(topic) {
     return new MessageEmbed()
       .setColor(colorTopics)
-      .setAuthor('Topic', topicIconLink)
+      .setAuthor({
+        name: 'Topic',
+        iconURL: topicIconLink,
+      })
       .setTitle(topic.title)
       .setURL(topic.link)
       .setDescription(topic.description)
       .setImage(topic.banner)
-      .setFooter('Lodestone', lodestoneIconLink)
-      .setTimestamp(topic.date)
+      .setFooter({
+        text: 'Lodestone',
+        iconURL: lodestoneIconLink,
+      })
+      .setTimestamp(moment(topic.date).toDate())
   }
 
   static getNoticesEmbed(notice) {
     return new MessageEmbed()
       .setColor(colorNotices)
-      .setAuthor(notice.tag, noticeIconLink)
+      .setAuthor({
+        name: notice.tag,
+        iconURL: noticeIconLink,
+      })
       .setTitle(notice.title)
       .setURL(notice.link)
       .setDescription(notice.details)
-      .setFooter('Lodestone', lodestoneIconLink)
+      .setFooter({
+        text: 'Lodestone',
+        iconURL: lodestoneIconLink,
+      })
       .setTimestamp(notice.date)
   }
 
   static getMaintenanceEmbed(maint) {
     return new MessageEmbed()
       .setColor(colorMaintenances)
-      .setAuthor(maint.tag, maintenanceIconLink)
+      .setAuthor({
+        name: maint.tag,
+        iconURL: maintenanceIconLink,
+      })
       .setTitle(maint.title)
       .setURL(maint.link)
       .setDescription(maint.details)
-      .setFooter('Lodestone', lodestoneIconLink)
+      .setFooter({
+        text: 'Lodestone',
+        iconURL: lodestoneIconLink,
+      })
       .setTimestamp(maint.date)
   }
 
   static getUpdatesEmbed(update) {
     return new MessageEmbed()
       .setColor(colorUpdates)
-      .setAuthor('Update', updateIconLink)
+      .setAuthor({
+        name: 'Update',
+        iconURL: updateIconLink,
+      })
       .setTitle(update.title)
       .setURL(update.link)
       .setDescription(update.details)
-      .setFooter('Lodestone', lodestoneIconLink)
+      .setFooter({
+        text: 'Lodestone',
+        iconURL: lodestoneIconLink,
+      })
       .setTimestamp(update.date)
   }
 
   static getStatusEmbed(status) {
     return new MessageEmbed()
       .setColor(colorStatus)
-      .setAuthor(status.tag, statusIconLink)
+      .setAuthor({
+        name: status.tag,
+        iconURL: statusIconLink,
+      })
       .setTitle(status.title)
       .setURL(status.link)
       .setDescription(status.details)
-      .setFooter('Lodestone', lodestoneIconLink)
+      .setFooter({
+        text: 'Lodestone',
+        iconURL: lodestoneIconLink,
+      })
       .setTimestamp(status.date)
   }
 }

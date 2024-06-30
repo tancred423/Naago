@@ -15,7 +15,7 @@ module.exports = class TopicsUtil {
   static async getLast10() {
     try {
       const res = await axios.get(
-        `http://localhost:${naagostonePort}/lodestone/topics`
+        `http://localhost:${naagostonePort}/lodestone/topics`,
       )
       return res?.data?.Topics ?? []
     } catch (err) {
@@ -47,7 +47,7 @@ module.exports = class TopicsUtil {
       topic.description = NaagoUtil.cutString(
         topic.description,
         2000,
-        topic.link
+        topic.link,
       )
 
       // Image
@@ -67,16 +67,62 @@ module.exports = class TopicsUtil {
   static async sentTopic(topic) {
     // Send embeds
     const client = GlobalUtil.client
-    if (!client) return
+
+    if (!client) {
+      console.log(
+        `[${moment().format(
+          'YYYY-MM-DD HH:mm',
+        )}] [TOPICS] Sending topics was NOT successful because client is null!`,
+      )
+
+      return
+    }
+
     const setups = await DbUtil.getSetups('topics')
-    if (!setups || setups?.length < 1) return
+
+    if (!setups || setups?.length < 1) {
+      console.log(
+        `[${moment().format(
+          'YYYY-MM-DD HH:mm',
+        )}] [TOPICS] Sending topics was NOT successful because setups cannot be found! | Is setups null: ${!setups} | Is setups not null but empty: ${
+          setups?.length < 1 ?? 'null...'
+        }`,
+      )
+
+      return
+    }
 
     for (const setup of setups) {
       try {
         const guild = await client.guilds.fetch(setup.guild_id)
-        if (!guild) continue
+
+        if (!guild) {
+          console.log(
+            `[${moment().format(
+              'YYYY-MM-DD HH:mm',
+            )}] [TOPICS] Sending topic to ${
+              setup.guild_id
+            } was NOT successful because could not fetch guild.`,
+          )
+
+          continue
+        }
+
         const channel = await guild.channels.fetch(setup.channel_id)
-        if (!channel) continue
+
+        if (!channel) {
+          console.log(
+            `[${moment().format(
+              'YYYY-MM-DD HH:mm',
+            )}] [TOPICS] Sending topic to ${
+              setup.guild_id
+            } was NOT successful because could not fetch channel with id ${
+              setup.channel_id
+            }.`,
+          )
+
+          continue
+        }
 
         const embed = DiscordUtil.getTopicEmbed(topic)
 
@@ -85,8 +131,10 @@ module.exports = class TopicsUtil {
         console.log(
           `[${moment().format('YYYY-MM-DD HH:mm')}] [TOPICS] Sending topic to ${
             setup.guild_id
-          } was NOT successful: ${err.message}`
+          } was NOT successful: ${err.message}`,
+          err,
         )
+
         continue
       }
     }

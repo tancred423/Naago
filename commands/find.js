@@ -14,13 +14,13 @@ module.exports = {
       option
         .setName('name')
         .setDescription('A full character name.')
-        .setRequired(true)
+        .setRequired(true),
     )
     .addStringOption((option) =>
       option
         .setName('server')
         .setDescription('The server the character is on.')
-        .setRequired(true)
+        .setRequired(true),
     ),
   async execute(interaction) {
     await interaction.deferReply()
@@ -34,7 +34,7 @@ module.exports = {
       await interaction.deleteReply()
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
       return
     }
@@ -44,21 +44,21 @@ module.exports = {
 
     if (characterIds.length > 1) {
       const embed = DiscordUtil.getErrorEmbed(
-        `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`
+        `Multiple characters were found for \`${name}\` on \`${server}\`.\nPlease provide the command with the full name of your character to get rid of duplicates.`,
       )
       await interaction.deleteReply()
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
     } else if (characterIds.length < 1) {
       const embed = DiscordUtil.getErrorEmbed(
-        `No characters were found for \`${name}\` on \`${server}\``
+        `No characters were found for \`${name}\` on \`${server}\``,
       )
       await interaction.deleteReply()
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
     } else {
       const characterId = characterIds[0]
@@ -66,19 +66,19 @@ module.exports = {
 
       if (!character) {
         const embed = DiscordUtil.getErrorEmbed(
-          `Could not fetch your character.\nPlease try again later.`
+          `Could not fetch your character.\nPlease try again later.`,
         )
         await interaction.deleteReply()
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true
+          ephemeral: true,
         })
       } else {
         const profileImage = await ProfileUtil.getImage(
           interaction,
           character,
           false,
-          'profile'
+          'profile',
         )
         if (!profileImage) throw new Error('[/find] profileImage is undefined')
 
@@ -88,7 +88,7 @@ module.exports = {
           'profile',
           null,
           'find',
-          characterId
+          characterId,
         )
 
         await interaction.editReply({
@@ -96,7 +96,7 @@ module.exports = {
           files: [file],
           embeds: [],
           attachments: [],
-          components: components
+          components: components,
         })
       }
     }
@@ -112,11 +112,11 @@ module.exports = {
 
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
-        `Could not fetch this character.\nPlease try again later.`
+        `Could not fetch this character.\nPlease try again later.`,
       )
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
       return
     }
@@ -131,15 +131,17 @@ module.exports = {
     }
 
     if (profilePage === 'portrait') {
-      const response = await axios.get(character.portrait, { responseType: 'arraybuffer' })
-      const buffer = Buffer.from(response.data, "utf-8")
+      const response = await axios.get(character.portrait, {
+        responseType: 'arraybuffer',
+      })
+      const buffer = Buffer.from(response.data, 'utf-8')
       const file = new MessageAttachment(buffer)
 
       const components = ProfileUtil.getComponents(
         profilePage,
         subProfilePage,
         'find',
-        characterId
+        characterId,
       )
 
       await interaction.editReply({
@@ -147,7 +149,7 @@ module.exports = {
         files: [file],
         embeds: [],
         attachments: [],
-        components: components
+        components: components,
       })
     } else {
       const profileImage = await ProfileUtil.getImage(
@@ -155,7 +157,7 @@ module.exports = {
         character,
         false,
         profilePage,
-        subProfilePage
+        subProfilePage,
       )
       if (!profileImage) throw new Error('profileImage is undefined')
 
@@ -165,7 +167,7 @@ module.exports = {
         profilePage,
         subProfilePage,
         'find',
-        characterId
+        characterId,
       )
 
       await interaction.editReply({
@@ -173,8 +175,8 @@ module.exports = {
         files: [file],
         embeds: [],
         attachments: [],
-        components: components
+        components: components,
       })
     }
-  }
+  },
 }

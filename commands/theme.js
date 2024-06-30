@@ -31,19 +31,25 @@ module.exports = {
             label: 'Dark UI',
             description: 'The dark UI like in-game',
             value: 'dark',
-            emoji: await DiscordUtil.getEmote(client, 'theme_dark')
+            emoji: await DiscordUtil.getEmote(client, 'theme_dark'),
           },
           {
             label: 'Light UI',
             description: 'The light UI like in-game',
             value: 'light',
-            emoji: await DiscordUtil.getEmote(client, 'theme_light')
+            emoji: await DiscordUtil.getEmote(client, 'theme_light'),
           },
           {
             label: 'Classic UI',
             description: 'The classic UI like in-game',
             value: 'classic',
-            emoji: await DiscordUtil.getEmote(client, 'theme_classic')
+            emoji: await DiscordUtil.getEmote(client, 'theme_classic'),
+          },
+          {
+            label: 'Clear Blue UI',
+            description: 'The clear blue UI like in-game',
+            value: 'clear_blue',
+            emoji: await DiscordUtil.getEmote(client, 'theme_clear_blue'),
           },
           {
             label: 'Character Selection',
@@ -52,38 +58,38 @@ module.exports = {
             emoji: await DiscordUtil.getEmote(
               client,
               'theme_character_selection'
-            )
+            ),
           },
           {
             label: 'Amaurot',
             description: 'Amaurot projection from the Tempest',
             value: 'amaurot',
-            emoji: await DiscordUtil.getEmote(client, 'theme_amaurot')
+            emoji: await DiscordUtil.getEmote(client, 'theme_amaurot'),
           },
           {
             label: 'The Moon',
             description: 'Landscape on Mare Lamentorum',
             value: 'moon',
-            emoji: await DiscordUtil.getEmote(client, 'theme_moon')
+            emoji: await DiscordUtil.getEmote(client, 'theme_moon'),
           },
           {
             label: 'The Final Days',
             description: 'Fiery star showers',
             value: 'final_days',
-            emoji: await DiscordUtil.getEmote(client, 'theme_final_days')
+            emoji: await DiscordUtil.getEmote(client, 'theme_final_days'),
           },
           {
             label: 'Ultima Thule',
             description: 'At the edge of the universe',
             value: 'ultima_thule',
-            emoji: await DiscordUtil.getEmote(client, 'theme_ultima_thule')
-          }
+            emoji: await DiscordUtil.getEmote(client, 'theme_ultima_thule'),
+          },
         ])
     )
 
     await interaction.editReply({
       content: 'Which theme do you prefer?',
-      components: [row]
+      components: [row],
     })
   },
 
@@ -105,7 +111,7 @@ module.exports = {
       interaction.editReply({
         content: ' ',
         components: [],
-        embeds: [embed]
+        embeds: [embed],
       })
 
       return
@@ -118,7 +124,7 @@ module.exports = {
     interaction.editReply({
       content: ' ',
       components: [],
-      embeds: [embed]
+      embeds: [embed],
     })
-  }
+  },
 }

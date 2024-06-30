@@ -15,7 +15,7 @@ module.exports = {
 
     if (!verification?.is_verified) {
       const embed = DiscordUtil.getErrorEmbed(
-        'Please verify your character first. See `/verify set`.'
+        'Please verify your character first. See `/verify set`.',
       )
       await interaction.reply({ ephemeral: true, embeds: [embed] })
       return
@@ -28,32 +28,35 @@ module.exports = {
 
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
-        `Could not fetch your character.\nPlease try again later.`
+        `Could not fetch your character.\nPlease try again later.`,
       )
       await interaction.deleteReply()
       await interaction.followUp({
         embeds: [embed],
-        ephemeral: true
+        ephemeral: true,
       })
       return
     }
 
     const profilePages = await DbUtil.getProfilePages(userId)
-    const profilePage = profilePages.profilePage ?? 'profile'
+    let profilePage = profilePages.profilePage ?? 'profile'
+    if (profilePage === 'socialmedia') profilePage = 'profile'
     const subProfilePage = profilePages.subProfilePage
 
     if (!profilePage) throw new Error('[/me] profilePage is undefined')
 
     if (profilePage === 'portrait') {
-      const response = await axios.get(character.portrait, { responseType: 'arraybuffer' })
-      const buffer = Buffer.from(response.data, "utf-8")
+      const response = await axios.get(character.portrait, {
+        responseType: 'arraybuffer',
+      })
+      const buffer = Buffer.from(response.data, 'utf-8')
       const file = new MessageAttachment(buffer)
 
       const components = ProfileUtil.getComponents(
         profilePage,
         subProfilePage,
         'me',
-        characterId
+        characterId,
       )
 
       await interaction.editReply({
@@ -61,7 +64,7 @@ module.exports = {
         files: [file],
         embeds: [],
         attachments: [],
-        components: components
+        components: components,
       })
     } else {
       const profileImage = await ProfileUtil.getImage(
@@ -69,7 +72,7 @@ module.exports = {
         character,
         true,
         profilePage,
-        subProfilePage
+        subProfilePage,
       )
       if (!profileImage) throw new Error('[/me] profileImage is undefined')
 
@@ -79,7 +82,7 @@ module.exports = {
         profilePage,
         subProfilePage,
         'me',
-        characterId
+        characterId,
       )
 
       await interaction.editReply({
@@ -87,7 +90,7 @@ module.exports = {
         files: [file],
         embeds: [],
         attachments: [],
-        components: components
+        components: components,
       })
     }
   },
@@ -103,11 +106,11 @@ module.exports = {
 
       if (!character) {
         const embed = DiscordUtil.getErrorEmbed(
-          `Could not fetch your character.\nPlease try again later.`
+          `Could not fetch your character.\nPlease try again later.`,
         )
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true
+          ephemeral: true,
         })
         return
       }
@@ -122,21 +125,25 @@ module.exports = {
         profilePage = 'classesjobs'
       } else if (profilePage === 'classesjobs' && !subProfilePage) {
         subProfilePage = 'dowdom'
+      } else if (profilePage === 'socialmedia') {
+        profilePage = 'profile'
       }
 
       // Update profile page
       DbUtil.updateProfilePage(userId, profilePage, subProfilePage)
 
       if (profilePage === 'portrait') {
-        const response = await axios.get(character.portrait, { responseType: 'arraybuffer' })
-        const buffer = Buffer.from(response.data, "utf-8")
+        const response = await axios.get(character.portrait, {
+          responseType: 'arraybuffer',
+        })
+        const buffer = Buffer.from(response.data, 'utf-8')
         const file = new MessageAttachment(buffer)
 
         const components = ProfileUtil.getComponents(
           profilePage,
           subProfilePage,
           'me',
-          characterId
+          characterId,
         )
 
         await interaction.editReply({
@@ -144,7 +151,7 @@ module.exports = {
           files: [file],
           embeds: [],
           attachments: [],
-          components: components
+          components: components,
         })
       } else {
         const profileImage = await ProfileUtil.getImage(
@@ -152,7 +159,7 @@ module.exports = {
           character,
           true,
           profilePage,
-          subProfilePage
+          subProfilePage,
         )
         if (!profileImage) throw new Error('profileImage is undefined')
 
@@ -162,7 +169,7 @@ module.exports = {
           profilePage,
           subProfilePage,
           'me',
-          characterId
+          characterId,
         )
 
         await interaction.editReply({
@@ -170,9 +177,9 @@ module.exports = {
           files: [file],
           embeds: [],
           attachments: [],
-          components: components
+          components: components,
         })
       }
     }
-  }
+  },
 }

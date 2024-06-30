@@ -79,8 +79,9 @@ client.once('ready', () => {
     if (lodestoneCheckOnStart) {
       checkLodestone()
     } else {
-      cron.schedule('*/15 * * * *', () => {
+      cron.schedule('1-59/15 * * * *', () => {
         checkLodestone()
+        client.user.setActivity('naago.tancred.de', { type: 'PLAYING' })
       })
     }
   } catch (err) {
@@ -100,8 +101,8 @@ async function checkLodestone() {
 
   console.log(
     `[${moment().format(
-      'YYYY-MM-DD HH:mm'
-    )}] Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${status} status.`
+      'YYYY-MM-DD HH:mm',
+    )}] Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${status} status.`,
   )
 }
 
@@ -138,7 +139,7 @@ client.on('interactionCreate', async (interaction) => {
       console.error(err)
 
       const embed = DiscordUtil.getErrorEmbed(
-        'There was an error while executing this command.'
+        'There was an error while executing this command.',
       )
       if (interaction.ephemeral) {
         await interaction.editReply({
@@ -158,7 +159,7 @@ client.on('interactionCreate', async (interaction) => {
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
-        'There was an error while executing this button.'
+        'There was an error while executing this button.',
       )
       await interaction.followUp({
         embeds: [embed],
@@ -171,7 +172,7 @@ client.on('interactionCreate', async (interaction) => {
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
-        'There was an error while executing this menu.'
+        'There was an error while executing this menu.',
       )
       await interaction.followUp({
         embeds: [embed],
@@ -186,7 +187,7 @@ client.on('interactionCreate', async (interaction) => {
     } catch (err) {
       console.error(err)
       const embed = DiscordUtil.getErrorEmbed(
-        'There was an error while executing this command.'
+        'There was an error while executing this command.',
       )
       if (interaction.ephemeral) {
         await interaction.editReply({
