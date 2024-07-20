@@ -30,10 +30,8 @@ module.exports = {
 
     await interaction.deferReply()
 
-    const character = await DbUtil.fetchCharacter(
-      interaction,
-      characterCache.ID,
-    )
+    const characterDataDto = await DbUtil.fetchCharacter(interaction, characterCache.ID)
+    const character = characterDataDto.characterData
 
     const profileImage = await ProfileUtil.getImage(
       interaction,
@@ -55,7 +53,7 @@ module.exports = {
     )
 
     await interaction.editReply({
-      content: ' ',
+      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
       files: [file],
       embeds: [],
       attachments: [],

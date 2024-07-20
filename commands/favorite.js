@@ -84,12 +84,10 @@ module.exports = {
           })
         } else {
           const characterId = characterIds[0]
-          const character = await DbUtil.fetchCharacter(
-            interaction,
-            characterId,
-          )
+          const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+          const character = characterDataDto.characterData
 
-          if (!character) {
+          if (!characterDataDto) {
             const embed = DiscordUtil.getErrorEmbed(
               `Could not fetch the character.\nPlease try again later.`,
             )
@@ -229,7 +227,8 @@ module.exports = {
 
   async get(interaction) {
     const characterId = interaction.values[0]
-    const character = await DbUtil.fetchCharacter(interaction, characterId)
+    const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+    const character = characterDataDto.characterData
 
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(
@@ -260,7 +259,7 @@ module.exports = {
       )
 
       await interaction.editReply({
-        content: ' ',
+        content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
         files: [file],
         embeds: [],
         attachments: [],

@@ -24,9 +24,10 @@ module.exports = {
     await interaction.deferReply()
 
     const characterId = verification.character_id
-    const character = await DbUtil.fetchCharacter(interaction, characterId)
+    const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+    const character = characterDataDto.characterData
 
-    if (!character) {
+    if (!characterDataDto) {
       const embed = DiscordUtil.getErrorEmbed(
         `Could not fetch your character.\nPlease try again later.`,
       )
@@ -86,7 +87,7 @@ module.exports = {
       )
 
       await interaction.editReply({
-        content: ' ',
+        content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
         files: [file],
         embeds: [],
         attachments: [],
@@ -102,9 +103,10 @@ module.exports = {
     if (verification?.is_verified) {
       // Get character
       const characterId = verification.character_id
-      const character = await DbUtil.fetchCharacterCached(interaction, characterId)
+      const characterDataDto = await DbUtil.fetchCharacterCached(interaction, characterId)
+      const character = characterDataDto.characterData
 
-      if (!character) {
+      if (!characterDataDto) {
         const embed = DiscordUtil.getErrorEmbed(
           `Could not fetch your character.\nPlease try again later.`,
         )
@@ -173,7 +175,7 @@ module.exports = {
         )
 
         await interaction.editReply({
-          content: ' ',
+          content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
           files: [file],
           embeds: [],
           attachments: [],

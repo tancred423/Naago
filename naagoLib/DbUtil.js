@@ -2,6 +2,7 @@ const mysql = require('../naagoLib/mysql')
 const FfxivUtil = require('../naagoLib/FfxivUtil')
 const moment = require('moment-timezone')
 const DiscordUtil = require('./DiscordUtil')
+const CharacterDataDto = require('../dto/CharacterDataDto')
 
 module.exports = class DbUtil {
   static async getMysqlResult(sql) {
@@ -107,13 +108,20 @@ module.exports = class DbUtil {
 
       const characterDataRes = await this.getMysqlResult(sql)
 
+      const latestUpdate =
+        typeof characterDataRes?.latest_update === 'object'
+          ? moment(new Date(characterDataRes.latest_update))
+          : undefined
+
       const characterData =
         typeof characterDataRes?.json_string === 'string'
           ? JSON.parse(characterDataRes.json_string)
           : undefined
 
-      if (characterData) {
-        return characterData
+      const characterDataDto = new CharacterDataDto(latestUpdate, characterData)
+
+      if (characterDataDto.characterData) {
+        return characterDataDto
       }
 
       // No character data yet. Cache now.
@@ -130,7 +138,7 @@ module.exports = class DbUtil {
 
       const now = Date.now()
       const nowSQL = moment(now)
-        .tz('Europe/London')
+        .tz('UTC')
         .format('YYYY-MM-DD HH:mm:ss')
 
       sql = `
@@ -152,7 +160,12 @@ module.exports = class DbUtil {
 
       const res = await this.getMysqlResult(sql)
 
-      return res ? JSON.parse(res.json_string) : undefined
+      characterDataDto = new CharacterDataDto(
+        moment(new Date(res.latest_update)),
+        JSON.parse(res.json_string)
+      )
+
+      return res ? characterDataDto : undefined
     } catch (err) {
       console.error(
         `[ERROR] Fetching character was NOT successful. Error: ${err.message}`,
@@ -177,16 +190,23 @@ module.exports = class DbUtil {
 
       const characterDataRes = await this.getMysqlResult(sql)
 
+      const latestUpdate =
+        typeof characterDataRes?.latest_update === 'object'
+          ? moment(new Date(characterDataRes.latest_update))
+          : undefined
+
       const characterData =
         typeof characterDataRes?.json_string === 'string'
           ? JSON.parse(characterDataRes.json_string)
           : undefined
 
-      if (characterData) {
-        const lastUpdate = new Date(characterDataRes.latest_update).getTime()
+      const characterDataDto = new CharacterDataDto(latestUpdate, characterData)
+
+      if (characterDataDto.characterData) {
+        const lastUpdate = characterDataDto.latestUpdate
         const now = Date.now()
         const nowSQL = moment(now)
-          .tz('Europe/London')
+          .tz('UTC')
           .format('YYYY-MM-DD HH:mm:ss')
 
         if (now - lastUpdate > 15 * 60 * 1000) {
@@ -220,7 +240,7 @@ module.exports = class DbUtil {
           return res ? JSON.parse(res.json_string) : undefined
         } else {
           // Last update was for < 2 hours. Use cached data.
-          return characterData
+          return characterDataDto
         }
       } else {
         // No character data yet. Cache now.
@@ -237,7 +257,7 @@ module.exports = class DbUtil {
 
         const now = Date.now()
         const nowSQL = moment(now)
-          .tz('Europe/London')
+          .tz('UTC')
           .format('YYYY-MM-DD HH:mm:ss')
 
         sql = `
@@ -259,7 +279,12 @@ module.exports = class DbUtil {
 
         const res = await this.getMysqlResult(sql)
 
-        return res ? JSON.parse(res.json_string) : undefined
+        const characterDataDto = new CharacterDataDto(
+          moment(new Date(res.latest_update)),
+          JSON.parse(res.json_string)
+        )
+
+        return res ? characterDataDto : undefined
       }
     } catch (err) {
       console.error(

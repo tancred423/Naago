@@ -62,9 +62,10 @@ module.exports = {
       })
     } else {
       const characterId = characterIds[0]
-      const character = await DbUtil.fetchCharacter(interaction, characterId)
+      const characterDataDto = await DbUtil.fetchCharacter(interaction, characterId)
+      const character = characterDataDto.characterData
 
-      if (!character) {
+      if (!characterDataDto) {
         const embed = DiscordUtil.getErrorEmbed(
           `Could not fetch your character.\nPlease try again later.`,
         )
@@ -92,7 +93,7 @@ module.exports = {
         )
 
         await interaction.editReply({
-          content: ' ',
+          content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
           files: [file],
           embeds: [],
           attachments: [],
@@ -108,9 +109,10 @@ module.exports = {
       throw new Error('[/find - button] button id length is !== 3')
 
     const characterId = buttonIdSplit[2]
-    const character = await DbUtil.fetchCharacterCached(interaction, characterId)
+    const characterDataDto = await DbUtil.fetchCharacterCached(interaction, characterId)
+    const character = characterDataDto.characterData
 
-    if (!character) {
+    if (!characterDataDto) {
       const embed = DiscordUtil.getErrorEmbed(
         `Could not fetch this character.\nPlease try again later.`,
       )
@@ -171,7 +173,7 @@ module.exports = {
       )
 
       await interaction.editReply({
-        content: ' ',
+        content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
         files: [file],
         embeds: [],
         attachments: [],
