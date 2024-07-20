@@ -108,7 +108,7 @@ module.exports = {
       throw new Error('[/find - button] button id length is !== 3')
 
     const characterId = buttonIdSplit[2]
-    const character = await DbUtil.fetchCharacter(interaction, characterId)
+    const character = await DbUtil.fetchCharacterCached(interaction, characterId)
 
     if (!character) {
       const embed = DiscordUtil.getErrorEmbed(

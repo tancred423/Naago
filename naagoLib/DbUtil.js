@@ -88,8 +88,78 @@ module.exports = class DbUtil {
   }
 
   ////////////////////////////////////////////
-  // Fetch Character (Cache)
+  // Fetch Character
   ////////////////////////////////////////////
+
+  static async fetchCharacterCached(interaction, characterId) {
+    try {
+      const loadingEmote = await DiscordUtil.getEmote(
+        interaction.client,
+        'loading',
+      )
+
+      // Get character data
+      let sql = `
+        SELECT *
+        FROM character_data
+        WHERE character_id=${mysql.escape(characterId)}
+      `
+
+      const characterDataRes = await this.getMysqlResult(sql)
+
+      const characterData =
+        typeof characterDataRes?.json_string === 'string'
+          ? JSON.parse(characterDataRes.json_string)
+          : undefined
+
+      if (characterData) {
+        return characterData
+      }
+
+      // No character data yet. Cache now.
+      await interaction.editReply({
+        content: `${loadingEmote} Updating lodestone data. This might take several seconds.`,
+        components: [],
+        files: [],
+        embeds: [],
+        attachments: [],
+      })
+
+      const character = await FfxivUtil.getCharacterById(characterId)
+      if (!character) return undefined
+
+      const now = Date.now()
+      const nowSQL = moment(now)
+        .tz('Europe/London')
+        .format('YYYY-MM-DD HH:mm:ss')
+
+      sql = `
+        INSERT INTO character_data (character_id,latest_update,json_string)
+        VALUES (
+          ${mysql.escape(characterId)},
+          ${mysql.escape(nowSQL)},
+          ${mysql.escape(JSON.stringify(character))}
+        )
+      `
+
+      await mysql.query(sql)
+
+      sql = `
+        SELECT *
+        FROM character_data
+        WHERE character_id=${mysql.escape(characterId)}
+      `
+
+      const res = await this.getMysqlResult(sql)
+
+      return res ? JSON.parse(res.json_string) : undefined
+    } catch (err) {
+      console.error(
+        `[ERROR] Fetching character was NOT successful. Error: ${err.message}`,
+      )
+      return undefined
+    }
+  }
 
   static async fetchCharacter(interaction, characterId) {
     try {
@@ -119,8 +189,8 @@ module.exports = class DbUtil {
           .tz('Europe/London')
           .format('YYYY-MM-DD HH:mm:ss')
 
-        if (now - lastUpdate > 2 * 60 * 60 * 1000) {
-          // Last update was for >= 2 hours. Update data now.
+        if (now - lastUpdate > 15 * 60 * 1000) {
+          // Last update was >= 15 minutes ago. Update data now.
           await interaction.editReply({
             content: `${loadingEmote} Updating lodestone data. This might take several seconds.`,
             components: [],
@@ -238,40 +308,6 @@ module.exports = class DbUtil {
   }
 
   ////////////////////////////////////////////
-  // Clear Cache
-  ////////////////////////////////////////////
-
-  static async clearCache(userId) {
-    try {
-      // Get character id
-      let sql = `
-        SELECT character_id
-        FROM verifications
-        WHERE user_id=${mysql.escape(userId)}
-      `
-
-      const res = await this.getMysqlResult(sql)
-      if (!res) return false
-
-      const characterId = res.character_id
-
-      sql = `
-        DELETE FROM character_data
-        WHERE character_id=${mysql.escape(characterId)}
-      `
-
-      await mysql.query(sql)
-
-      return true
-    } catch (err) {
-      console.error(
-        `[ERROR] Clearing cache was NOT successful. Error: ${err.message}`,
-      )
-      return false
-    }
-  }
-
-  ////////////////////////////////////////////
   // Profile Pages
   ////////////////////////////////////////////
 
@@ -287,9 +323,9 @@ module.exports = class DbUtil {
 
       return res
         ? {
-            profilePage: res.profile_page,
-            subProfilePage: res.sub_profile_page,
-          }
+          profilePage: res.profile_page,
+          subProfilePage: res.sub_profile_page,
+        }
         : { profilePage: 'profile', subProfilePage: undefined }
     } catch (err) {
       console.error(
@@ -568,8 +604,8 @@ module.exports = class DbUtil {
         FROM topic_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-        )}
+        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+      )}
       `
 
       const res = await mysql.query(sql)
@@ -592,10 +628,10 @@ module.exports = class DbUtil {
           VALUES (
             ${mysql.escape(topic.title)},
             ${mysql.escape(
-              moment(topic.date)
-                .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss'),
-            )}
+          moment(topic.date)
+            .tz('Europe/London')
+            .format('YYYY-MM-DD HH:mm:ss'),
+        )}
           )
         `
 
@@ -621,8 +657,8 @@ module.exports = class DbUtil {
         FROM notice_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-        )}
+        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+      )}
       `
 
       const res = await mysql.query(sql)
@@ -646,10 +682,10 @@ module.exports = class DbUtil {
             ${mysql.escape(notice.title)},
             ${mysql.escape(notice.tag)},
             ${mysql.escape(
-              moment(notice.date)
-                .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss'),
-            )},
+          moment(notice.date)
+            .tz('Europe/London')
+            .format('YYYY-MM-DD HH:mm:ss'),
+        )},
             ${mysql.escape(notice.link)},
             ${mysql.escape(notice.details)}
           )
@@ -703,8 +739,8 @@ module.exports = class DbUtil {
         FROM maintenance_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-        )}
+        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+      )}
       `
 
       const res = await mysql.query(sql)
@@ -730,20 +766,20 @@ module.exports = class DbUtil {
             ${mysql.escape(maintenance.title)},
             ${mysql.escape(maintenance.tag)},
             ${mysql.escape(
-              moment(maintenance.date)
-                .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss'),
-            )},
+          moment(maintenance.date)
+            .tz('Europe/London')
+            .format('YYYY-MM-DD HH:mm:ss'),
+        )},
             ${mysql.escape(maintenance.link)},
             ${mysql.escape(maintenance.details)},
             ${mysql.escape(
-              maintenance.from
-                ?.tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss'),
-            )},
+          maintenance.from
+            ?.tz('Europe/London')
+            .format('YYYY-MM-DD HH:mm:ss'),
+        )},
             ${mysql.escape(
-              maintenance.to?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-            )}
+          maintenance.to?.tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+        )}
           )
         `
 
@@ -769,8 +805,8 @@ module.exports = class DbUtil {
         FROM update_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-        )}
+        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+      )}
       `
 
       const res = await mysql.query(sql)
@@ -793,10 +829,10 @@ module.exports = class DbUtil {
           VALUES (
             ${mysql.escape(update.title)},
             ${mysql.escape(
-              moment(update.date)
-                .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss'),
-            )},
+          moment(update.date)
+            .tz('Europe/London')
+            .format('YYYY-MM-DD HH:mm:ss'),
+        )},
             ${mysql.escape(update.link)},
             ${mysql.escape(update.details)}
           )
@@ -824,8 +860,8 @@ module.exports = class DbUtil {
         FROM status_data
         WHERE title=${mysql.escape(title)}
         AND date=${mysql.escape(
-          moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
-        )}
+        moment(date).tz('Europe/London').format('YYYY-MM-DD HH:mm:ss'),
+      )}
       `
 
       const res = await mysql.query(sql)
@@ -849,10 +885,10 @@ module.exports = class DbUtil {
             ${mysql.escape(status.title)},
             ${mysql.escape(status.tag)},
             ${mysql.escape(
-              moment(status.date)
-                .tz('Europe/London')
-                .format('YYYY-MM-DD HH:mm:ss'),
-            )},
+          moment(status.date)
+            .tz('Europe/London')
+            .format('YYYY-MM-DD HH:mm:ss'),
+        )},
             ${mysql.escape(status.link)},
             ${mysql.escape(status.details)}
           )

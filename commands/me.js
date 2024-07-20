@@ -102,7 +102,7 @@ module.exports = {
     if (verification?.is_verified) {
       // Get character
       const characterId = verification.character_id
-      const character = await DbUtil.fetchCharacter(interaction, characterId)
+      const character = await DbUtil.fetchCharacterCached(interaction, characterId)
 
       if (!character) {
         const embed = DiscordUtil.getErrorEmbed(
