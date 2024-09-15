@@ -1504,7 +1504,7 @@ class Gear {
         this.isLeft || isFirst
           ? this.height
           : type === 'facewear' || type === 'soulcrystal'
-            ? this.height - 50
+            ? this.height - 57
             : this.height - 15,
         borderRadius,
       )
@@ -1520,14 +1520,14 @@ class Gear {
     this.ctx.drawImage(
       gearIcon,
       this.isLeft ? this.x - 35 : this.x + 5,
-      this.y,
+      type === 'facewear' || type === 'soulcrystal' ? this.y - 3 : this.y,
       30,
       30,
     )
 
     if (!gear) {
       this.x = this.isLeft ? this.x + 10 : this.x - 10
-      this.y -= this.isLeft ? 4 : type === 'facewear' ? 52 : 18
+      this.y -= this.isLeft ? 4 : type === 'facewear' ? 59 : 4
 
       return
     }
@@ -1608,7 +1608,7 @@ class Gear {
     this.ctx.fillText(
       gear.name?.split('<')[0],
       this.isLeft ? this.x - 45 : this.x + 45,
-      type === 'facewear' || type === 'soulcrystal' ? this.y + 7 : this.y + 17,
+      type === 'facewear' || type === 'soulcrystal' ? this.y + 3 : this.y + 17,
       this.fWidth,
     )
 
@@ -1724,7 +1724,7 @@ class Gear {
     }
 
     this.x = this.isLeft ? this.x + 10 : this.x - 10
-    this.y -= this.isLeft ? 4 : type === 'facewear' ? 52 : 18
+    this.y -= this.isLeft || isFirst ? 4 : type === 'facewear' ? 52 : 18
   }
 
   getDefaultIcon(type) {
@@ -1778,6 +1778,10 @@ class Gear {
         return './images/materia/crt_9.png'
       case 'Savage Aim Materia X':
         return './images/materia/crt_10.png'
+      case 'Savage Aim Materia XI':
+        return './images/materia/crt_11.png'
+      case 'Savage Aim Materia XII':
+        return './images/materia/crt_12.png'
       case "Heavens' Eye Materia I":
         return './images/materia/dh_1.png'
       case "Heavens' Eye Materia II":
@@ -1798,6 +1802,10 @@ class Gear {
         return './images/materia/dh_9.png'
       case "Heavens' Eye Materia X":
         return './images/materia/dh_10.png'
+      case "Heavens' Eye Materia XI":
+        return './images/materia/dh_11.png'
+      case "Heavens' Eye Materia XII":
+        return './images/materia/dh_12.png'
       case 'Savage Might Materia I':
         return './images/materia/det_1.png'
       case 'Savage Might Materia II':
@@ -1818,6 +1826,10 @@ class Gear {
         return './images/materia/det_9.png'
       case 'Savage Might Materia X':
         return './images/materia/det_10.png'
+      case 'Savage Might Materia XI':
+        return './images/materia/det_11.png'
+      case 'Savage Might Materia XII':
+        return './images/materia/det_12.png'
       case 'Quickarm Materia I':
         return './images/materia/sks_1.png'
       case 'Quickarm Materia II':
@@ -1838,6 +1850,10 @@ class Gear {
         return './images/materia/sks_9.png'
       case 'Quickarm Materia X':
         return './images/materia/sks_10.png'
+      case 'Quickarm Materia XI':
+        return './images/materia/sks_11.png'
+      case 'Quickarm Materia XII':
+        return './images/materia/sks_12.png'
       case 'Quicktongue Materia I':
         return './images/materia/sps_1.png'
       case 'Quicktongue Materia II':
@@ -1858,6 +1874,10 @@ class Gear {
         return './images/materia/sps_9.png'
       case 'Quicktongue Materia X':
         return './images/materia/sps_10.png'
+      case 'Quicktongue Materia XI':
+        return './images/materia/sps_11.png'
+      case 'Quicktongue Materia XII':
+        return './images/materia/sps_12.png'
       case 'Battledance Materia I':
         return './images/materia/tenacity_1.png'
       case 'Battledance Materia II':
@@ -1878,6 +1898,10 @@ class Gear {
         return './images/materia/tenacity_9.png'
       case 'Battledance Materia X':
         return './images/materia/tenacity_10.png'
+      case 'Battledance Materia XI':
+        return './images/materia/tenacity_11.png'
+      case 'Battledance Materia XII':
+        return './images/materia/tenacity_12.png'
       case 'Piety Materia I':
         return './images/materia/piety_1.png'
       case 'Piety Materia II':
@@ -1898,6 +1922,10 @@ class Gear {
         return './images/materia/piety_9.png'
       case 'Piety Materia X':
         return './images/materia/piety_10.png'
+      case 'Piety Materia XI':
+        return './images/materia/piety_11.png'
+      case 'Piety Materia XII':
+        return './images/materia/piety_12.png'
       case "Craftsman's Command Materia I":
         return './images/materia/control_1.png'
       case "Craftsman's Command Materia II":
@@ -1918,6 +1946,10 @@ class Gear {
         return './images/materia/control_9.png'
       case "Craftsman's Command Materia X":
         return './images/materia/control_10.png'
+      case "Craftsman's Command Materia XI":
+        return './images/materia/control_11.png'
+      case "Craftsman's Command Materia XII":
+        return './images/materia/control_12.png'
       case "Craftsman's Cunning Materia I":
         return './images/materia/cp_1.png'
       case "Craftsman's Cunning Materia II":
@@ -1938,6 +1970,10 @@ class Gear {
         return './images/materia/cp_9.png'
       case "Craftsman's Cunning Materia X":
         return './images/materia/cp_10.png'
+      case "Craftsman's Cunning Materia XI":
+        return './images/materia/cp_11.png'
+      case "Craftsman's Cunning Materia XII":
+        return './images/materia/cp_12.png'
       case "Craftsman's Competence Materia I":
         return './images/materia/cms_1.png'
       case "Craftsman's Competence Materia II":
@@ -1958,6 +1994,10 @@ class Gear {
         return './images/materia/cms_9.png'
       case "Craftsman's Competence Materia X":
         return './images/materia/cms_10.png'
+      case "Craftsman's Competence Materia XI":
+        return './images/materia/cms_11.png'
+      case "Craftsman's Competence Materia XII":
+        return './images/materia/cms_12.png'
       case "Gatherer's Grasp Materia I":
         return './images/materia/gp_1.png'
       case "Gatherer's Grasp Materia II":
@@ -1978,6 +2018,10 @@ class Gear {
         return './images/materia/gp_9.png'
       case "Gatherer's Grasp Materia X":
         return './images/materia/gp_10.png'
+      case "Gatherer's Grasp Materia XI":
+        return './images/materia/gp_11.png'
+      case "Gatherer's Grasp Materia XII":
+        return './images/materia/gp_12.png'
       case "Gatherer's Guerdon Materia I":
         return './images/materia/gathering_1.png'
       case "Gatherer's Guerdon Materia II":
@@ -1998,6 +2042,10 @@ class Gear {
         return './images/materia/gathering_9.png'
       case "Gatherer's Guerdon Materia X":
         return './images/materia/gathering_10.png'
+      case "Gatherer's Guerdon Materia XI":
+        return './images/materia/gathering_11.png'
+      case "Gatherer's Guerdon Materia XII":
+        return './images/materia/gathering_12.png'
       case "Gatherer's Guile Materia I":
         return './images/materia/perception_1.png'
       case "Gatherer's Guile Materia II":
@@ -2018,6 +2066,10 @@ class Gear {
         return './images/materia/perception_9.png'
       case "Gatherer's Guile Materia X":
         return './images/materia/perception_10.png'
+      case "Gatherer's Guile Materia XI":
+        return './images/materia/perception_11.png'
+      case "Gatherer's Guile Materia XII":
+        return './images/materia/perception_12.png'
       default:
         console.log(`[ERROR] Materia '${materia}' doesn't exist.'`)
         return './images/materia/fallback.png'
