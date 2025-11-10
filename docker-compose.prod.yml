@@ -1,7 +1,7 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: naago-mysql-dev
+    container_name: naago-mysql
     restart: unless-stopped
     env_file:
       - .env
@@ -13,7 +13,7 @@ services:
     ports:
       - "${DB_PORT}:3306"
     volumes:
-      - mysql_data_dev:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: [
@@ -34,7 +34,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:latest
-    container_name: naago-phpmyadmin-dev
+    container_name: naago-phpmyadmin
     restart: unless-stopped
     depends_on:
       mysql:
@@ -43,12 +43,12 @@ services:
       - .env
     environment:
       PMA_HOST: mysql
-      PMA_PORT: ${DB_PORT}
+      PMA_PORT: 3306
       PMA_USER: ${DB_USER}
       PMA_PASSWORD: ${DB_PASS}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     ports:
-      - "${PMA_PORT}:80"
+      - "8080:80"
     networks:
       - naago-network
 
@@ -56,7 +56,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: naago-app-dev
+    container_name: naago-app
     restart: unless-stopped
     depends_on:
       mysql:
@@ -64,14 +64,14 @@ services:
     entrypoint: [
       "/bin/bash",
       "-c",
-      "deno run --allow-all src/database/migrate.ts && tail -f /dev/null",
+      "deno run --allow-all src/database/migrate.ts && exec deno run --allow-all index.ts",
     ]
     volumes:
-      - ./src:/app/src
+      - ./image:/app/image:ro
     env_file:
       - .env
     environment:
-      IS_PROD: false
+      IS_PROD: true
     networks:
       - naago-network
     logging:
@@ -81,7 +81,7 @@ services:
         max-file: "3"
 
 volumes:
-  mysql_data_dev:
+  mysql_data:
     driver: local
 
 networks:
