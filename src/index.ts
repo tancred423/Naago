@@ -248,7 +248,7 @@ client.on("interactionCreate", async (interaction) => {
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this command.",
       );
-      if ((interaction as any).ephemeral) {
+      if (interaction.ephemeral) {
         await interaction.editReply({
           embeds: [embed],
         });
