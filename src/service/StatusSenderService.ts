@@ -15,7 +15,17 @@ const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
 
 export default class StatusSenderService {
   static async checkForNew(): Promise<number> {
-    const latestStatuses = await NaagostoneApiService.fetchLatest10Statuses();
+    let latestStatuses: Status[];
+    try {
+      latestStatuses = await NaagostoneApiService.fetchLatest10Statuses();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        log.error(
+          `[STATUS] Fetching latest statuses was NOT successful: ${error.message}`,
+        );
+      }
+      return 0;
+    }
     const newStatuses: Status[] = [];
 
     for (const status of latestStatuses) {

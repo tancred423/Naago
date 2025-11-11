@@ -174,13 +174,15 @@ client.on("interactionCreate", async (interaction) => {
       );
       if ((interaction as any).ephemeral) {
         await interaction.editReply({
+          content: "",
           embeds: [embed],
+          components: [],
         });
       } else if (interaction.replied || interaction.deferred) {
         await interaction.deleteReply();
         await interaction.followUp({
           embeds: [embed],
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } else {
         await interaction.reply({

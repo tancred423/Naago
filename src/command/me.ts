@@ -69,7 +69,7 @@ export default {
     if (profilePage === "portrait") {
       const response = await fetch(character.portrait);
       const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);;
+      const buffer = Buffer.from(arrayBuffer);
       const file = new AttachmentBuilder(buffer);
 
       const components = ProfileGeneratorService.getComponents(
@@ -167,7 +167,7 @@ export default {
       if (profilePage === "portrait") {
         const response = await fetch(character.portrait);
         const arrayBuffer = await response.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);;
+        const buffer = Buffer.from(arrayBuffer);
         const file = new AttachmentBuilder(buffer);
 
         const components = ProfileGeneratorService.getComponents(

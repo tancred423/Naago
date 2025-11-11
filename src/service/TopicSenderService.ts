@@ -27,7 +27,18 @@ export class TopicSenderService {
     }
 
     for (const newTopic of newTopics.reverse()) {
-      if (saveLodestoneNews) TopicsRepository.add(newTopic);
+      if (saveLodestoneNews) {
+        try {
+          TopicsRepository.add(newTopic);
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            log.error(
+              `[TOPICS] Saving topic "${newTopic.title}" was NOT successful: ${error.message}`,
+              error,
+            );
+          }
+        }
+      }
       if (sendLodestoneNews) await this.send(newTopic);
     }
 

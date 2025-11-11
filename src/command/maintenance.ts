@@ -16,6 +16,7 @@ export default {
         flags: MessageFlags.Ephemeral,
         content: "There is no active maintenance.",
       });
+      return;
     }
 
     const embeds = [];
