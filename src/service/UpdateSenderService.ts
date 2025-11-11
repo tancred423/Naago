@@ -27,7 +27,7 @@ export class UpdateSenderService {
     }
 
     for (const newUpdate of newUpdates.reverse()) {
-      if (saveLodestoneNews) UpdatesRepository.add(newUpdate);
+      if (saveLodestoneNews) await UpdatesRepository.add(newUpdate);
       if (sendLodestoneNews) await this.send(newUpdate);
     }
 

@@ -172,23 +172,30 @@ client.on("interactionCreate", async (interaction) => {
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this command.",
       );
-      if ((interaction as any).ephemeral) {
-        await interaction.editReply({
-          content: "",
-          embeds: [embed],
-          components: [],
-        });
-      } else if (interaction.replied || interaction.deferred) {
-        await interaction.deleteReply();
-        await interaction.followUp({
-          embeds: [embed],
-          flags: MessageFlags.Ephemeral,
-        });
-      } else {
-        await interaction.reply({
-          embeds: [embed],
-          flags: MessageFlags.Ephemeral,
-        });
+      try {
+        if (interaction.ephemeral) {
+          await interaction.editReply({
+            content: "",
+            embeds: [embed],
+            components: [],
+          });
+        } else if (interaction.replied || interaction.deferred) {
+          await interaction.deleteReply();
+          await interaction.followUp({
+            embeds: [embed],
+            flags: MessageFlags.Ephemeral,
+          });
+        } else {
+          await interaction.reply({
+            embeds: [embed],
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+      } catch (error: unknown) {
+        log.error(
+          `Error while sending error message for command '${interaction.commandName}':`,
+          error,
+        );
       }
     }
   } else if (interaction.isButton()) {

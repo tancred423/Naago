@@ -49,9 +49,9 @@ to add the bot to your server.
 
 2. **Create Discord application and upload emojis**
 
-  If you haven't yet, create a Discord application on the Discord Developer Portal.
-  After that, head to the emoji page and upload the ones from `emoji/`.
-  Copy the markdown of these emojis and fill them into your `.env` file.
+If you haven't yet, create a Discord application on the Discord Developer
+Portal. After that, head to the emoji page and upload the ones from `emoji/`.
+Copy the markdown of these emojis and fill them into your `.env` file.
 
 3. **Start all services**
 

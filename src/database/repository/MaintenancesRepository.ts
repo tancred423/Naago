@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gte, like, lte, not } from "drizzle-orm";
 import { database } from "../connection.ts";
 import moment from "moment";
 import { AlreadyInDatabaseError } from "../error/AlreadyInDatabaseError.ts";
@@ -27,10 +27,10 @@ export class MaintenancesRepository {
   }
 
   static async add(
-    topic: Maintenance,
+    maintenance: Maintenance,
   ): Promise<void> {
-    const dateSQL = moment(topic.date).tz("Europe/London").toDate();
-    const currentTopic = await this.find(topic.title, dateSQL);
+    const dateSQL = moment(maintenance.date).tz("Europe/London").toDate();
+    const currentTopic = await this.find(maintenance.title, dateSQL);
     if (currentTopic) {
       throw new AlreadyInDatabaseError(
         "This maintenance is already in the database",
@@ -40,26 +40,59 @@ export class MaintenancesRepository {
     await database
       .insert(maintenanceData)
       .values({
-        title: topic.title,
-        link: topic.link,
+        tag: maintenance.tag,
+        title: maintenance.title,
+        link: maintenance.link,
         date: dateSQL,
-        description: topic.description.markdown,
+        description: maintenance.description.markdown,
+        startDate: maintenance.start_timestamp
+          ? moment(maintenance.start_timestamp).tz("Europe/London").toDate()
+          : null,
+        endDate: maintenance.end_timestamp
+          ? moment(maintenance.end_timestamp).tz("Europe/London").toDate()
+          : null,
       });
   }
 
   static async findActive(): Promise<MaintenanceData[]> {
     const now = moment().tz("Europe/London").toDate();
 
-    const result = await database
+    const activeMaintenances = await database
       .select()
       .from(maintenanceData)
       .where(
         and(
           lte(maintenanceData.startDate, now),
           gte(maintenanceData.endDate, now),
+          not(eq(maintenanceData.tag, "Maintenance: Follow-up")),
         ),
       )
-      .orderBy(desc(maintenanceData.id));
+      .orderBy(maintenanceData.id);
+
+    const result: MaintenanceData[] = [];
+    const MAX_EMBEDS = 5;
+
+    for (const maintenance of activeMaintenances) {
+      if (result.length >= MAX_EMBEDS) break;
+
+      result.push(maintenance);
+
+      const followUps = await database
+        .select()
+        .from(maintenanceData)
+        .where(
+          and(
+            eq(maintenanceData.tag, "Maintenance: Follow-up"),
+            like(maintenanceData.title, `%${maintenance.title}%`),
+          ),
+        )
+        .orderBy(maintenanceData.id);
+
+      for (const followUp of followUps) {
+        if (result.length >= MAX_EMBEDS) break;
+        result.push(followUp);
+      }
+    }
 
     return result;
   }

@@ -29,7 +29,7 @@ export class NoticeSenderService {
     }
 
     for (const newNotice of newNotices.reverse()) {
-      if (saveLodestoneNews) NoticesRepository.add(newNotice);
+      if (saveLodestoneNews) await NoticesRepository.add(newNotice);
       if (sendLodestoneNews) await this.send(newNotice);
     }
 

@@ -27,18 +27,7 @@ export class TopicSenderService {
     }
 
     for (const newTopic of newTopics.reverse()) {
-      if (saveLodestoneNews) {
-        try {
-          TopicsRepository.add(newTopic);
-        } catch (error: unknown) {
-          if (error instanceof Error) {
-            log.error(
-              `[TOPICS] Saving topic "${newTopic.title}" was NOT successful: ${error.message}`,
-              error,
-            );
-          }
-        }
-      }
+      if (saveLodestoneNews) await TopicsRepository.add(newTopic);
       if (sendLodestoneNews) await this.send(newTopic);
     }
 

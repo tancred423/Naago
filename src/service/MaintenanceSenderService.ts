@@ -37,7 +37,7 @@ export class MaintenanceSenderService {
     }
 
     for (const maintenance of newMaintenances.reverse()) {
-      if (saveLodestoneNews) MaintenancesRepository.add(maintenance);
+      if (saveLodestoneNews) await MaintenancesRepository.add(maintenance);
       if (sendLodestoneNews) await this.send(maintenance);
     }
 

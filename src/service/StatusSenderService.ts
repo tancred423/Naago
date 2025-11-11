@@ -40,7 +40,7 @@ export default class StatusSenderService {
     }
 
     for (const newStatus of newStatuses.reverse()) {
-      if (saveLodestoneNews) StatusesRepository.add(newStatus);
+      if (saveLodestoneNews) await StatusesRepository.add(newStatus);
       if (sendLodestoneNews) await this.send(newStatus);
     }
 

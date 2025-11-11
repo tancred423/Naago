@@ -9,8 +9,8 @@ export interface Maintenance {
   date: number;
   link: string;
   description: MaintenanceDescription;
-  startDate: number | null;
-  endDate: number | null;
+  start_timestamp: number | null;
+  end_timestamp: number | null;
 }
 
 export interface MaintenanceResponse {
