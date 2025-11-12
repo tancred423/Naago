@@ -1,7 +1,6 @@
 import { load } from "@std/dotenv";
 import { readdirSync } from "node:fs";
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v10";
+import { REST, Routes } from "discord.js";
 import * as log from "@std/log";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -29,7 +28,7 @@ log.setup({
 const clientId = Deno.env.get("DISCORD_CLIENT_ID")!;
 const guildId = Deno.env.get("DISCORD_GUILD_ID")!;
 const token = Deno.env.get("DISCORD_TOKEN")!;
-const isProd = Deno.env.get("IS_PROD");
+const isProd = Deno.env.get("IS_PROD")! === "true";
 
 if (isProd) {
   const commands: any[] = [];

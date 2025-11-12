@@ -1,6 +1,7 @@
 import {
   ButtonInteraction,
   CommandInteraction,
+  ModalSubmitInteraction,
   StringSelectMenuInteraction,
 } from "discord.js";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
@@ -10,6 +11,7 @@ import moment from "moment";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
 import { DiscordEmojiService } from "./DiscordEmojiService.ts";
+import { StringManipulationService } from "./StringManipulationService.ts";
 
 export class FetchCharacterService {
   static async findVerifiedCharacterByUserId(
@@ -34,7 +36,8 @@ export class FetchCharacterService {
     interaction:
       | CommandInteraction
       | StringSelectMenuInteraction
-      | ButtonInteraction,
+      | ButtonInteraction
+      | ModalSubmitInteraction,
     characterId: number,
   ): Promise<CharacterDataDto | null> {
     const characterData = await CharacterDataRepository.find(
@@ -60,7 +63,8 @@ export class FetchCharacterService {
     interaction:
       | CommandInteraction
       | StringSelectMenuInteraction
-      | ButtonInteraction,
+      | ButtonInteraction
+      | ModalSubmitInteraction,
     characterId: number,
   ): Promise<CharacterDataDto | null> {
     await this.prepareInteraction(interaction);
@@ -78,12 +82,12 @@ export class FetchCharacterService {
     interaction:
       | CommandInteraction
       | StringSelectMenuInteraction
-      | ButtonInteraction,
+      | ButtonInteraction
+      | ModalSubmitInteraction,
   ): Promise<void> {
-    const loadingEmote = DiscordEmojiService.getAsMarkdown("EMOJI_LOADING");
-    await interaction.editReply({
-      content:
-        `${loadingEmote} Updating lodestone data. This might take several seconds.`,
-    });
+    const content = StringManipulationService.buildLoadingText(
+      "Updating lodestone data. This might take several seconds.",
+    );
+    await interaction.editReply({ content });
   }
 }

@@ -1,12 +1,11 @@
 import { ButtonInteraction, MessageFlags } from "discord.js";
 import Favorite from "../command/favorite.ts";
-import Me from "../command/me.ts";
-import Find from "../command/find.ts";
-import Setup from "../command/setup.ts";
+import Profile from "../command/profile.ts";
 import Verify from "../command/verify.ts";
 import { ArrayManipulationService } from "../service/ArrayManipulationService.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { HelpCommandHelper } from "../helper/HelpCommandHelper.ts";
+import { StringManipulationService } from "../service/StringManipulationService.ts";
 
 export class ButtonInteractionHandler {
   static cooldown: string[] = [];
@@ -43,26 +42,28 @@ export class ButtonInteractionHandler {
     const commandName = buttonIdSplit[0];
 
     switch (commandName) {
-      case "me":
+      case "profile": {
+        const content = StringManipulationService.buildLoadingText(
+          "Generating profile image...",
+        );
+        await interaction.message.edit({ content });
         await interaction.deferUpdate();
-        await Me.update(interaction, buttonIdSplit);
+        await Profile.update(interaction, buttonIdSplit);
         break;
-      case "find":
-        await interaction.deferUpdate();
-        await Find.update(interaction, buttonIdSplit);
-        break;
-      case "setup":
-        await interaction.deferUpdate();
-        await Setup.update(interaction, buttonIdSplit);
-        break;
+      }
       case "verify":
         await interaction.deferUpdate();
         await Verify.update(interaction, buttonIdSplit);
         break;
-      case "favorite":
+      case "favorite": {
+        const content = StringManipulationService.buildLoadingText(
+          "Generating profile image...",
+        );
+        await interaction.message.edit({ content });
         await interaction.deferUpdate();
-        await Favorite.update(interaction, buttonIdSplit); // todo helper methoden aus command rausziehen
+        await Favorite.update(interaction, buttonIdSplit);
         break;
+      }
       case "help":
         await interaction.deferUpdate();
         await HelpCommandHelper.update(interaction, buttonIdSplit);

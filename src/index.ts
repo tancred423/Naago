@@ -9,7 +9,7 @@ import {
   ContextMenuCommandInteraction,
   GatewayIntentBits,
   MessageFlags,
-  StringSelectMenuInteraction,
+  ModalSubmitInteraction,
 } from "discord.js";
 import { CanvasRenderingContext2D } from "canvas";
 import moment from "moment";
@@ -24,7 +24,7 @@ import { TopicSenderService } from "./service/TopicSenderService.ts";
 import { MaintenanceSenderService } from "./service/MaintenanceSenderService.ts";
 import { UpdateSenderService } from "./service/UpdateSenderService.ts";
 import { ButtonInteractionHandler } from "./handler/ButtonInteractionHandler.ts";
-import { SelectMenuInteractionHandler } from "./handler/SelectMenuInteractionHandler.ts";
+import { ModalInteractionHandler } from "./handler/ModalInteractionHandler.ts";
 
 // Env
 await load({ export: true });
@@ -214,18 +214,18 @@ client.on("interactionCreate", async (interaction) => {
         flags: MessageFlags.Ephemeral,
       });
     }
-  } else if (interaction.isStringSelectMenu()) {
+  } else if (interaction.isModalSubmit()) {
     try {
-      await SelectMenuInteractionHandler.execute(
-        interaction as StringSelectMenuInteraction,
+      await ModalInteractionHandler.execute(
+        interaction as ModalSubmitInteraction,
       );
     } catch (err) {
-      log.error(`Error while executing menu '${interaction.customId}':`, err);
+      log.error(`Error while executing modal '${interaction.customId}':`, err);
       if (err instanceof Error) {
         console.error(err.stack);
       }
       const embed = DiscordEmbedService.getErrorEmbed(
-        "There was an error while executing this menu.",
+        "There was an error while executing this modal.",
       );
       await interaction.followUp({
         embeds: [embed],

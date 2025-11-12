@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { DiscordEmojiService } from "./DiscordEmojiService.ts";
 
 export class StringManipulationService {
   static formatName(name: string): string {
@@ -35,5 +36,9 @@ export class StringManipulationService {
         ": " +
         tag.replaceAll("[", "").replaceAll("]", "")
       : StringManipulationService.capitalizeFirstLetter(category);
+  }
+
+  static buildLoadingText(message: string): string {
+    return DiscordEmojiService.getAsMarkdown("EMOJI_LOADING") + "  " + message;
   }
 }

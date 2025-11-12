@@ -21,17 +21,16 @@ to add the bot to your server.
 
 - `/help` - Command overview and explanations.
 - `/ping` - Bot's latency and uptime.
-- `/verify set` - Verify your character.
-- `/verify delete` - Unlink your character and delete all stored data of you.
-- `/theme` - Set a theme for your verified character's profile.
-- `/me` - Your verified character's profile.
-- `/find` - View anyone's character profile.
+- `/verify add` - Verify your character.
+- `/verify remove` - Unlink your character and delete all stored data of you.
+- `/setup theme` - Set a theme for your verified character's profile.
+- `/profile me` - Your verified character's profile.
+- `/profile find` - View anyone's character profile.
+- `/profile favorite` - Get a favorite character's profile.
 - `/favorite add` - Add a character to your favorites.
-- `/favorite get` - Get a favorite character's profile.
 - `/favorite remove` - Remove a character from your favorites.
 - `/maintenance` - Current maintenances if any.
-- `/setup notifications` - Set up automated lodestone news notifications.
-- `/setup purge` - Delete all saved data of this server.
+- `/setup lodestone` - Set up automated lodestone news notifications.
 
 ## For developers
 

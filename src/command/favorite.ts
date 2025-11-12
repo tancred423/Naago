@@ -1,23 +1,17 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
 import {
   ActionRowBuilder,
-  AttachmentBuilder,
   ButtonBuilder,
-  MessageFlags,
-  StringSelectMenuBuilder,
-} from "discord.js";
-import {
-  ActionRow,
-  APISelectMenuOption,
   ButtonInteraction,
   ChatInputCommandInteraction,
-  MessageActionRowComponent,
-  StringSelectMenuComponent,
-  StringSelectMenuInteraction,
+  LabelBuilder,
+  MessageFlags,
+  ModalBuilder,
+  ModalSubmitInteraction,
+  SlashCommandBuilder,
+  StringSelectMenuBuilder,
 } from "discord.js";
 import * as log from "@std/log";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
-import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
@@ -50,11 +44,6 @@ export default {
     )
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("get")
-        .setDescription("Get a favorite character's profile.")
-    )
-    .addSubcommand((subcommand) =>
-      subcommand
         .setName("remove")
         .setDescription("Remove a character from your favorites.")
     ),
@@ -64,8 +53,6 @@ export default {
 
     if (verification?.isVerified) {
       if (interaction.options.getSubcommand() === "add") {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
         const name = StringManipulationService.formatName(
           interaction.options.getString("name")!,
         );
@@ -73,15 +60,16 @@ export default {
 
         if (!FfxivServerValidationService.isValidServer(server)) {
           const embed = DiscordEmbedService.getErrorEmbed(
-            `This server doesn't exist.`,
+            `The given server \`${server}\` doesn't exist.`,
           );
-          await interaction.deleteReply();
-          await interaction.followUp({
+          await interaction.reply({
             embeds: [embed],
             flags: MessageFlags.Ephemeral,
           });
           return;
         }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const characterIds = await NaagostoneApiService.fetchCharacterIdsByName(
           name,
@@ -129,7 +117,7 @@ export default {
               );
               await sendSuccess(
                 interaction,
-                `\`${name}\` was added as favorite.`,
+                `\`${name}\` has been added to your favorites.`,
               );
             } catch (error: unknown) {
               if (error instanceof MaximumAmountReachedError) {
@@ -150,15 +138,16 @@ export default {
           }
         }
       } else if (interaction.options.getSubcommand() === "remove") {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
         const favorites = await FavoritesRepository.get(userId);
 
         if (favorites?.length === 0) {
-          await sendError(
-            interaction,
-            "Please add favorites first. See `/favorites add`",
+          const embed = DiscordEmbedService.getErrorEmbed(
+            `Please add favorites first. See \`/favorite add\``,
           );
+          await interaction.reply({
+            embeds: [embed],
+            flags: MessageFlags.Ephemeral,
+          });
           return;
         }
 
@@ -171,56 +160,25 @@ export default {
           });
         }
 
-        const row = new ActionRowBuilder<StringSelectMenuBuilder>()
-          .addComponents(
-            new StringSelectMenuBuilder()
-              .setCustomId("favorite.remove")
-              .setPlaceholder("Select a character...")
-              .addOptions(options),
-          );
+        const selectMenu = new StringSelectMenuBuilder()
+          .setCustomId("favorite_character_remove")
+          .setPlaceholder("Select a character...")
+          .addOptions(options);
 
-        await interaction.editReply({
-          content: "Which character would you like to remove?",
-          components: [row],
-        });
-      } else {
-        await interaction.deferReply();
+        const row = new LabelBuilder()
+          .setLabel("Which character do you want to remove?")
+          .setStringSelectMenuComponent(selectMenu);
 
-        const favorites = await FavoritesRepository.get(userId);
+        const modal = new ModalBuilder()
+          .setCustomId("favorite.remove.modal")
+          .setTitle("Remove Favorite")
+          .addLabelComponents(row);
 
-        if (favorites?.length === 0) {
-          await sendErrorFollowUp(
-            interaction,
-            `Please add favorites first. See \`/favorites add\``,
-          );
-          return;
-        }
-
-        const options = [];
-        for (const favorite of favorites) {
-          options.push({
-            label: favorite.characterName,
-            description: favorite.server,
-            value: favorite.characterId.toString(),
-          });
-        }
-
-        const row = new ActionRowBuilder<StringSelectMenuBuilder>()
-          .addComponents(
-            new StringSelectMenuBuilder()
-              .setCustomId("favorite.get")
-              .setPlaceholder("Select a character...")
-              .addOptions(options),
-          );
-
-        await interaction.editReply({
-          content: "Whose FFXIV profile would you like to see?",
-          components: [row],
-        });
+        await interaction.showModal(modal);
       }
     } else {
       const embed = DiscordEmbedService.getErrorEmbed(
-        "Please verify your character first. See `/verify set`.",
+        "Please verify your character first. See `/verify add`.",
       );
       await interaction.reply({
         flags: MessageFlags.Ephemeral,
@@ -229,64 +187,22 @@ export default {
     }
   },
 
-  async get(interaction: StringSelectMenuInteraction) {
-    const characterId = parseInt(interaction.values[0]);
-    const characterDataDto = await FetchCharacterService.fetchCharacterCached(
-      interaction,
-      characterId,
+  async remove(interaction: ModalSubmitInteraction) {
+    const fields = interaction.fields;
+    const stringSelectValue = fields.getStringSelectValues(
+      "favorite_character_remove",
     );
-
-    if (!characterDataDto) {
-      const embed = DiscordEmbedService.getErrorEmbed(
-        `Could not fetch your character.\nPlease try again later.`,
+    if (stringSelectValue.length !== 1) {
+      throw new Error(
+        `Found \`${stringSelectValue.length}\` select values. Expected 1.`,
       );
-      await interaction.deleteReply();
-      await interaction.followUp({
-        embeds: [embed],
-        flags: MessageFlags.Ephemeral,
-      });
-    } else {
-      const character = characterDataDto.character;
-
-      const profileImage = await ProfileGeneratorService.getImage(
-        interaction,
-        character,
-        false,
-        "profile",
-      );
-      if (!profileImage) {
-        throw new Error("[/favorite] profileImage is undefined");
-      }
-
-      const file = new AttachmentBuilder(profileImage);
-
-      const components = ProfileGeneratorService.getComponents(
-        "profile",
-        null,
-        "find",
-        characterId,
-      );
-
-      await interaction.editReply({
-        content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
-        files: [file],
-        embeds: [],
-        attachments: [],
-        components: components,
-      });
     }
-  },
+    const characterId = parseInt(stringSelectValue[0]);
 
-  async remove(interaction: StringSelectMenuInteraction) {
-    const characterId = parseInt(interaction.values[0]);
-    const messageRow = interaction.message.components[0] as ActionRow<
-      MessageActionRowComponent
-    >;
-    const selectMenu = messageRow.components[0] as StringSelectMenuComponent;
-    const characterName =
-      selectMenu.options?.find((option: APISelectMenuOption) =>
-        option.value === characterId.toString()
-      )?.label ?? characterId.toString();
+    const userId = interaction.user.id;
+    const favorites = await FavoritesRepository.get(userId);
+    const favorite = favorites.find((f) => f.characterId === characterId);
+    const characterName = favorite?.characterName ?? characterId.toString();
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
@@ -299,10 +215,11 @@ export default {
         .setStyle(4),
     );
 
-    await interaction.editReply({
+    await interaction.reply({
       content:
         `Are you sure you want to remove \`${characterName}\` from your favorites?`,
       components: [row],
+      flags: MessageFlags.Ephemeral,
     });
   },
 
@@ -373,18 +290,5 @@ async function sendError(
     content: " ",
     components: [],
     embeds: [embed],
-  });
-}
-
-async function sendErrorFollowUp(
-  interaction: ChatInputCommandInteraction,
-  message: string,
-): Promise<void> {
-  const embed = DiscordEmbedService.getErrorEmbed(message);
-
-  await interaction.deleteReply();
-  await interaction.followUp({
-    embeds: [embed],
-    flags: MessageFlags.Ephemeral,
   });
 }

@@ -5,4 +5,3 @@ export * from "./themes.ts";
 export * from "./favorites.ts";
 export * from "./lodestone-news.ts";
 export * from "./setups.ts";
-export * from "./social-medias.ts";

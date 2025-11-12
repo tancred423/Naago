@@ -47,7 +47,7 @@ export class MaintenanceSenderService {
   private static async send(maintenance: Maintenance): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAll("maintenances");
+    const setups: Setup[] = await SetupsRepository.getAllByType("maintenances");
     if (!setups || setups?.length < 1) return;
 
     for (const setup of setups) {

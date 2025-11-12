@@ -128,7 +128,7 @@ class Profile {
   }
 
   async getTheme(): Promise<Theme> {
-    const themeName = await ThemeRepository.get(this.userId);
+    const themeName = await ThemeRepository.get(this.character.id);
     const themeFile = readFileSync(
       join(BASE_PATH, "theme", `${themeName}.json`),
       "utf-8",
@@ -419,7 +419,9 @@ class Profile {
       ctx.lineWidth = 0;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
       ctx.clip();
-      const backgroundImage = await loadImage(theme.background);
+      const backgroundImage = await loadImage(
+        join(BASE_PATH, "image", "background", theme.background),
+      );
       ctx.drawImage(backgroundImage, 0, 0);
       ctx.fillStyle = theme.background_transparency;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();
@@ -664,7 +666,9 @@ class Profile {
       ctx.lineWidth = 0;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
       ctx.clip();
-      const backgroundImage = await loadImage(theme.background);
+      const backgroundImage = await loadImage(
+        join(BASE_PATH, "image", "background", theme.background),
+      );
       ctx.drawImage(backgroundImage, 0, 0);
       ctx.fillStyle = theme.background_transparency;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();
@@ -827,7 +831,7 @@ class Profile {
     ctx.fillText(
       bozja
         ? `${bozja.name}: ${bozja.level}` +
-          (bozja.Mettle !== "--" ? ` (${bozja.Mettle} mettle)` : "")
+          (bozja.mettle !== "--" ? ` (${bozja.mettle} mettle)` : "")
         : "-",
       x + 10,
       yAdd + 30,
@@ -855,8 +859,8 @@ class Profile {
     ctx.fillText(
       eureka
         ? `${eureka.name}: ${eureka.level}` +
-          (eureka.CurrentEXP !== "--"
-            ? ` (${eureka.CurrentEXP} / ${eureka.MaxEXP} exp)`
+          (eureka.current_exp !== "--"
+            ? ` (${eureka.current_exp} / ${eureka.max_exp} exp)`
             : "")
         : "-",
       x + 10,
@@ -897,7 +901,9 @@ class Profile {
       ctx.lineWidth = 0;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
       ctx.clip();
-      const backgroundImage = await loadImage(theme.background);
+      const backgroundImage = await loadImage(
+        join(BASE_PATH, "image", "background", theme.background),
+      );
       ctx.drawImage(backgroundImage, 0, 0);
       ctx.fillStyle = theme.background_transparency;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();
@@ -1042,7 +1048,9 @@ class Profile {
       ctx.lineWidth = 0;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
       ctx.clip();
-      const backgroundImage = await loadImage(theme.background);
+      const backgroundImage = await loadImage(
+        join(BASE_PATH, "image", "background", theme.background),
+      );
       ctx.drawImage(backgroundImage, 0, 0);
       ctx.fillStyle = theme.background_transparency;
       ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();

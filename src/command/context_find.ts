@@ -1,6 +1,8 @@
-import { ContextMenuCommandBuilder } from "@discordjs/builders";
-import { ApplicationCommandType } from "discord-api-types/v10";
-import { AttachmentBuilder } from "discord.js";
+import {
+  ApplicationCommandType,
+  AttachmentBuilder,
+  ContextMenuCommandBuilder,
+} from "discord.js";
 import { ContextMenuCommandInteraction } from "discord.js";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
@@ -56,7 +58,7 @@ export default {
     const components = ProfileGeneratorService.getComponents(
       "profile",
       null,
-      "find",
+      "profile",
       targetCharacter?.id,
     );
 

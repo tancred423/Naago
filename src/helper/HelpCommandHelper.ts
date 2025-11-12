@@ -4,9 +4,10 @@ import {
   ButtonInteraction,
   CommandInteraction,
   EmbedBuilder,
+  time,
 } from "discord.js";
 import { DiscordColorService } from "../service/DiscordColorService.ts";
-import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
+import moment from "moment";
 
 export class HelpCommandHelper {
   static async update(
@@ -18,8 +19,11 @@ export class HelpCommandHelper {
       case "profiles":
         await interaction.editReply(await this.getProfiles(interaction));
         break;
-      case "news":
-        await interaction.editReply(await this.getNews(interaction));
+      case "verification":
+        await interaction.editReply(await this.getVerification(interaction));
+        break;
+      case "favorites":
+        await interaction.editReply(await this.getFavorites(interaction));
         break;
       case "setup":
         await interaction.editReply(await this.getSetup(interaction));
@@ -47,19 +51,19 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/me",
+          name: "/profile me",
           value:
-            "- Get the profile of your verified character.\n- Characters can be verified with `/verify set`.",
+            "- Get the profile of your verified character.\n- Characters can be verified with `/verify add`.",
           inline: false,
         },
         {
-          name: "/find",
+          name: "/profile find",
           value:
             "- Get any character's profile by providing the full character name and the server the character is on.\n- Alternatively you can right click a user 🠆 choose `Apps` 🠆 `Find`. This is faster but requires this user to have a verified character.",
           inline: false,
         },
         {
-          name: "/favorite get",
+          name: "/profile favorite",
           value:
             "- A quick access to character profiles.\n- Favorites can be added or removed with `/favorite add` and `/favorite remove` respectively.\n- Alternatively you can right click a user 🠆 choose `Apps` 🠆 `Add Favorite` / `Remove Favorite`. This is faster but requires this user to have a verified character.",
           inline: false,
@@ -74,7 +78,7 @@ export class HelpCommandHelper {
     };
   }
 
-  static async getNews(
+  static async getVerification(
     interaction: ButtonInteraction | CommandInteraction,
   ): Promise<
     { embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }
@@ -85,18 +89,59 @@ export class HelpCommandHelper {
       .setColor(
         await DiscordColorService.getBotColorByInteraction(interaction),
       )
-      .setTitle("Help: Current News")
+      .setTitle("Help: Verification")
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/maintenance",
+          name: "/verify add",
           value:
-            "- Shows you the currently ongoing FFXIV maintenances. This includes the game, the lodestone, and companion app.",
+            "- Links your FFXIV character to your Discord account.\n- You will have to verify it by changing the bio of your Lodestone profile.\n- Verification is needed to use `/setup theme` and `/favorite`.",
+          inline: false,
+        },
+        {
+          name: "/verify remove",
+          value:
+            "- Unlinks your FFXIV character from your Discord account.\n- Also removes any other information stored of you including `/setup theme` and `/favorite`.",
           inline: false,
         },
       ]);
 
-    const component = HelpCommandHelper.getButtons("news");
+    const component = HelpCommandHelper.getButtons("verification");
+
+    return {
+      embeds: [embed],
+      components: [component],
+    };
+  }
+
+  static async getFavorites(
+    interaction: ButtonInteraction | CommandInteraction,
+  ): Promise<
+    { embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }
+  > {
+    const client = interaction.client;
+
+    const embed = new EmbedBuilder()
+      .setColor(
+        await DiscordColorService.getBotColorByInteraction(interaction),
+      )
+      .setTitle("Help: Favorites")
+      .setThumbnail(client.user!.displayAvatarURL())
+      .addFields([
+        {
+          name: "/favorite add",
+          value:
+            "- Save any character as favorite.\n- You can then access them quickly with `/profile favorite`.\n- You can have up to 25 favorites.",
+          inline: false,
+        },
+        {
+          name: "/favorite remove",
+          value: "- Remove one of your favorites.",
+          inline: false,
+        },
+      ]);
+
+    const component = HelpCommandHelper.getButtons("favorites");
 
     return {
       embeds: [embed],
@@ -119,43 +164,14 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/verify set",
+          name: "/setup lodestone",
           value:
-            "- Links your FFXIV character to your Discord account.\n- You will have to verify it by changing the bio of your Lodestone profile.\n- Verification is needed to use `/theme` and `/favorite`.",
+            `- Set up which channels receive automated Lodestone news updates.\n- You can set or remove channels for each category in the modal.\n- Lodestone posts include:\n  - Topics (Latest news, PLL's and patch notes)\n  - Notices (Secondary news)\n  - Maintenances (All kind of maintenances and their durations)\n  - Updates (Outcome from maintenances)\n  - Status (Technical difficulties and server statuses)\n- By default, it requires \`Manage Channels\` permission to execute.`,
           inline: false,
         },
         {
-          name: "/verify delete",
-          value:
-            "- Unlinks your FFXIV character from your Discord account.\n- Also removes any other information stored of you including `/theme` and `/favorite`.",
-          inline: false,
-        },
-        {
-          name: "/theme",
-          value: "- Set a custom theme for all character profiles you request.",
-          inline: false,
-        },
-        {
-          name: "/favorite add",
-          value:
-            "- Save any character as favorite.\n- You can then access them quickly with `/favorite get`.\n- You can have up to 25 favorites.",
-          inline: false,
-        },
-        {
-          name: "/favorite remove",
-          value: "- Remove one of your favorites.",
-          inline: false,
-        },
-        {
-          name: "/setup notifications",
-          value:
-            `- Set up automated notifications for Lodestone posts.\n- Lodestone posts include:\n  - Topics (Latest news and patch notes)\n  - Notices (Secondary news and letters from Naoki Yoshida)\n  - Maintenances (All kind of maintenances and their durations)\n  - Updates (Outcome from maintenances)\n  - Status (Technical difficulties and server statuses)`,
-          inline: false,
-        },
-        {
-          name: "/setup purge",
-          value:
-            "- Removed all stored information of your server.\n- This includes all `/setup notifications` settings.",
+          name: "/setup theme",
+          value: "- Set a theme for your verified character's profile.",
           inline: false,
         },
       ]);
@@ -174,25 +190,23 @@ export class HelpCommandHelper {
     { embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }
   > {
     const client = interaction.client;
+    const uptimeFormatted = time(
+      moment().subtract(client.uptime!, "ms").toDate(),
+      "R",
+    );
 
     const embed = new EmbedBuilder()
       .setColor(
         await DiscordColorService.getBotColorByInteraction(interaction),
       )
       .setTitle("Help: Technical")
-      .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
+        { name: "Ping", value: `${client.ws.ping} ms`, inline: true },
+        { name: "Latest restart", value: uptimeFormatted, inline: true },
         {
-          name: "/ping",
-          value:
-            "- Displays the following technical information:\n  - Bot's latency to the websocket (ping)\n  - Bot's uptime\n  - Amount of servers the bot is currently on",
-          inline: false,
-        },
-        {
-          name: "/help",
-          value: "- You are already here. " +
-            DiscordEmojiService.getAsEmojiData("EMOJI_DOGGO_SMILE"),
-          inline: false,
+          name: "Servers",
+          value: (await client.guilds.fetch())?.size.toString(),
+          inline: true,
         },
       ]);
 
@@ -207,13 +221,17 @@ export class HelpCommandHelper {
   static getButtons(currentPage: string): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
-        .setLabel("Character Profiles")
+        .setLabel("Character Profile")
         .setCustomId("help.profiles")
         .setStyle(currentPage === "profiles" ? 1 : 2),
       new ButtonBuilder()
-        .setLabel("Current News")
-        .setCustomId("help.news")
-        .setStyle(currentPage === "news" ? 1 : 2),
+        .setLabel("Verification")
+        .setCustomId("help.verification")
+        .setStyle(currentPage === "verification" ? 1 : 2),
+      new ButtonBuilder()
+        .setLabel("Favorites")
+        .setCustomId("help.favorites")
+        .setStyle(currentPage === "favorites" ? 1 : 2),
       new ButtonBuilder()
         .setLabel("Setup")
         .setCustomId("help.setup")

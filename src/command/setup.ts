@@ -1,20 +1,20 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { ChannelType } from "discord-api-types/v10";
 import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  MessageFlags,
-  PermissionsBitField,
-} from "discord.js";
-import {
-  ButtonInteraction,
+  ChannelSelectMenuBuilder,
+  ChannelType,
   ChatInputCommandInteraction,
-  GuildMember,
+  LabelBuilder,
+  MessageFlags,
+  ModalBuilder,
+  ModalSubmitInteraction,
+  PermissionsBitField,
+  SlashCommandBuilder,
+  StringSelectMenuBuilder,
 } from "discord.js";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
-import { DiscordPermissionService } from "../service/DiscordPermissionService.ts";
-import { StringManipulationService } from "../service/StringManipulationService.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
+import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
+import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
+import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
 
 export default {
   data: new SlashCommandBuilder()
@@ -22,232 +22,333 @@ export default {
     .setDescription("Setup M'naago.")
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("notifications")
-        .setDescription("Set up automated lodestone news notifications.")
-        .addStringOption((option) =>
-          option
-            .setName("type")
-            .setDescription("Which category?")
-            .setRequired(true)
-            .addChoices([
-              { name: "Topics (Latest news and patch notes)", value: "topics" },
-              {
-                name: "Notices (Secondary news and letters from Naoki Yoshida)",
-                value: "notices",
-              },
-              {
-                name:
-                  "Maintenances (All kind of maintenances and their durations)",
-                value: "maintenances",
-              },
-              { name: "Updates (Outcome from maintenances)", value: "updates" },
-              {
-                name: "Status (Technical difficulties and server statuses)",
-                value: "status",
-              },
-            ])
-        )
-        .addChannelOption((option) =>
-          option
-            .setName("channel")
-            .setDescription(
-              "The channel to post the notifications in. Provide the current one to unset it.",
-            )
-            .setRequired(true)
-            .addChannelTypes([ChannelType.GuildText])
+        .setName("lodestone")
+        .setDescription(
+          "Set up which channels receive automated Lodestone news updates.",
         )
     )
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("purge")
-        .setDescription("Delete all saved data of this server.")
-    ),
+        .setName("theme")
+        .setDescription("Set a theme for your verified character's profile.")
+    )
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels),
   async execute(interaction: ChatInputCommandInteraction) {
-    if (
-      !(await DiscordPermissionService.hasAllPermissions(
-        interaction,
-        interaction.member as GuildMember,
-        PermissionsBitField.Flags.ManageChannels,
-        PermissionsBitField.Flags.ManageGuild,
-      ))
-    ) {
-      return;
-    }
-
-    if (interaction.options.getSubcommand() === "notifications") {
+    if (interaction.options.getSubcommand() === "lodestone") {
       const guildId = interaction.guild!.id;
-      const type = interaction.options.getString("type")!;
-      const typeName = StringManipulationService.capitalizeFirstLetter(type);
-      const channel = interaction.options.getChannel("channel")!;
-
-      const currentChannelId = await SetupsRepository.getChannelId(
-        guildId,
-        type,
+      const setups = await SetupsRepository.getAllByGuildId(guildId);
+      const setupMap = Object.fromEntries(
+        setups.map((setup) => [setup.type, setup]),
       );
+      const {
+        topic: currentTopicChannel,
+        notice: currentNoticeChannel,
+        maintenance: currentMaintenanceChannel,
+        update: currentUpdateChannel,
+        status: currentStatusChannel,
+      } = setupMap;
 
-      if (channel.id === currentChannelId) {
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setCustomId("setup.unset.cancel")
-            .setLabel("No, cancel.")
-            .setStyle(2),
-          new ButtonBuilder()
-            .setCustomId(`setup.unset.${type}`)
-            .setLabel("Yes, unset it.")
-            .setStyle(4),
-        );
-
-        await interaction.reply({
-          flags: MessageFlags.Ephemeral,
-          content:
-            `${channel.toString()} is already set as ${typeName} notification channel. Do you want to unset it?`,
-          components: [row],
-        });
-
-        return;
+      const topicChannelMenu = new ChannelSelectMenuBuilder()
+        .setCustomId("setup_topics_channel_select")
+        .setPlaceholder("Channel to post topics in...")
+        .setChannelTypes(ChannelType.GuildText)
+        .setRequired(false);
+      if (currentTopicChannel) {
+        topicChannelMenu.setDefaultChannels(currentTopicChannel.channelId);
       }
+      const topicRow = new LabelBuilder()
+        .setLabel("Topics (Latest news, PLL's and patch notes)")
+        .setChannelSelectMenuComponent(topicChannelMenu);
 
-      try {
-        await SetupsRepository.setChannelId(
-          guildId,
-          type,
-          channel.id,
+      const noticeChannelMenu = new ChannelSelectMenuBuilder()
+        .setCustomId("setup_notice_channel_select")
+        .setPlaceholder("Channel to post notices in...")
+        .setChannelTypes(ChannelType.GuildText)
+        .setRequired(false);
+      if (currentNoticeChannel) {
+        noticeChannelMenu.setDefaultChannels(currentNoticeChannel.channelId);
+      }
+      const noticeRow = new LabelBuilder()
+        .setLabel("Notices (Secondary news)")
+        .setChannelSelectMenuComponent(noticeChannelMenu);
+
+      const maintenanceChannelMenu = new ChannelSelectMenuBuilder()
+        .setCustomId("setup_maintenance_channel_select")
+        .setPlaceholder("Channel to post maintenances in...")
+        .setChannelTypes(ChannelType.GuildText)
+        .setRequired(false);
+      if (currentMaintenanceChannel) {
+        maintenanceChannelMenu.setDefaultChannels(
+          currentMaintenanceChannel.channelId,
         );
-      } catch (_error: unknown) {
+      }
+      const maintenanceRow = new LabelBuilder()
+        .setLabel("Maintenances (And their durations)")
+        .setChannelSelectMenuComponent(maintenanceChannelMenu);
+
+      const updateChannelMenu = new ChannelSelectMenuBuilder()
+        .setCustomId("setup_update_channel_select")
+        .setPlaceholder("Channel to post updates in...")
+        .setChannelTypes(ChannelType.GuildText)
+        .setRequired(false);
+      if (currentUpdateChannel) {
+        updateChannelMenu.setDefaultChannels(currentUpdateChannel.channelId);
+      }
+      const updateRow = new LabelBuilder()
+        .setLabel("Updates (Outcome from maintenances)")
+        .setChannelSelectMenuComponent(updateChannelMenu);
+
+      const statusChannelMenu = new ChannelSelectMenuBuilder()
+        .setCustomId("setup_status_channel_select")
+        .setPlaceholder("Channel to post statuses in...")
+        .setChannelTypes(ChannelType.GuildText)
+        .setRequired(false);
+      if (currentStatusChannel) {
+        statusChannelMenu.setDefaultChannels(currentStatusChannel.channelId);
+      }
+      const statusRow = new LabelBuilder()
+        .setLabel("Statuses (Tech. difficulties & server status)")
+        .setChannelSelectMenuComponent(statusChannelMenu);
+
+      const modal = new ModalBuilder()
+        .setCustomId("setup.lodestone")
+        .setTitle("Lodestone News Channels")
+        .addLabelComponents(
+          topicRow,
+          noticeRow,
+          maintenanceRow,
+          updateRow,
+          statusRow,
+        );
+
+      await interaction.showModal(modal);
+    } else if (interaction.options.getSubcommand() === "theme") {
+      const userId = interaction.user.id;
+      const verification = await VerificationsRepository.find(userId);
+
+      if (!verification?.isVerified) {
         const embed = DiscordEmbedService.getErrorEmbed(
-          `Could not set ${typeName} notification channel. Please contact Tancred#0001 for help.`,
+          "Please verify your character first. See `/verify add`.",
         );
-
         await interaction.reply({
-          embeds: [embed],
           flags: MessageFlags.Ephemeral,
+          embeds: [embed],
         });
-
         return;
       }
 
-      const embed = DiscordEmbedService.getSuccessEmbed(
-        `${typeName} notifications will now be posted in ${channel.toString()}.`,
+      const darkEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_DARK");
+      const lightEmoji = DiscordEmojiService.getAsEmojiData(
+        "EMOJI_THEME_LIGHT",
       );
+      const classicEmoji = DiscordEmojiService
+        .getAsEmojiData("EMOJI_THEME_CLASSIC");
+      const clearBlueEmoji = DiscordEmojiService
+        .getAsEmojiData("EMOJI_THEME_CLEAR_BLUE");
+      const characterSelectionEmoji = DiscordEmojiService
+        .getAsEmojiData("EMOJI_THEME_CHARACTER_SELECTION");
+      const amaurotEmoji = DiscordEmojiService
+        .getAsEmojiData("EMOJI_THEME_AMAUROT");
+      const moonEmoji = DiscordEmojiService
+        .getAsEmojiData("EMOJI_THEME_MOON");
+      const theFinalDaysEmoji = DiscordEmojiService
+        .getAsEmojiData("EMOJI_THEME_THE_FINAL_DAYS");
+      const ultimaThuleEmoji = DiscordEmojiService
+        .getAsEmojiData("EMOJI_THEME_ULTIMA_THULE");
 
-      await interaction.reply({
-        embeds: [embed],
-        ephemeral: true,
-      });
-    } else if (interaction.options.getSubcommand() === "purge") {
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId("setup.purge.cancel")
-          .setLabel("No, cancel.")
-          .setStyle(2),
-        new ButtonBuilder()
-          .setCustomId(`setup.purge.confirm`)
-          .setLabel("Yes, delete it.")
-          .setStyle(4),
-      );
+      const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId("theme_select")
+        .setPlaceholder("Select a theme...")
+        .addOptions([
+          {
+            label: "Dark UI",
+            description: "The dark UI like in-game",
+            value: "dark",
+            ...(darkEmoji && { emoji: darkEmoji }),
+          },
+          {
+            label: "Light UI",
+            description: "The light UI like in-game",
+            value: "light",
+            ...(lightEmoji && { emoji: lightEmoji }),
+          },
+          {
+            label: "Classic UI",
+            description: "The classic UI like in-game",
+            value: "classic",
+            ...(classicEmoji && { emoji: classicEmoji }),
+          },
+          {
+            label: "Clear Blue UI",
+            description: "The clear blue UI like in-game",
+            value: "clear_blue",
+            ...(clearBlueEmoji && { emoji: clearBlueEmoji }),
+          },
+          {
+            label: "Character Selection",
+            description: "Background from character selection",
+            value: "character_selection",
+            ...(characterSelectionEmoji && { emoji: characterSelectionEmoji }),
+          },
+          {
+            label: "Amaurot",
+            description: "Amaurot projection from the Tempest",
+            value: "amaurot",
+            ...(amaurotEmoji && { emoji: amaurotEmoji }),
+          },
+          {
+            label: "The Moon",
+            description: "Landscape on Mare Lamentorum",
+            value: "moon",
+            ...(moonEmoji && { emoji: moonEmoji }),
+          },
+          {
+            label: "The Final Days",
+            description: "Fiery star showers",
+            value: "final_days",
+            ...(theFinalDaysEmoji && { emoji: theFinalDaysEmoji }),
+          },
+          {
+            label: "Ultima Thule",
+            description: "At the edge of the universe",
+            value: "ultima_thule",
+            ...(ultimaThuleEmoji && { emoji: ultimaThuleEmoji }),
+          },
+        ]);
 
-      await interaction.reply({
-        ephemeral: true,
-        content:
-          "Are you sure you want to delete all stored data from this server?",
-        components: [row],
-      });
+      const row = new LabelBuilder()
+        .setLabel("Which theme do you prefer?")
+        .setStringSelectMenuComponent(selectMenu);
+
+      const modal = new ModalBuilder()
+        .setCustomId(`setup.theme.modal.${verification.characterId}`)
+        .setTitle("Select Theme")
+        .addLabelComponents(row);
+
+      await interaction.showModal(modal);
     }
   },
 
-  async update(interaction: ButtonInteraction, buttonIdSplit: string[]) {
-    const action = buttonIdSplit[1];
+  async handleModal(interaction: ModalSubmitInteraction) {
+    const guildId = interaction.guild!.id;
+    const fields = interaction.fields;
 
-    if (action === "unset") {
-      if (buttonIdSplit.length !== 3) {
-        throw new Error("[setup: unset - button] button id length is !== 3");
-      }
+    const typeMap: Record<string, string> = {
+      "setup_topics_channel_select": "topic",
+      "setup_notice_channel_select": "notice",
+      "setup_maintenance_channel_select": "maintenance",
+      "setup_update_channel_select": "update",
+      "setup_status_channel_select": "status",
+    };
 
-      const type = buttonIdSplit[2];
-      const typeName = StringManipulationService.capitalizeFirstLetter(type);
+    const typeNameMap: Record<string, string> = {
+      "topic": "Topics",
+      "notice": "Notices",
+      "maintenance": "Maintenances",
+      "update": "Updates",
+      "status": "Statuses",
+    };
 
-      if (type === "cancel") {
-        const embed = DiscordEmbedService.getSuccessEmbed("Cancelled.");
+    const results: string[] = [];
 
-        await interaction.editReply({
-          content: " ",
-          embeds: [embed],
-          components: [],
-        });
+    for (const [customId, type] of Object.entries(typeMap)) {
+      const channelValues = fields.getSelectedChannels(customId);
+      const typeName = typeNameMap[type];
 
-        return;
-      }
-
-      try {
-        SetupsRepository.delete(
-          interaction.guild!.id,
-          type,
+      if (!channelValues || channelValues.size === 0) {
+        try {
+          await SetupsRepository.delete(guildId, type);
+          results.push(`\`${typeName}\` notifications are disabled.`);
+        } catch (_error: unknown) {
+          results.push(
+            `\`${typeName}\` notifications could not be unset. Please try again later.`,
+          );
+        }
+      } else if (channelValues.size === 1) {
+        const channelId = channelValues.first()!.id;
+        try {
+          await SetupsRepository.setChannelId(guildId, type, channelId);
+          const channel = await interaction.guild!.channels.fetch(channelId);
+          results.push(
+            `\`${typeName}\` notifications are active in ${
+              channel?.toString() ?? channelId
+            }.`,
+          );
+        } catch (_error: unknown) {
+          results.push(
+            `\`${typeName}\` notification channel could not be set. Please try again later.`,
+          );
+        }
+      } else {
+        results.push(
+          `\`${typeName}\`: Invalid selection (expected 0 or 1 channel, got ${channelValues.size}).`,
         );
-      } catch (_error: unknown) {
-        const embed = DiscordEmbedService.getErrorEmbed(
-          `The channel for ${typeName} notifications could not be unset. Please contact Tancred#0001 for help.`,
-        );
-
-        await interaction.editReply({
-          content: " ",
-          embeds: [embed],
-          components: [],
-        });
       }
-
-      const embed = DiscordEmbedService.getSuccessEmbed(
-        `${typeName} notifications will no longer be posted in that channel.`,
-      );
-
-      await interaction.editReply({
-        content: " ",
-        embeds: [embed],
-        components: [],
-      });
-    } else if (action === "purge") {
-      if (buttonIdSplit.length !== 3) {
-        throw new Error("[setup: purge - button] button id length is !== 3");
-      }
-
-      const subAction = buttonIdSplit[2];
-
-      if (subAction === "cancel") {
-        const embed = DiscordEmbedService.getSuccessEmbed("Cancelled.");
-
-        await interaction.editReply({
-          content: " ",
-          embeds: [embed],
-          components: [],
-        });
-
-        return;
-      }
-
-      try {
-        await SetupsRepository.deleteAll(interaction.guild!.id);
-      } catch (_error: unknown) {
-        const embed = DiscordEmbedService.getErrorEmbed(
-          "This guild's data could not be (fully) deleted. Please contact Tancred#0001 for help.",
-        );
-
-        await interaction.editReply({
-          content: " ",
-          embeds: [embed],
-          components: [],
-        });
-
-        return;
-      }
-
-      const embed = DiscordEmbedService.getSuccessEmbed(
-        "All data from this guild has been deleted.",
-      );
-
-      await interaction.editReply({
-        content: " ",
-        embeds: [embed],
-        components: [],
-      });
     }
+
+    const embed = DiscordEmbedService.getSuccessEmbed(
+      results.join("\n") || "No changes were made.",
+    );
+
+    await interaction.reply({
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral,
+    });
+  },
+
+  async handleThemeModal(interaction: ModalSubmitInteraction) {
+    const characterId = parseInt(interaction.customId.split(".").pop() ?? "0");
+    if (characterId === 0) {
+      throw new Error(
+        `Couldnt get character ID from modal custom ID \`${interaction.customId}\`.`,
+      );
+    }
+    const userId = interaction.user.id;
+    const fields = interaction.fields;
+    const stringSelectValue = fields.getStringSelectValues("theme_select");
+    if (stringSelectValue.length !== 1) {
+      throw new Error(
+        `Found \`${stringSelectValue.length}\` select values. Expected 1.`,
+      );
+    }
+    const theme = stringSelectValue[0];
+
+    const themeNames: Record<string, string> = {
+      "dark": "Dark UI",
+      "light": "Light UI",
+      "classic": "Classic UI",
+      "clear_blue": "Clear Blue UI",
+      "character_selection": "Character Selection",
+      "amaurot": "Amaurot",
+      "moon": "The Moon",
+      "final_days": "The Final Days",
+      "ultima_thule": "Ultima Thule",
+    };
+    const themeName = themeNames[theme] ?? theme;
+
+    try {
+      await ThemeRepository.set(userId, characterId, theme);
+    } catch (error: unknown) {
+      console.error("Error setting theme:", error);
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Theme could not be set to \`${themeName}\`. Please contact Tancred#0001 for help.`,
+      );
+
+      await interaction.reply({
+        embeds: [embed],
+        flags: MessageFlags.Ephemeral,
+      });
+
+      return;
+    }
+
+    const embed = DiscordEmbedService.getSuccessEmbed(
+      `Your theme was set to \`${themeName}\`.`,
+    );
+
+    await interaction.reply({
+      embeds: [embed],
+      flags: MessageFlags.Ephemeral,
+    });
   },
 };

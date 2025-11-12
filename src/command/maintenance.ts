@@ -1,6 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction } from "discord.js";
-
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import { MaintenancesRepository } from "../database/repository/MaintenancesRepository.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 

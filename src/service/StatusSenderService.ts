@@ -50,7 +50,7 @@ export default class StatusSenderService {
   static async send(status: Status): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAll("status");
+    const setups: Setup[] = await SetupsRepository.getAllByType("status");
     if (!setups || setups?.length < 1) return;
 
     for (const setup of setups) {

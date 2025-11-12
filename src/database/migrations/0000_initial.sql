@@ -40,10 +40,12 @@ CREATE TABLE `profile_pages` (
 
 CREATE TABLE `themes` (
 	`user_id` varchar(255) NOT NULL,
+	`character_id` int UNSIGNED NOT NULL,
 	`theme` varchar(100) NOT NULL,
 	`created_at` timestamp NOT NULL DEFAULT (now()),
 	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-	CONSTRAINT `themes_user_id` PRIMARY KEY(`user_id`)
+	CONSTRAINT `themes_user_id` PRIMARY KEY(`user_id`),
+	CONSTRAINT `themes_unique_character_id` UNIQUE (`character_id`)
 );
 
 -- Guild Data

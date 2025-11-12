@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 import { HelpCommandHelper } from "../helper/HelpCommandHelper.ts";
 
 export default {

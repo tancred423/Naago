@@ -3,20 +3,24 @@ import { database } from "../connection.ts";
 import { themes } from "../schema/themes.ts";
 
 export class ThemeRepository {
-  static async get(userId: string): Promise<string> {
+  static async get(characterId: number): Promise<string> {
     const result = await database
       .select({ theme: themes.theme })
       .from(themes)
-      .where(eq(themes.userId, userId))
+      .where(eq(themes.characterId, characterId))
       .limit(1);
 
     return result[0]?.theme ?? "dark";
   }
 
-  static async set(userId: string, theme: string): Promise<void> {
+  static async set(
+    userId: string,
+    characterId: number,
+    theme: string,
+  ): Promise<void> {
     await database
       .insert(themes)
-      .values({ userId, theme })
+      .values({ userId, characterId, theme })
       .onDuplicateKeyUpdate({ set: { theme } });
   }
 

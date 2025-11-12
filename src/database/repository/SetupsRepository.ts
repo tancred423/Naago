@@ -3,11 +3,18 @@ import { database } from "../connection.ts";
 import { Setup, setups } from "../schema/setups.ts";
 
 export class SetupsRepository {
-  static async getAll(type: string): Promise<Setup[]> {
+  static async getAllByType(type: string): Promise<Setup[]> {
     return await database
       .select()
       .from(setups)
       .where(eq(setups.type, type));
+  }
+
+  static async getAllByGuildId(guildId: string): Promise<Setup[]> {
+    return await database
+      .select()
+      .from(setups)
+      .where(eq(setups.guildId, guildId));
   }
 
   static async getChannelId(

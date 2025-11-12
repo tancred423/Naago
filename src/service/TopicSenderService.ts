@@ -37,7 +37,7 @@ export class TopicSenderService {
   static async send(topic: Topic): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAll("topics");
+    const setups: Setup[] = await SetupsRepository.getAllByType("topics");
     if (!setups || setups?.length < 1) return;
 
     for (const setup of setups) {

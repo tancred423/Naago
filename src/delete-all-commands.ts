@@ -1,5 +1,4 @@
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v10";
+import { REST, Routes } from "discord.js";
 import { load } from "@std/dotenv";
 import * as log from "@std/log";
 

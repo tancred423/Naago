@@ -1,6 +1,9 @@
-import { ContextMenuCommandBuilder } from "@discordjs/builders";
-import { ApplicationCommandType } from "discord-api-types/v10";
-import { ContextMenuCommandInteraction, MessageFlags } from "discord.js";
+import {
+  ApplicationCommandType,
+  ContextMenuCommandBuilder,
+  ContextMenuCommandInteraction,
+  MessageFlags,
+} from "discord.js";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { FavoritesRepository } from "../database/repository/FavoritesRepository.ts";
 import { MaximumAmountReachedError } from "../database/error/MaximumAmountReachedError.ts";

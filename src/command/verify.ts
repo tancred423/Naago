@@ -1,6 +1,11 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonBuilder, MessageFlags } from "discord.js";
-import { ButtonInteraction, ChatInputCommandInteraction } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ChatInputCommandInteraction,
+  MessageFlags,
+  SlashCommandBuilder,
+} from "discord.js";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
@@ -14,7 +19,7 @@ export default {
     .setDescription("Manage the verification of your character.")
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("set")
+        .setName("add")
         .setDescription("Verify your character.")
         .addStringOption((option) =>
           option
@@ -31,7 +36,7 @@ export default {
     )
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("delete")
+        .setName("remove")
         .setDescription(
           "Unlink your character and delete all stored data of you.",
         )
@@ -39,7 +44,7 @@ export default {
   async execute(interaction: ChatInputCommandInteraction) {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    if (interaction.options.getSubcommand() === "set") {
+    if (interaction.options.getSubcommand() === "add") {
       const name = StringManipulationService.formatName(
         interaction.options.getString("name")!,
       );
@@ -241,7 +246,7 @@ export default {
         });
       } else {
         const embed = DiscordEmbedService.getErrorEmbed(
-          "Please verify your character first. See `/verify set`.",
+          "Please verify your character first. See `/verify add`.",
         );
         await interaction.editReply({ embeds: [embed] });
       }

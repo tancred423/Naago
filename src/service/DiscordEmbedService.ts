@@ -24,15 +24,15 @@ const lodestoneIconLink = Deno.env.get("ICON_LODESTONE")!;
 
 export class DiscordEmbedService {
   static getSuccessEmbed(message: string): EmbedBuilder {
-    return new EmbedBuilder().setColor(green as ColorResolvable).setDescription(
-      `✅ ${message}`,
-    );
+    return new EmbedBuilder()
+      .setColor(green as ColorResolvable)
+      .setDescription(message);
   }
 
   static getErrorEmbed(message: string): EmbedBuilder {
-    return new EmbedBuilder().setColor(red as ColorResolvable).setDescription(
-      `:x: ${message}`,
-    );
+    return new EmbedBuilder()
+      .setColor(red as ColorResolvable)
+      .setDescription(message);
   }
 
   static getTopicEmbed(topic: Topic): EmbedBuilder {

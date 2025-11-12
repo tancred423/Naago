@@ -37,7 +37,7 @@ export class UpdateSenderService {
   static async send(update: Update): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAll("updates");
+    const setups: Setup[] = await SetupsRepository.getAllByType("updates");
     if (!setups || setups?.length < 1) return;
 
     for (const setup of setups) {

@@ -39,7 +39,7 @@ export class NoticeSenderService {
   static async send(notice: Notice): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAll("notices");
+    const setups: Setup[] = await SetupsRepository.getAllByType("notices");
     if (!setups || setups?.length < 1) return;
 
     for (const setup of setups) {
