@@ -23,120 +23,82 @@ const statusIconLink = Deno.env.get("ICON_STATUS")!;
 const lodestoneIconLink = Deno.env.get("ICON_LODESTONE")!;
 
 export class DiscordEmbedService {
-  static getSuccessEmbed(message: string): EmbedBuilder {
+  public static getSuccessEmbed(message: string): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(green as ColorResolvable)
       .setDescription(message);
   }
 
-  static getErrorEmbed(message: string): EmbedBuilder {
+  public static getErrorEmbed(message: string): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(red as ColorResolvable)
       .setDescription(message);
   }
 
-  static getTopicEmbed(topic: Topic): EmbedBuilder {
+  public static getTopicEmbed(topic: Topic): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorTopics as ColorResolvable)
-      .setAuthor({
-        name: "Topic",
-        iconURL: topicIconLink,
-      })
+      .setAuthor({ name: "Topic", iconURL: topicIconLink })
       .setTitle(topic.title)
       .setURL(topic.link)
       .setDescription(topic.description.markdown)
       .setImage(topic.banner)
-      .setFooter({
-        text: "Lodestone",
-        iconURL: lodestoneIconLink,
-      })
+      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
       .setTimestamp(moment(topic.date).toDate());
   }
 
-  static getNoticesEmbed(notice: Notice): EmbedBuilder {
+  public static getNoticesEmbed(notice: Notice): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorNotices as ColorResolvable)
-      .setAuthor({
-        name: notice.tag ?? "Notice",
-        iconURL: noticeIconLink,
-      })
+      .setAuthor({ name: notice.tag ?? "Notice", iconURL: noticeIconLink })
       .setTitle(notice.title)
       .setURL(notice.link)
       .setDescription(notice.description.markdown)
-      .setFooter({
-        text: "Lodestone",
-        iconURL: lodestoneIconLink,
-      })
+      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
       .setTimestamp(notice.date);
   }
 
-  static getMaintenanceEmbedFromData(
-    maintenanceData: MaintenanceData,
-  ): EmbedBuilder {
+  public static getMaintenanceEmbedFromData(maintenanceData: MaintenanceData): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorMaintenances as ColorResolvable)
-      .setAuthor({
-        name: maintenanceData.tag ?? "Maintenance",
-        iconURL: maintenanceIconLink,
-      })
+      .setAuthor({ name: maintenanceData.tag ?? "Maintenance", iconURL: maintenanceIconLink })
       .setTitle(maintenanceData.title)
       .setURL(maintenanceData.link)
       .setDescription(maintenanceData.description)
-      .setFooter({
-        text: "Lodestone",
-        iconURL: lodestoneIconLink,
-      })
+      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
       .setTimestamp(maintenanceData.date);
   }
 
   static getMaintenanceEmbed(maintenance: Maintenance): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorMaintenances as ColorResolvable)
-      .setAuthor({
-        name: maintenance.tag ?? "Maintenance",
-        iconURL: maintenanceIconLink,
-      })
+      .setAuthor({ name: maintenance.tag ?? "Maintenance", iconURL: maintenanceIconLink })
       .setTitle(maintenance.title)
       .setURL(maintenance.link)
       .setDescription(maintenance.description.markdown)
-      .setFooter({
-        text: "Lodestone",
-        iconURL: lodestoneIconLink,
-      })
+      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
       .setTimestamp(maintenance.date);
   }
 
   static getUpdatesEmbed(update: Update): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorUpdates as ColorResolvable)
-      .setAuthor({
-        name: "Update",
-        iconURL: updateIconLink,
-      })
+      .setAuthor({ name: "Update", iconURL: updateIconLink })
       .setTitle(update.title)
       .setURL(update.link)
       .setDescription(update.description.markdown)
-      .setFooter({
-        text: "Lodestone",
-        iconURL: lodestoneIconLink,
-      })
+      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
       .setTimestamp(update.date);
   }
 
   static getStatusEmbed(status: Status): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorStatus as ColorResolvable)
-      .setAuthor({
-        name: status.tag ?? "Status",
-        iconURL: statusIconLink,
-      })
+      .setAuthor({ name: status.tag ?? "Status", iconURL: statusIconLink })
       .setTitle(status.title)
       .setURL(status.link)
       .setDescription(status.description.markdown)
-      .setFooter({
-        text: "Lodestone",
-        iconURL: lodestoneIconLink,
-      })
+      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
       .setTimestamp(status.date);
   }
 }
