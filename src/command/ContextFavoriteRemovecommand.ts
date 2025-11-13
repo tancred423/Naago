@@ -36,10 +36,7 @@ class ContextFavoriteRemoveCommand extends Command {
       );
     } catch (error: unknown) {
       if (error instanceof NotInDatabaseError) {
-        await DiscordMessageService.editReplySuccess(
-          interaction,
-          `\`${targetCharacter.name}\` is not a favorite.`,
-        );
+        await DiscordMessageService.editReplySuccess(interaction, `\`${targetCharacter.name}\` is not a favorite.`);
         return;
       }
 

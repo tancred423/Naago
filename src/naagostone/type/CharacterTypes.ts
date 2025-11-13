@@ -68,26 +68,26 @@ export interface Eureka {
 export interface Equipment {
   name: string;
   icon: string;
-  mirage_name?: string;
-  mirage_icon?: string;
-  rarity?: string;
+  mirage_name: string | null;
+  mirage_icon: string | null;
+  rarity: string | null;
   color_code: string | null;
   color_name: string | null;
   color_code2: string | null;
   color_name2: string | null;
-  amount_dye_slots?: number;
-  materia_1?: string;
-  materia_1_stats?: string;
-  materia_2?: string;
-  materia_2_stats?: string;
-  materia_3?: string;
-  materia_3_stats?: string;
-  materia_4?: string;
-  materia_4_stats?: string;
-  materia_5?: string;
-  materia_5_stats?: string;
-  type?: string;
-  item_level?: string;
+  amount_dye_slots: number | null;
+  materia_1: string | null;
+  materia_1_stats: string | null;
+  materia_2: string | null;
+  materia_2_stats: string | null;
+  materia_3: string | null;
+  materia_3_stats: string | null;
+  materia_4: string | null;
+  materia_4_stats: string | null;
+  materia_5: string | null;
+  materia_5_stats: string | null;
+  type: string | null;
+  item_level: string | null;
 }
 
 export interface Character {
@@ -97,7 +97,7 @@ export interface Character {
   title: string;
   avatar: string;
   portrait: string;
-  characteristics?: Characteristics;
+  characteristics: Characteristics | null;
   server: Server;
   nameday: string;
   guardian_deity: GuardianDeity;
@@ -108,9 +108,9 @@ export interface Character {
   amount_mounts: number;
   amount_minions: number;
   active_classjob: ActiveClassJob;
-  grand_company?: GrandCompany;
-  free_company?: FreeCompany;
-  pvp_team?: string;
+  grand_company: GrandCompany | null;
+  free_company: FreeCompany | null;
+  pvp_team: string | null;
   strength: number;
   dexterity: number;
   vitality: number;
@@ -131,8 +131,8 @@ export interface Character {
   hp: number;
   mp_gp_cp: number;
   mp_gp_cp_parameter_name: string;
-  bozja?: Bozja;
-  eureka?: Eureka;
+  bozja: Bozja | null;
+  eureka: Eureka | null;
   paladin: ClassJob;
   warrior: ClassJob;
   darkknight: ClassJob;

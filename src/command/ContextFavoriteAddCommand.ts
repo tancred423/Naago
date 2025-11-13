@@ -12,11 +12,11 @@ import { Command } from "./type/Command.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 
 class ContextFavoriteAddCommand extends Command {
-  readonly data = new ContextMenuCommandBuilder()
+  public readonly data = new ContextMenuCommandBuilder()
     .setName("Add Favorite")
     .setType(ApplicationCommandType.User);
 
-  async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
+  public async execute(interaction: ContextMenuCommandInteraction): Promise<void> {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.user;

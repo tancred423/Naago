@@ -8,9 +8,9 @@ import { ProfileCommandHandler } from "../helper/ProfileCommandHelper.ts";
 import { VerifyCommandHelper } from "../helper/VerifyCommandHelper.ts";
 
 export class ButtonInteractionHandler {
-  static cooldown: string[] = [];
+  private static cooldown: string[] = [];
 
-  static async execute(interaction: ButtonInteraction): Promise<void> {
+  public static async execute(interaction: ButtonInteraction): Promise<void> {
     const userId = interaction.user.id;
     const messageAuthorId = interaction.message.interaction?.user.id;
 

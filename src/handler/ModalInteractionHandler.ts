@@ -6,7 +6,7 @@ import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
 import { InvalidCommandError } from "./error/InvalidCommandError.ts";
 
 export class ModalInteractionHandler {
-  static async execute(
+  public static async execute(
     interaction: ModalSubmitInteraction,
   ): Promise<void> {
     const modalIdSplit = interaction.customId.split(".");
