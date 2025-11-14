@@ -126,11 +126,13 @@ jobs:
             docker pull ${IMAGE_TAG} || { echo "Docker pull failed"; exit 1; }
 
             echo "Updating docker-compose.prod.yml with new image..."
-            if grep -q "image:" docker-compose.prod.yml; then
-              sed -i "s|image:.*|image: ${IMAGE_TAG}|g" docker-compose.prod.yml
+            if grep -q "^    image:" docker-compose.prod.yml; then
+              sed -i "s|^    image:.*|    image: ${IMAGE_TAG}|" docker-compose.prod.yml
             else
-              sed -i "/app:/a\    image: ${IMAGE_TAG}" docker-compose.prod.yml
+              sed -i "/^  app:/a\    image: ${IMAGE_TAG}" docker-compose.prod.yml
             fi
+            echo "Validating docker-compose.prod.yml syntax..."
+            docker compose -f docker-compose.prod.yml config > /dev/null || { echo "docker-compose.prod.yml is invalid!"; exit 1; }
 
             echo "Stopping existing containers..."
             docker compose -f docker-compose.prod.yml down || true
