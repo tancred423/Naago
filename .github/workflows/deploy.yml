@@ -38,6 +38,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get lowercase repository name
+        id: repo
+        run: |
+          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "repo=$REPO_LOWER" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -45,23 +51,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get lowercase repository name
-        id: repo
-        run: |
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          echo "repo=$REPO_LOWER" >> $GITHUB_OUTPUT
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ steps.repo.outputs.repo }}
-          tags: |
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -69,8 +60,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ghcr.io/${{ steps.repo.outputs.repo }}:latest
+            ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -79,19 +71,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-
-      - name: Add server to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
-
       - name: Get lowercase repository name
         id: repo
         run: |
@@ -99,50 +78,16 @@ jobs:
           echo "repo=$REPO_LOWER" >> $GITHUB_OUTPUT
 
       - name: Deploy to server
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          IMAGE_TAG: ghcr.io/${{ steps.repo.outputs.repo }}:latest
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_ACTOR: ${{ github.actor }}
-        run: |
-          ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} bash << REMOTE_SCRIPT
-            set -e
-            set -x
-            DEPLOY_PATH="${{ secrets.DEPLOY_PATH }}"
-            # Expand tilde to home directory on remote server
-            if [[ "\$DEPLOY_PATH" =~ ^~ ]]; then
-              DEPLOY_PATH="\${DEPLOY_PATH/#\~/\$HOME}"
-            fi
-            echo "Changing to directory: \$DEPLOY_PATH"
-            cd "\$DEPLOY_PATH" || { echo "Failed to cd to \$DEPLOY_PATH"; exit 1; }
-            pwd
-
-            echo "Logging in to GitHub Container Registry..."
-            echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin || { echo "Docker login failed"; exit 1; }
-
-            echo "Pulling latest image: ${IMAGE_TAG}"
-            docker pull ${IMAGE_TAG} || { echo "Docker pull failed"; exit 1; }
-
-            echo "Updating docker-compose.prod.yml with new image..."
-            if grep -q "^    image:" docker-compose.prod.yml; then
-              sed -i "s|^    image:.*|    image: ${IMAGE_TAG}|" docker-compose.prod.yml
-            else
-              sed -i "/^  app:/a\    image: ${IMAGE_TAG}" docker-compose.prod.yml
-            fi
-            echo "Validating docker-compose.prod.yml syntax..."
-            docker compose -f docker-compose.prod.yml config > /dev/null || { echo "docker-compose.prod.yml is invalid!"; exit 1; }
-
-            echo "Stopping existing containers..."
-            docker compose -f docker-compose.prod.yml down || true
-
-            echo "Starting containers with new image..."
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            docker compose -f docker-compose.prod.yml down --volumes=false
+            docker image prune -f --filter "label=org.opencontainers.image.source=https://github.com/${{ github.repository }}"
             docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
-
-            echo "Cleaning up old images..."
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
             docker image prune -af --filter "until=24h" || true
-
-            echo "Deployment completed successfully!"
-          REMOTE_SCRIPT
