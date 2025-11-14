@@ -6,7 +6,7 @@ import { StatusData, statusData } from "../schema/lodestone-news.ts";
 import { Status } from "../../naagostone/type/Status.ts";
 
 export class StatusesRepository {
-  static async find(
+  public static async find(
     title: string,
     date: Date,
   ): Promise<StatusData | null> {
@@ -26,7 +26,7 @@ export class StatusesRepository {
     return result[0];
   }
 
-  static async add(
+  public static async add(
     status: Status,
   ): Promise<void> {
     const dateSQL = moment(status.date).tz("Europe/London").toDate();

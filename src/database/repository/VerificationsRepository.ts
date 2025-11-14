@@ -3,7 +3,7 @@ import { type Verification, verifications } from "../schema/verifications.ts";
 import { database } from "../connection.ts";
 
 export class VerificationsRepository {
-  static async find(
+  public static async find(
     userId: string,
   ): Promise<Verification | null> {
     const result = await database
@@ -15,7 +15,7 @@ export class VerificationsRepository {
     return result[0] ?? null;
   }
 
-  static async setVerificationCode(
+  public static async setVerificationCode(
     userId: string,
     characterId: number,
     verificationCode: string,
@@ -26,7 +26,7 @@ export class VerificationsRepository {
       .onDuplicateKeyUpdate({ set: { verificationCode } });
   }
 
-  static async setVerification(
+  public static async setVerification(
     userId: string,
     characterId: number,
   ): Promise<void> {
@@ -36,7 +36,7 @@ export class VerificationsRepository {
       .where(eq(verifications.userId, userId));
   }
 
-  static async delete(userId: string, characterId: number): Promise<void> {
+  public static async delete(userId: string, characterId: number): Promise<void> {
     await database
       .delete(verifications)
       .where(and(

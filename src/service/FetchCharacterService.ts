@@ -8,25 +8,20 @@ import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
 import { StringManipulationService } from "./StringManipulationService.ts";
 
 export class FetchCharacterService {
-  static async findVerifiedCharacterByUserId(
+  public static async findVerifiedCharacterByUserId(
     userId: string,
   ): Promise<CharacterDataDto | null> {
     const verification = await VerificationsRepository.find(userId);
     if (!verification) return null;
 
-    const characterData = await CharacterDataRepository.find(
-      verification.characterId,
-    );
+    const characterData = await CharacterDataRepository.find(verification.characterId);
     if (!characterData) return null;
 
     const latestUpdate = moment(new Date(characterData.latestUpdate));
-    return new CharacterDataDto(
-      latestUpdate,
-      JSON.parse(characterData.jsonString) as Character,
-    );
+    return new CharacterDataDto(latestUpdate, JSON.parse(characterData.jsonString) as Character);
   }
 
-  static async fetchCharacterCached(
+  public static async fetchCharacterCached(
     interaction:
       | CommandInteraction
       | StringSelectMenuInteraction
@@ -34,9 +29,7 @@ export class FetchCharacterService {
       | ModalSubmitInteraction,
     characterId: number,
   ): Promise<CharacterDataDto | null> {
-    const characterData = await CharacterDataRepository.find(
-      characterId,
-    );
+    const characterData = await CharacterDataRepository.find(characterId);
 
     if (!characterData) {
       return this.fetchCharacterForced(interaction, characterId);
@@ -47,13 +40,10 @@ export class FetchCharacterService {
       return this.fetchCharacterForced(interaction, characterId);
     }
 
-    return new CharacterDataDto(
-      latestUpdate,
-      JSON.parse(characterData.jsonString) as Character,
-    );
+    return new CharacterDataDto(latestUpdate, JSON.parse(characterData.jsonString) as Character);
   }
 
-  static async fetchCharacterForced(
+  private static async fetchCharacterForced(
     interaction:
       | CommandInteraction
       | StringSelectMenuInteraction
@@ -63,9 +53,7 @@ export class FetchCharacterService {
   ): Promise<CharacterDataDto | null> {
     await this.prepareInteraction(interaction);
 
-    const character = await NaagostoneApiService.fetchCharacterById(
-      characterId,
-    );
+    const character = await NaagostoneApiService.fetchCharacterById(characterId);
     if (!character) return null;
 
     CharacterDataRepository.set(character);

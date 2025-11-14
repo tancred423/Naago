@@ -5,7 +5,7 @@ import moment from "moment";
 import { Character } from "../../naagostone/type/CharacterTypes.ts";
 
 export class CharacterDataRepository {
-  static async find(
+  public static async find(
     characterId: number,
   ): Promise<CharacterData | null> {
     const result = await database
@@ -17,7 +17,7 @@ export class CharacterDataRepository {
     return result[0] ?? null;
   }
 
-  static async set(character: Character): Promise<void> {
+  public static async set(character: Character): Promise<void> {
     const now = Date.now();
     const nowSQL = moment(now).tz("UTC").toDate();
 
@@ -36,7 +36,7 @@ export class CharacterDataRepository {
       });
   }
 
-  static async delete(characterId: number): Promise<void> {
+  public static async delete(characterId: number): Promise<void> {
     await database
       .delete(characterData)
       .where(eq(characterData.characterId, characterId));

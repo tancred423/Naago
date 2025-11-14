@@ -13,7 +13,7 @@ const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
 const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
 
 export class TopicSenderService {
-  static async checkForNew(): Promise<number> {
+  public static async checkForNew(): Promise<number> {
     const latestTopics = await NaagostoneApiService.fetchLatest10Topics();
     const newTopics: Topic[] = [];
 
@@ -34,7 +34,7 @@ export class TopicSenderService {
     return newTopics.length;
   }
 
-  static async send(topic: Topic): Promise<void> {
+  public static async send(topic: Topic): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
     const setups: Setup[] = await SetupsRepository.getAllByType("topics");
@@ -52,10 +52,7 @@ export class TopicSenderService {
         await (channel as TextChannel).send({ embeds: [embed] });
       } catch (error: unknown) {
         if (error instanceof Error) {
-          log.error(
-            `[TOPICS] Sending topic to ${setup.guildId} was NOT successful: ${error.message}`,
-            error,
-          );
+          log.error(`[TOPICS] Sending topic to ${setup.guildId} was NOT successful: ${error.message}`, error);
         }
         continue;
       }

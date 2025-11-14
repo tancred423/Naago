@@ -14,15 +14,13 @@ const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
 const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
 
 export default class StatusSenderService {
-  static async checkForNew(): Promise<number> {
+  public static async checkForNew(): Promise<number> {
     let latestStatuses: Status[];
     try {
       latestStatuses = await NaagostoneApiService.fetchLatest10Statuses();
     } catch (error: unknown) {
       if (error instanceof Error) {
-        log.error(
-          `[STATUS] Fetching latest statuses was NOT successful: ${error.message}`,
-        );
+        log.error(`[STATUS] Fetching latest statuses was NOT successful: ${error.message}`);
       }
       return 0;
     }
@@ -47,7 +45,7 @@ export default class StatusSenderService {
     return newStatuses.length;
   }
 
-  static async send(status: Status): Promise<void> {
+  public static async send(status: Status): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
     const setups: Setup[] = await SetupsRepository.getAllByType("status");
@@ -65,9 +63,7 @@ export default class StatusSenderService {
         await (channel as TextChannel).send({ embeds: [embed] });
       } catch (error: unknown) {
         if (error instanceof Error) {
-          log.error(
-            `[STATUS] Sending status to ${setup.guildId} was NOT successful: ${error.message}`,
-          );
+          log.error(`[STATUS] Sending status to ${setup.guildId} was NOT successful: ${error.message}`);
         }
         continue;
       }

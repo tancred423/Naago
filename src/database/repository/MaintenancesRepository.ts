@@ -6,7 +6,7 @@ import { MaintenanceData, maintenanceData } from "../schema/lodestone-news.ts";
 import { Maintenance } from "../../naagostone/type/Maintenance.ts";
 
 export class MaintenancesRepository {
-  static async find(
+  public static async find(
     title: string,
     date: Date,
   ): Promise<MaintenanceData | null> {
@@ -26,7 +26,7 @@ export class MaintenancesRepository {
     return result[0];
   }
 
-  static async add(
+  public static async add(
     maintenance: Maintenance,
   ): Promise<void> {
     const dateSQL = moment(maintenance.date).tz("Europe/London").toDate();
@@ -52,7 +52,7 @@ export class MaintenancesRepository {
       });
   }
 
-  static async findActive(): Promise<MaintenanceData[]> {
+  public static async findActive(): Promise<MaintenanceData[]> {
     const now = moment().tz("Europe/London").toDate();
 
     const activeMaintenances = await database

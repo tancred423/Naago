@@ -6,11 +6,9 @@ export class ArrayManipulationService {
     permissions.forEach((permission) => {
       const split = permission.split("_");
       pretty.push(
-        `${StringManipulationService.capitalizeFirstLetter(split[0])} ${
-          StringManipulationService.capitalizeFirstLetter(
-            split[1] || "",
-          )
-        }`,
+        StringManipulationService.capitalizeFirstLetter(split[0]) +
+          " " +
+          StringManipulationService.capitalizeFirstLetter(split[1] || ""),
       );
     });
 

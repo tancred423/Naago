@@ -69,7 +69,7 @@ export class DiscordEmbedService {
       .setTimestamp(maintenanceData.date);
   }
 
-  static getMaintenanceEmbed(maintenance: Maintenance): EmbedBuilder {
+  public static getMaintenanceEmbed(maintenance: Maintenance): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorMaintenances as ColorResolvable)
       .setAuthor({ name: maintenance.tag ?? "Maintenance", iconURL: maintenanceIconLink })
@@ -80,7 +80,7 @@ export class DiscordEmbedService {
       .setTimestamp(maintenance.date);
   }
 
-  static getUpdatesEmbed(update: Update): EmbedBuilder {
+  public static getUpdatesEmbed(update: Update): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorUpdates as ColorResolvable)
       .setAuthor({ name: "Update", iconURL: updateIconLink })
@@ -91,7 +91,7 @@ export class DiscordEmbedService {
       .setTimestamp(update.date);
   }
 
-  static getStatusEmbed(status: Status): EmbedBuilder {
+  public static getStatusEmbed(status: Status): EmbedBuilder {
     return new EmbedBuilder()
       .setColor(colorStatus as ColorResolvable)
       .setAuthor({ name: status.tag ?? "Status", iconURL: statusIconLink })

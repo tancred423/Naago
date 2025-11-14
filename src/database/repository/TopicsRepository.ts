@@ -6,7 +6,7 @@ import { AlreadyInDatabaseError } from "../error/AlreadyInDatabaseError.ts";
 import { Topic } from "../../naagostone/type/Topic.ts";
 
 export class TopicsRepository {
-  static async find(
+  public static async find(
     title: string,
     date: Date,
   ): Promise<TopicData | null> {
@@ -26,7 +26,7 @@ export class TopicsRepository {
     return result[0];
   }
 
-  static async add(
+  public static async add(
     topic: Topic,
   ): Promise<void> {
     const dateSQL = moment(topic.date).tz("Europe/London").toDate();

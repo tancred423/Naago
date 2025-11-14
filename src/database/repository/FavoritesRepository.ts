@@ -6,7 +6,7 @@ import { MaximumAmountReachedError } from "../error/MaximumAmountReachedError.ts
 import { NotInDatabaseError } from "../error/NotInDatabaseError.ts";
 
 export class FavoritesRepository {
-  static async get(
+  public static async get(
     userId: string,
   ): Promise<Favorite[]> {
     return await database
@@ -15,7 +15,7 @@ export class FavoritesRepository {
       .where(eq(favorites.userId, userId));
   }
 
-  static async add(
+  public static async add(
     userId: string,
     characterId: number,
     characterName: string,
@@ -43,7 +43,7 @@ export class FavoritesRepository {
     });
   }
 
-  static async delete(
+  public static async delete(
     userId: string,
     characterId: number,
   ): Promise<void> {
@@ -65,7 +65,7 @@ export class FavoritesRepository {
       );
   }
 
-  static async deleteAll(userId: string): Promise<void> {
+  public static async deleteAll(userId: string): Promise<void> {
     await database
       .delete(favorites)
       .where(eq(favorites.userId, userId));

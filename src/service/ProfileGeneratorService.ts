@@ -9,34 +9,22 @@ import * as log from "@std/log";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Theme } from "./type/Theme.ts";
+import { ProfilePage, SubProfilePage } from "./type/ProfilePageTypes.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BASE_PATH = join(__dirname, "..");
-
 const width = parseInt(Deno.env.get("PROFILE_WIDTH")!, 10);
 const height = parseInt(Deno.env.get("PROFILE_HEIGHT")!, 10);
 const borderRadius = parseInt(Deno.env.get("PROFILE_BORDER_RADIUS")!, 10);
-const borderRadiusOuter = parseInt(
-  Deno.env.get("PROFILE_BORDER_RADIUS_OUTER")!,
-  10,
-);
-
+const borderRadiusOuter = parseInt(Deno.env.get("PROFILE_BORDER_RADIUS_OUTER")!, 10);
 const maxLevel = parseInt(Deno.env.get("MAX_LEVEL")!, 10);
 const maxLevelLimited = parseInt(Deno.env.get("MAX_LEVEL_LIMITED")!, 10);
 const maxMounts = parseInt(Deno.env.get("MAX_MOUNTS")!, 10);
 const maxMinions = parseInt(Deno.env.get("MAX_MINIONS")!, 10);
 const maxAchievements = parseInt(Deno.env.get("MAX_ACHIEVEMENTS")!, 10);
 
-type ProfilePage =
-  | "profile"
-  | "classesjobs"
-  | "equipment"
-  | "attributes"
-  | "portrait";
-type SubProfilePage = "dowdom" | "dohdol" | null;
-
 export class ProfileGeneratorService {
-  static async getImage(
+  public static async getImage(
     character: Character,
     isVerified: boolean,
     profilePage: ProfilePage,
@@ -55,7 +43,7 @@ export class ProfileGeneratorService {
     return character.portrait;
   }
 
-  static getComponents(
+  public static getComponents(
     profilePage: ProfilePage,
     subProfilePage: SubProfilePage,
     commandName: string,
@@ -111,24 +99,18 @@ class Profile {
   private character: Character;
   private isVerified: boolean;
 
-  constructor(
-    character: Character,
-    isVerified: boolean,
-  ) {
+  constructor(character: Character, isVerified: boolean) {
     this.character = character;
     this.isVerified = isVerified;
   }
 
-  async getTheme(): Promise<Theme> {
+  private async getTheme(): Promise<Theme> {
     const themeName = await ThemeRepository.get(this.character.id);
-    const themeFile = readFileSync(
-      join(BASE_PATH, "theme", `${themeName}.json`),
-      "utf-8",
-    );
+    const themeFile = readFileSync(join(BASE_PATH, "theme", `${themeName}.json`), "utf-8");
     return JSON.parse(themeFile);
   }
 
-  async getProfile(): Promise<Buffer> {
+  public async getProfile(): Promise<Buffer> {
     ////////////////////////////////////////////
     // Theme
     ////////////////////////////////////////////
@@ -383,7 +365,7 @@ class Profile {
     return canvas.toBuffer("image/png");
   }
 
-  async getDowDom(): Promise<Buffer> {
+  public async getDowDom(): Promise<Buffer> {
     ////////////////////////////////////////////
     // Theme
     ////////////////////////////////////////////
@@ -630,7 +612,7 @@ class Profile {
     return canvas.toBuffer("image/png");
   }
 
-  async getDohDol(): Promise<Buffer> {
+  public async getDohDol(): Promise<Buffer> {
     ////////////////////////////////////////////
     // Theme
     ////////////////////////////////////////////
@@ -863,7 +845,7 @@ class Profile {
     return canvas.toBuffer("image/png");
   }
 
-  async getEquipment(): Promise<Buffer> {
+  public async getEquipment(): Promise<Buffer> {
     ////////////////////////////////////////////
     // Theme
     ////////////////////////////////////////////
@@ -1010,7 +992,7 @@ class Profile {
     return canvas.toBuffer("image/png");
   }
 
-  async getAttributes(): Promise<Buffer> {
+  public async getAttributes(): Promise<Buffer> {
     ////////////////////////////////////////////
     // Theme
     ////////////////////////////////////////////
@@ -1374,7 +1356,7 @@ class ProfileBlock {
     this.yAdd = yAdd;
   }
 
-  async add(
+  public async add(
     title: string,
     content: string,
     iconLink: string | string[] | null = null,
@@ -1422,7 +1404,7 @@ class ProfileBlock {
     } else if (iconLink) await this.drawIcon(iconLink, fWidth, rightSide);
   }
 
-  async drawIcon(
+  private async drawIcon(
     iconLink: string,
     fWidth: number,
     rightSide: boolean,
@@ -1460,7 +1442,7 @@ class ClassJobBlock {
     this.yAdd = yAdd;
   }
 
-  async add(job: ClassJob): Promise<void> {
+  public async add(job: ClassJob): Promise<void> {
     this.yAdd += 40;
 
     const jobIcon = await loadImage(job.icon);
@@ -1494,7 +1476,7 @@ class ClassJobBlock {
       .fill();
   }
 
-  getLevelPercent(job: ClassJob): number {
+  private getLevelPercent(job: ClassJob): number {
     const currentExpParse = job.current_exp.toString().replaceAll(",", "");
     const currentExp = isNaN(Number(currentExpParse)) ? 0 : parseInt(currentExpParse);
 
@@ -1527,7 +1509,7 @@ class Stats {
     this.fWidth = fWidth;
   }
 
-  add(
+  public add(
     title: string,
     content: string | number,
     color: string = this.theme.block_title,
@@ -1575,7 +1557,7 @@ class Gear {
     this.height = 87;
   }
 
-  async add(
+  public async add(
     gear: Equipment | null,
     type: string,
     isFirst = false,
@@ -1820,7 +1802,7 @@ class Gear {
     this.y -= this.isLeft || isFirst ? 4 : type === "facewear" ? 52 : 18;
   }
 
-  getDefaultIcon(type: string): string {
+  private getDefaultIcon(type: string): string {
     switch (type) {
       case "head":
         return join(
@@ -1921,7 +1903,7 @@ class Gear {
     }
   }
 
-  getMateriaIcon(materia: string): string {
+  private getMateriaIcon(materia: string): string {
     switch (materia) {
       case "Savage Aim Materia I":
         return join(BASE_PATH, "image", "materia", "crt_1.png");

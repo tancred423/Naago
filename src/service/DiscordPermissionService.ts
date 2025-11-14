@@ -3,7 +3,7 @@ import { DiscordEmbedService } from "./DiscordEmbedService.ts";
 import { ArrayManipulationService } from "./ArrayManipulationService.ts";
 
 export class DiscordPermissionService {
-  static async hasAllPermissions(
+  public static async hasAllPermissions(
     interaction: CommandInteraction,
     member: GuildMember,
     ...permissions: bigint[]
@@ -24,28 +24,20 @@ export class DiscordPermissionService {
 
     if (hasAllPermissions) return true;
     else {
-      const embed = DiscordEmbedService.getErrorEmbed(
-        "Not enough permissions to execute this command.",
-      )
+      const embed = DiscordEmbedService
+        .getErrorEmbed("Not enough permissions to execute this command.")
         .addFields([
           {
             name: "For this command you will need",
-            value: ArrayManipulationService.prettifyPermissionArray(
-              neededPerms,
-            ),
+            value: ArrayManipulationService.prettifyPermissionArray(neededPerms),
           },
           {
             name: "But you are missing",
-            value: ArrayManipulationService.prettifyPermissionArray(
-              missingPerms,
-            ),
+            value: ArrayManipulationService.prettifyPermissionArray(missingPerms),
           },
         ]);
 
-      await interaction.reply({
-        embeds: [embed],
-        flags: MessageFlags.Ephemeral,
-      });
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 
       return false;
     }

@@ -3,7 +3,7 @@ import { database } from "../connection.ts";
 import { themes } from "../schema/themes.ts";
 
 export class ThemeRepository {
-  static async get(characterId: number): Promise<string> {
+  public static async get(characterId: number): Promise<string> {
     const result = await database
       .select({ theme: themes.theme })
       .from(themes)
@@ -13,7 +13,7 @@ export class ThemeRepository {
     return result[0]?.theme ?? "dark";
   }
 
-  static async set(
+  public static async set(
     userId: string,
     characterId: number,
     theme: string,
@@ -24,7 +24,7 @@ export class ThemeRepository {
       .onDuplicateKeyUpdate({ set: { characterId, theme } });
   }
 
-  static async delete(userId: string): Promise<void> {
+  public static async delete(userId: string): Promise<void> {
     await database
       .delete(themes)
       .where(eq(themes.userId, userId));

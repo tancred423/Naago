@@ -48,7 +48,7 @@ log.setup({
 
 // Client
 export class GlobalClient {
-  static client: Client;
+  public static client: Client;
 }
 
 // Moment
@@ -98,8 +98,13 @@ const commandFiles = readdirSync(join(__dirname, "command"))
   });
 
 for (const file of commandFiles) {
-  const command = await import(join(__dirname, "command", file));
-  client.commands.set(command.default.data.name, command.default);
+  await import(join(__dirname, "command", file))
+    .then((command) => {
+      client.commands.set(command.default.data.name, command.default);
+    })
+    .catch((err) => {
+      log.error(`Failed to load command file ${file}:`, err);
+    });
 }
 
 client.once("clientReady", () => {
@@ -108,37 +113,56 @@ client.once("clientReady", () => {
   GlobalClient.client = client;
   setPresence();
 
-  try {
-    if (lodestoneCheckOnStart) {
-      checkLodestone();
-    }
-
-    cron.schedule("1-56/5 * * * *", () => {
-      checkLodestone();
-      setPresence();
+  if (lodestoneCheckOnStart) {
+    checkLodestone().catch((err) => {
+      log.error("Lodestone check failed on start:", err);
     });
-  } catch (err) {
-    log.error("Lodestone checker failed.", err);
   }
+
+  cron.schedule("1-56/5 * * * *", async () => {
+    await checkLodestone().catch((err) => {
+      log.error("Lodestone check failed:", err);
+    });
+    setPresence();
+  });
 });
 
 function setPresence(): void {
-  client.user?.setPresence({
-    activities: [{
-      name: "naago.tancred.de",
-      type: ActivityType.Custom,
-      state: "🔗 naago.tancred.de",
-    }],
-    status: "online",
-  });
+  try {
+    client.user?.setPresence({
+      activities: [{
+        name: "naago.tancred.de",
+        type: ActivityType.Custom,
+        state: "🔗 naago.tancred.de",
+      }],
+      status: "online",
+    });
+  } catch (err) {
+    log.error("Failed to set presence:", err);
+  }
 }
 
 async function checkLodestone(): Promise<void> {
-  const topics = await TopicSenderService.checkForNew();
-  const notices = await NoticeSenderService.checkForNew();
-  const maintenances = await MaintenanceSenderService.checkForNew();
-  const updates = await UpdateSenderService.checkForNew();
-  const status = await StatusSenderService.checkForNew();
+  const results = await Promise.allSettled([
+    TopicSenderService.checkForNew(),
+    NoticeSenderService.checkForNew(),
+    MaintenanceSenderService.checkForNew(),
+    UpdateSenderService.checkForNew(),
+    StatusSenderService.checkForNew(),
+  ]);
+
+  const topics = results[0].status === "fulfilled" ? results[0].value : 0;
+  const notices = results[1].status === "fulfilled" ? results[1].value : 0;
+  const maintenances = results[2].status === "fulfilled" ? results[2].value : 0;
+  const updates = results[3].status === "fulfilled" ? results[3].value : 0;
+  const status = results[4].status === "fulfilled" ? results[4].value : 0;
+
+  results.forEach((result, index) => {
+    if (result.status === "rejected") {
+      const serviceNames = ["topics", "notices", "maintenances", "updates", "status"];
+      log.error(`Failed to check for new ${serviceNames[index]}:`, result.reason);
+    }
+  });
 
   log.info(
     `Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${status} status.`,
@@ -278,4 +302,7 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-client.login(token);
+client.login(token).catch((err) => {
+  log.error("Failed to login to Discord:", err);
+  Deno.exit(1);
+});

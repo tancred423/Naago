@@ -6,7 +6,7 @@ import { NoticeData, noticeData } from "../schema/lodestone-news.ts";
 import { Notice } from "../../naagostone/type/Notice.ts";
 
 export class NoticesRepository {
-  static async find(
+  public static async find(
     title: string,
     date: Date,
   ): Promise<NoticeData | null> {
@@ -26,7 +26,7 @@ export class NoticesRepository {
     return result[0];
   }
 
-  static async add(
+  public static async add(
     notice: Notice,
   ): Promise<void> {
     const dateSQL = moment(notice.date).tz("Europe/London").toDate();

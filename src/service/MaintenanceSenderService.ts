@@ -14,9 +14,8 @@ const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
 const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
 
 export class MaintenanceSenderService {
-  static async checkForNew(): Promise<number> {
-    const latestMaintenances = await NaagostoneApiService
-      .fetchLatest10Maintenances();
+  public static async checkForNew(): Promise<number> {
+    const latestMaintenances = await NaagostoneApiService.fetchLatest10Maintenances();
     const newMaintenances: Maintenance[] = [];
 
     for (const maintenance of latestMaintenances) {
@@ -26,10 +25,7 @@ export class MaintenanceSenderService {
       if (await MaintenancesRepository.find(maintenance.title, date)) continue;
 
       maintenance.tag = maintenance.tag === "[Maintenance]" ? null : maintenance.tag;
-      maintenance.tag = StringManipulationService.convertTag(
-        "maintenance",
-        maintenance.tag ?? null,
-      );
+      maintenance.tag = StringManipulationService.convertTag("maintenance", maintenance.tag ?? null);
 
       newMaintenances.push(maintenance);
     }
@@ -60,9 +56,7 @@ export class MaintenanceSenderService {
         await (channel as TextChannel).send({ embeds: [embed] });
       } catch (error: unknown) {
         if (error instanceof Error) {
-          log.error(
-            `[MAINTENANCES] Sending maintenance to ${setup.guildId} was NOT successful: ${error.message}`,
-          );
+          log.error(`[MAINTENANCES] Sending maintenance to ${setup.guildId} was NOT successful: ${error.message}`);
         }
         continue;
       }

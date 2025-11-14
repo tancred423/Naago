@@ -1,7 +1,7 @@
 import { ButtonInteraction, Client, ColorResolvable, CommandInteraction, Guild } from "discord.js";
 
 export class DiscordColorService {
-  private static blurple = Deno.env.get("COLOR_BLURPLE")!;
+  private static readonly blurple = Deno.env.get("COLOR_BLURPLE")!;
 
   public static async getBotColorByInteraction(
     interaction: CommandInteraction | ButtonInteraction,

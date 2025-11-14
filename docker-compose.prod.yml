@@ -53,9 +53,7 @@ services:
       - naago-network
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/tancred423/naago:latest
     container_name: naago-app
     restart: unless-stopped
     depends_on:

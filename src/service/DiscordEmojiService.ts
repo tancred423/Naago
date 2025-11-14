@@ -4,7 +4,7 @@ import { EmojiData } from "./type/EmojiData.ts";
 import { EmojiName } from "./type/EmojiName.ts";
 
 export class DiscordEmojiService {
-  static getAsEmojiData(name: EmojiName): EmojiData {
+  public static getAsEmojiData(name: EmojiName): EmojiData {
     const emojiMarkdown = Deno.env.get(name);
     if (!emojiMarkdown) {
       throw new EmojiCouldNotBeFetchedError(name);
@@ -24,7 +24,7 @@ export class DiscordEmojiService {
     };
   }
 
-  static getAsMarkdown(name: EmojiName): string {
+  public static getAsMarkdown(name: EmojiName): string {
     const emojiMarkdown = Deno.env.get(name);
     if (!emojiMarkdown) throw new EmojiCouldNotBeFetchedError(name);
     return emojiMarkdown;

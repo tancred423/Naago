@@ -3,21 +3,21 @@ import { database } from "../connection.ts";
 import { Setup, setups } from "../schema/setups.ts";
 
 export class SetupsRepository {
-  static async getAllByType(type: string): Promise<Setup[]> {
+  public static async getAllByType(type: string): Promise<Setup[]> {
     return await database
       .select()
       .from(setups)
       .where(eq(setups.type, type));
   }
 
-  static async getAllByGuildId(guildId: string): Promise<Setup[]> {
+  public static async getAllByGuildId(guildId: string): Promise<Setup[]> {
     return await database
       .select()
       .from(setups)
       .where(eq(setups.guildId, guildId));
   }
 
-  static async getChannelId(
+  public static async getChannelId(
     guildId: string,
     type: string,
   ): Promise<string | null> {
@@ -30,7 +30,7 @@ export class SetupsRepository {
     return result[0]?.channelId ?? null;
   }
 
-  static async setChannelId(
+  public static async setChannelId(
     guildId: string,
     type: string,
     channelId: string,
@@ -41,7 +41,7 @@ export class SetupsRepository {
       .onDuplicateKeyUpdate({ set: { channelId } });
   }
 
-  static async delete(
+  public static async delete(
     guildId: string,
     type: string,
   ): Promise<void> {
@@ -50,7 +50,7 @@ export class SetupsRepository {
       .where(and(eq(setups.guildId, guildId), eq(setups.type, type)));
   }
 
-  static async deleteAll(guildId: string): Promise<void> {
+  public static async deleteAll(guildId: string): Promise<void> {
     await database
       .delete(setups)
       .where(eq(setups.guildId, guildId));
