@@ -103,7 +103,7 @@ jobs:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          IMAGE_TAG: ghcr.io/${{ steps.repo.outputs.repo }}:main-${{ github.sha }}
+          IMAGE_TAG: ghcr.io/${{ steps.repo.outputs.repo }}:latest
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
