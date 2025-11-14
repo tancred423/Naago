@@ -57,14 +57,14 @@ export class HelpCommandHelper {
           name: "/profile find",
           value:
             "- Get any character's profile by providing the full character name and the server the character is on." +
-            "\n- Alternatively you can right click a user 🠆 choose `Apps` 🠆 `Find`. This is faster but requires this user to have a verified character.",
+            "\n- Alternatively you can right click a user → choose `Apps` → `Find`. This is faster but requires this user to have a verified character.",
           inline: false,
         },
         {
           name: "/profile favorite",
           value:
             "- A quick access to character profiles.\n- Favorites can be added or removed with `/favorite add` and `/favorite remove` respectively." +
-            "\n- Alternatively you can right click a user 🠆 choose `Apps` 🠆 `Add Favorite` / `Remove Favorite`. This is faster but requires this user to have a verified character.",
+            "\n- Alternatively you can right click a user → choose `Apps` → `Add Favorite` / `Remove Favorite`. This is faster but requires this user to have a verified character.",
           inline: false,
         },
       ]);
