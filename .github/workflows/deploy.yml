@@ -133,11 +133,11 @@ jobs:
             fi
 
             echo "Stopping existing containers..."
-            docker-compose -f docker-compose.prod.yml down || true
+            docker compose -f docker-compose.prod.yml down || true
 
             echo "Starting containers with new image..."
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
 
             echo "Cleaning up old images..."
             docker image prune -af --filter "until=24h" || true
