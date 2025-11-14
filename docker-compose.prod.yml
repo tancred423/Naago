@@ -14,6 +14,7 @@ services:
       - .env
     environment:
       IS_PROD: true
+    network_mode: bridge
     logging:
       driver: "json-file"
       options:
