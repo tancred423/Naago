@@ -56,8 +56,12 @@ export class FetchCharacterService {
     const character = await NaagostoneApiService.fetchCharacterById(characterId);
     if (!character) return null;
 
-    CharacterDataRepository.set(character);
-    return new CharacterDataDto(moment(), character);
+    await CharacterDataRepository.set(character);
+
+    const characterData = await CharacterDataRepository.find(characterId);
+    const latestUpdate = moment(new Date(characterData!.latestUpdate));
+
+    return new CharacterDataDto(latestUpdate, character);
   }
 
   private static async prepareInteraction(
