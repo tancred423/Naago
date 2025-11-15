@@ -155,7 +155,7 @@ async function checkLodestone(): Promise<void> {
   const notices = results[1].status === "fulfilled" ? results[1].value : 0;
   const maintenances = results[2].status === "fulfilled" ? results[2].value : 0;
   const updates = results[3].status === "fulfilled" ? results[3].value : 0;
-  const status = results[4].status === "fulfilled" ? results[4].value : 0;
+  const statuses = results[4].status === "fulfilled" ? results[4].value : 0;
 
   results.forEach((result, index) => {
     if (result.status === "rejected") {
@@ -165,9 +165,11 @@ async function checkLodestone(): Promise<void> {
     }
   });
 
-  log.info(
-    `Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${status} status.`,
-  );
+  if (topics > 0 || notices > 0 || maintenances > 0 || updates > 0 || statuses > 0) {
+    log.info(
+      `Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${statuses} status.`,
+    );
+  }
 }
 
 client.on("interactionCreate", async (interaction) => {
