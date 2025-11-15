@@ -30,4 +30,4 @@ networks:
 
   naagostone-network:
     external: true
-    name: naagostone_network
+    name: naagostone-network
