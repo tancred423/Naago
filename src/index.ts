@@ -217,7 +217,9 @@ client.on("interactionCreate", async (interaction) => {
         }
       } catch (error: unknown) {
         log.error(
-          `Error while sending error message for command '${interaction.commandName}': ${error instanceof Error ? error.stack : String(error)}`,
+          `Error while sending error message for command '${interaction.commandName}': ${
+            error instanceof Error ? error.stack : String(error)
+          }`,
         );
       }
     }
@@ -225,7 +227,9 @@ client.on("interactionCreate", async (interaction) => {
     try {
       await ButtonInteractionHandler.execute(interaction as ButtonInteraction);
     } catch (err) {
-      log.error(`Error while executing button '${interaction.customId}': ${err instanceof Error ? err.stack : String(err)}`);
+      log.error(
+        `Error while executing button '${interaction.customId}': ${err instanceof Error ? err.stack : String(err)}`,
+      );
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this button.",
       );
@@ -240,7 +244,9 @@ client.on("interactionCreate", async (interaction) => {
         interaction as ModalSubmitInteraction,
       );
     } catch (err) {
-      log.error(`Error while executing modal '${interaction.customId}': ${err instanceof Error ? err.stack : String(err)}`);
+      log.error(
+        `Error while executing modal '${interaction.customId}': ${err instanceof Error ? err.stack : String(err)}`,
+      );
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this modal.",
       );
@@ -268,7 +274,9 @@ client.on("interactionCreate", async (interaction) => {
       await command.execute(interaction as ContextMenuCommandInteraction);
     } catch (err) {
       log.error(
-        `Error while executing context command '${interaction.commandName}': ${err instanceof Error ? err.stack : String(err)}`,
+        `Error while executing context command '${interaction.commandName}': ${
+          err instanceof Error ? err.stack : String(err)
+        }`,
       );
       const embed = DiscordEmbedService.getErrorEmbed(
         "There was an error while executing this command.",
