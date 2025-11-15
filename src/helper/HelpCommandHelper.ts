@@ -10,6 +10,7 @@ import {
 import { DiscordColorService } from "../service/DiscordColorService.ts";
 import { InvalidHelpPageError } from "./error/InvalidHelpPageError.ts";
 import moment from "moment";
+import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
 
 export class HelpCommandHelper {
   public static async handlePageSwapButton(
@@ -27,11 +28,14 @@ export class HelpCommandHelper {
       case "favorites":
         await interaction.editReply(await this.getFavorites(interaction));
         break;
+      case "info":
+        await interaction.editReply(await this.getInfo(interaction));
+        break;
       case "setup":
         await interaction.editReply(await this.getSetup(interaction));
         break;
-      case "technical":
-        await interaction.editReply(await this.getTechnical(interaction));
+      case "about":
+        await interaction.editReply(await this.getAbout(interaction));
         break;
       default:
         throw new InvalidHelpPageError(page);
@@ -42,7 +46,7 @@ export class HelpCommandHelper {
     interaction: ButtonInteraction | CommandInteraction,
   ): Promise<{ embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }> {
     const client = interaction.client;
-    const component = HelpCommandHelper.getButtons("profiles");
+    const components = HelpCommandHelper.getButtons("profiles");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
       .setTitle("Help: Character Profiles")
@@ -71,7 +75,7 @@ export class HelpCommandHelper {
 
     return {
       embeds: [embed],
-      components: [component],
+      components,
     };
   }
 
@@ -79,7 +83,7 @@ export class HelpCommandHelper {
     interaction: ButtonInteraction | CommandInteraction,
   ): Promise<{ embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }> {
     const client = interaction.client;
-    const component = HelpCommandHelper.getButtons("verification");
+    const components = HelpCommandHelper.getButtons("verification");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
       .setTitle("Help: Verification")
@@ -102,7 +106,7 @@ export class HelpCommandHelper {
 
     return {
       embeds: [embed],
-      components: [component],
+      components,
     };
   }
 
@@ -110,7 +114,7 @@ export class HelpCommandHelper {
     interaction: ButtonInteraction | CommandInteraction,
   ): Promise<{ embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }> {
     const client = interaction.client;
-    const component = HelpCommandHelper.getButtons("favorites");
+    const components = HelpCommandHelper.getButtons("favorites");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
       .setTitle("Help: Favorites")
@@ -132,7 +136,36 @@ export class HelpCommandHelper {
 
     return {
       embeds: [embed],
-      components: [component],
+      components,
+    };
+  }
+
+  private static async getInfo(
+    interaction: ButtonInteraction | CommandInteraction,
+  ): Promise<{ embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }> {
+    const client = interaction.client;
+    const components = HelpCommandHelper.getButtons("info");
+    const embed = new EmbedBuilder()
+      .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
+      .setTitle("Help: Informational")
+      .setThumbnail(client.user!.displayAvatarURL())
+      .addFields([
+        {
+          name: "/help",
+          value: "- You are already here " + DiscordEmojiService.getAsMarkdown("EMOJI_DOGGO_SMILE"),
+          inline: false,
+        },
+        {
+          name: "/maintenance",
+          value: "- View current maintenances if any." +
+            "\n- Shows active maintenance schedules and their durations.",
+          inline: false,
+        },
+      ]);
+
+    return {
+      embeds: [embed],
+      components,
     };
   }
 
@@ -140,7 +173,7 @@ export class HelpCommandHelper {
     interaction: ButtonInteraction | CommandInteraction,
   ): Promise<{ embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }> {
     const client = interaction.client;
-    const component = HelpCommandHelper.getButtons("setup");
+    const components = HelpCommandHelper.getButtons("setup");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
       .setTitle("Help: Setup")
@@ -168,19 +201,26 @@ export class HelpCommandHelper {
 
     return {
       embeds: [embed],
-      components: [component],
+      components,
     };
   }
 
-  private static async getTechnical(
+  private static async getAbout(
     interaction: ButtonInteraction | CommandInteraction,
   ): Promise<{ embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }> {
     const client = interaction.client;
-    const component = HelpCommandHelper.getButtons("technical");
+    const components = HelpCommandHelper.getButtons("about");
     const uptimeFormatted = time(moment().subtract(client.uptime!, "ms").toDate(), "R");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
-      .setTitle("Help: Technical")
+      .setTitle("About M'naago")
+      .setThumbnail(client.user!.displayAvatarURL())
+      .setDescription(
+        "M'naago is a Discord bot for Final Fantasy XIV that provides character profiles and " +
+          "automated Lodestone news notifications. The bot allows you to verify your character, " +
+          "view detailed character profiles with customizable themes, manage favorites, and stay " +
+          "up-to-date with the latest news, maintenances, and updates from the Lodestone.",
+      )
       .addFields([
         { name: "Ping", value: `${client.ws.ping} ms`, inline: true },
         { name: "Latest restart", value: uptimeFormatted, inline: true },
@@ -189,12 +229,14 @@ export class HelpCommandHelper {
 
     return {
       embeds: [embed],
-      components: [component],
+      components,
     };
   }
 
-  private static getButtons(currentPage: string): ActionRowBuilder<ButtonBuilder> {
-    return new ActionRowBuilder<ButtonBuilder>().addComponents(
+  private static getButtons(
+    currentPage: string,
+  ): ActionRowBuilder<ButtonBuilder>[] {
+    const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
       new ButtonBuilder()
         .setLabel("Character Profile")
         .setCustomId("help.profiles")
@@ -208,13 +250,22 @@ export class HelpCommandHelper {
         .setCustomId("help.favorites")
         .setStyle(currentPage === "favorites" ? ButtonStyle.Primary : ButtonStyle.Secondary),
       new ButtonBuilder()
+        .setLabel("Info")
+        .setCustomId("help.info")
+        .setStyle(currentPage === "info" ? ButtonStyle.Primary : ButtonStyle.Secondary),
+      new ButtonBuilder()
         .setLabel("Setup")
         .setCustomId("help.setup")
         .setStyle(currentPage === "setup" ? ButtonStyle.Primary : ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setLabel("Technical")
-        .setCustomId("help.technical")
-        .setStyle(currentPage === "technical" ? ButtonStyle.Primary : ButtonStyle.Secondary),
     );
+
+    const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+      new ButtonBuilder()
+        .setLabel("About")
+        .setCustomId("help.about")
+        .setStyle(currentPage === "about" ? ButtonStyle.Primary : ButtonStyle.Secondary),
+    );
+
+    return [row1, row2];
   }
 }
