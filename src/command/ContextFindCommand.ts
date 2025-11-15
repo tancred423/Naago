@@ -15,23 +15,13 @@ class ContextFindCommand extends Command {
 
     await interaction.deferReply();
 
-    const targetCharacterDataDtoCached = await FetchCharacterService.findVerifiedCharacterByUserId(
+    const targetCharacterDataDto = await FetchCharacterService.fetchVerifiedCharacterCachedByUserId(
+      interaction,
       interaction.targetId,
     );
 
-    if (!targetCharacterDataDtoCached) {
-      await DiscordMessageService.editReplyError(interaction, "This user does not have a verified character.");
-      return;
-    }
-
-    const targetCharacterCached = targetCharacterDataDtoCached.character;
-    const targetCharacterDataDto = await FetchCharacterService.fetchCharacterCached(
-      interaction,
-      targetCharacterCached.id,
-    );
-
     if (!targetCharacterDataDto) {
-      await DiscordMessageService.editReplyError(interaction, "Unable to fetch character. Please try again later.");
+      await DiscordMessageService.editReplyError(interaction, "This user does not have a verified character.");
       return;
     }
 

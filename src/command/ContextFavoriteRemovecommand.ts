@@ -19,7 +19,10 @@ class ContextFavoriteRemoveCommand extends Command {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.user;
-    const targetCharacterDataDto = await FetchCharacterService.findVerifiedCharacterByUserId(interaction.targetId);
+    const targetCharacterDataDto = await FetchCharacterService.fetchVerifiedCharacterCachedByUserId(
+      interaction,
+      interaction.targetId,
+    );
 
     if (!targetCharacterDataDto) {
       await DiscordMessageService.editReplyError(interaction, "This user does not have a verified character.");

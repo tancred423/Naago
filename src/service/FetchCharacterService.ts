@@ -1,4 +1,10 @@
-import { ButtonInteraction, CommandInteraction, ModalSubmitInteraction, StringSelectMenuInteraction } from "discord.js";
+import {
+  ButtonInteraction,
+  CommandInteraction,
+  ContextMenuCommandInteraction,
+  ModalSubmitInteraction,
+  StringSelectMenuInteraction,
+} from "discord.js";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
 import { Character } from "../naagostone/type/CharacterTypes.ts";
@@ -8,17 +14,17 @@ import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
 import { StringManipulationService } from "./StringManipulationService.ts";
 
 export class FetchCharacterService {
-  public static async findVerifiedCharacterByUserId(
+  public static async fetchVerifiedCharacterCachedByUserId(
+    interaction: ContextMenuCommandInteraction,
     userId: string,
   ): Promise<CharacterDataDto | null> {
     const verification = await VerificationsRepository.find(userId);
-    if (!verification) return null;
 
-    const characterData = await CharacterDataRepository.find(verification.characterId);
-    if (!characterData) return null;
+    if (!verification) {
+      return null;
+    }
 
-    const latestUpdate = moment(new Date(characterData.latestUpdate));
-    return new CharacterDataDto(latestUpdate, JSON.parse(characterData.jsonString) as Character);
+    return this.fetchCharacterCached(interaction, verification.characterId);
   }
 
   public static async fetchCharacterCached(
