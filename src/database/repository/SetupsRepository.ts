@@ -17,6 +17,14 @@ export class SetupsRepository {
       .where(eq(setups.guildId, guildId));
   }
 
+  public static async getAllUniqueGuildIds(): Promise<string[]> {
+    const result = await database
+      .select({ guildId: setups.guildId })
+      .from(setups);
+    const uniqueGuildIds = Array.from(new Set(result.map((row) => row.guildId)));
+    return uniqueGuildIds;
+  }
+
   public static async getChannelId(
     guildId: string,
     type: string,

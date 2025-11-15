@@ -26,6 +26,7 @@ import { UpdateSenderService } from "./service/UpdateSenderService.ts";
 import { ButtonInteractionHandler } from "./handler/ButtonInteractionHandler.ts";
 import { ModalInteractionHandler } from "./handler/ModalInteractionHandler.ts";
 import { Command } from "./command/type/Command.ts";
+import { SetupsRepository } from "./database/repository/SetupsRepository.ts";
 
 // Env
 await load({ export: true });
@@ -125,6 +126,12 @@ client.once("clientReady", () => {
     });
     setPresence();
   });
+
+  cron.schedule("0 3 * * *", async () => {
+    await cleanupOrphanedGuilds().catch((err) => {
+      log.error(`Failed to cleanup orphaned guilds: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+  });
 });
 
 function setPresence(): void {
@@ -169,6 +176,31 @@ async function checkLodestone(): Promise<void> {
     log.info(
       `Sent ${topics} topics, ${notices} notices, ${maintenances} maintenances, ${updates} updates and ${statuses} status.`,
     );
+  }
+}
+
+async function cleanupOrphanedGuilds(): Promise<void> {
+  try {
+    const guildIdsInDatabase = await SetupsRepository.getAllUniqueGuildIds();
+    const guildIdsInClient = new Set(client.guilds.cache.map((guild) => guild.id));
+
+    let deletedCount = 0;
+    for (const guildId of guildIdsInDatabase) {
+      if (!guildIdsInClient.has(guildId)) {
+        await SetupsRepository.deleteAll(guildId);
+        deletedCount++;
+        log.info(`Cleaned up orphaned guild data for guild ${guildId}`);
+      }
+    }
+
+    if (deletedCount > 0) {
+      log.info(`Periodic cleanup: Deleted configuration data for ${deletedCount} orphaned guild(s)`);
+    }
+  } catch (err) {
+    log.error(
+      `Error during orphaned guild cleanup: ${err instanceof Error ? err.stack : String(err)}`,
+    );
+    throw err;
   }
 }
 
@@ -295,6 +327,19 @@ client.on("interactionCreate", async (interaction) => {
         });
       }
     }
+  }
+});
+
+client.on("guildDelete", async (guild) => {
+  try {
+    await SetupsRepository.deleteAll(guild.id);
+    log.info(`Deleted all configuration data for guild ${guild.id} (${guild.name})`);
+  } catch (err) {
+    log.error(
+      `Failed to delete guild configuration data for guild ${guild.id}: ${
+        err instanceof Error ? err.stack : String(err)
+      }`,
+    );
   }
 });
 
