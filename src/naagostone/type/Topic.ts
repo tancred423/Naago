@@ -9,6 +9,7 @@ export interface Topic {
   date: number;
   banner: string;
   description: TopicDescription;
+  timestamp_live_letter: number | null;
 }
 
 export interface TopicResponse {

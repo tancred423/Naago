@@ -27,6 +27,7 @@ import { ButtonInteractionHandler } from "./handler/ButtonInteractionHandler.ts"
 import { ModalInteractionHandler } from "./handler/ModalInteractionHandler.ts";
 import { Command } from "./command/type/Command.ts";
 import { SetupsRepository } from "./database/repository/SetupsRepository.ts";
+import { TopicsRepository } from "./database/repository/TopicsRepository.ts";
 
 // Env
 await load({ export: true });
@@ -112,7 +113,9 @@ client.once("clientReady", () => {
   log.info(`Connected: Discord (${client.user?.tag})`);
 
   GlobalClient.client = client;
-  setPresence();
+  setPresence().catch((err) => {
+    log.error(`Failed to set presence on start: ${err instanceof Error ? err.stack : String(err)}`);
+  });
 
   if (lodestoneCheckOnStart) {
     checkLodestone().catch((err) => {
@@ -124,7 +127,12 @@ client.once("clientReady", () => {
     await checkLodestone().catch((err) => {
       log.error(`Lodestone check failed: ${err instanceof Error ? err.stack : String(err)}`);
     });
-    setPresence();
+  });
+
+  cron.schedule("0 * * * *", async () => {
+    await setPresence().catch((err) => {
+      log.error(`Failed to update presence: ${err instanceof Error ? err.stack : String(err)}`);
+    });
   });
 
   cron.schedule("0 3 * * *", async () => {
@@ -134,13 +142,54 @@ client.once("clientReady", () => {
   });
 });
 
-function setPresence(): void {
+function buildTimeString(totalSeconds: number): string {
+  const SECONDS_IN_HOUR = 3600;
+  const SECONDS_IN_DAY = 86400;
+  const days = Math.floor(totalSeconds / SECONDS_IN_DAY);
+  const remainingSeconds = totalSeconds - days * SECONDS_IN_DAY;
+  const roundedHours = Math.round(remainingSeconds / SECONDS_IN_HOUR);
+  if (days > 0) {
+    if (roundedHours === 24) {
+      return `${days + 1} days`;
+    }
+    if (roundedHours > 0) {
+      return `${days}d, ${roundedHours}h`;
+    }
+    return `${days} ${days === 1 ? "day" : "days"}`;
+  }
+  if (roundedHours === 24) {
+    return "1 day";
+  }
+  if (roundedHours >= 2) {
+    return `${roundedHours} ${roundedHours === 1 ? "hour" : "hours"}`;
+  }
+  return "< 1 hour";
+}
+
+async function setPresence(): Promise<void> {
   try {
+    const newestLiveLetterTimestamp = await TopicsRepository.getNewestLiveLetterTimestamp();
+    let presenceState = "🔗 naago.tancred.de";
+
+    if (newestLiveLetterTimestamp) {
+      const now = Date.now();
+      const timestampMs = newestLiveLetterTimestamp.getTime();
+      const diffMs = timestampMs - now;
+      const diffSeconds = Math.floor(diffMs / 1000);
+      const twoHoursInMs = 2 * 60 * 60 * 1000;
+
+      if (diffMs > 0) {
+        presenceState = `Live Letter in ${buildTimeString(diffSeconds)}`;
+      } else if (diffMs >= -twoHoursInMs) {
+        presenceState = "Live Letter is currently live!";
+      }
+    }
+
     client.user?.setPresence({
       activities: [{
         name: "naago.tancred.de",
         type: ActivityType.Custom,
-        state: "🔗 naago.tancred.de",
+        state: presenceState,
       }],
       status: "online",
     });

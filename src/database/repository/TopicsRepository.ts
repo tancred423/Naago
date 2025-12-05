@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { TopicData, topicData } from "../schema/lodestone-news.ts";
 import moment from "moment-timezone";
@@ -35,6 +35,10 @@ export class TopicsRepository {
       throw new AlreadyInDatabaseError("This topic is already in the database");
     }
 
+    const timestampLiveLetterSQL = topic.timestamp_live_letter
+      ? new Date(topic.timestamp_live_letter)
+      : null;
+
     await database
       .insert(topicData)
       .values({
@@ -43,6 +47,18 @@ export class TopicsRepository {
         date: dateSQL,
         banner: topic.banner,
         description: topic.description.markdown,
+        timestampLiveLetter: timestampLiveLetterSQL,
       });
+  }
+
+  public static async getNewestLiveLetterTimestamp(): Promise<Date | null> {
+    const result = await database
+      .select({ timestampLiveLetter: topicData.timestampLiveLetter })
+      .from(topicData)
+      .where(isNotNull(topicData.timestampLiveLetter))
+      .orderBy(desc(topicData.timestampLiveLetter))
+      .limit(1);
+
+    return result[0]?.timestampLiveLetter ?? null;
   }
 }

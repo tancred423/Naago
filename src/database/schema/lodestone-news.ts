@@ -7,6 +7,7 @@ export const topicData = mysqlTable("topic_data", {
   date: timestamp("date").notNull(),
   banner: text("banner").notNull(),
   description: text("description").notNull(),
+  timestampLiveLetter: timestamp("timestamp_live_letter"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 }, (table) => ({

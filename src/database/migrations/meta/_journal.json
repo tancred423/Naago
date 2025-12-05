@@ -15,6 +15,13 @@
       "when": 1763212602975,
       "tag": "0001_remove_favorites_character_name_server",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1733407200000,
+      "tag": "0002_add_topic_timestamp_live_letter",
+      "breakpoints": true
     }
   ]
 }
