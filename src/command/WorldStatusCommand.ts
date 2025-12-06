@@ -8,7 +8,7 @@ import * as log from "@std/log";
 class WorldStatusCommand extends Command {
   public readonly data = new SlashCommandBuilder()
     .setName("worldstatus")
-    .setDescription("Shows server status, characte creation status and server congestion.");
+    .setDescription("Shows server status, character creation status and server congestion.");
 
   public async execute(interaction: ChatInputCommandInteraction): Promise<void> {
     try {

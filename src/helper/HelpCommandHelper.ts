@@ -168,7 +168,7 @@ export class HelpCommandHelper {
         },
         {
           name: "/worldstatus",
-          value: "- Shows server status, characte creation status and server congestion.",
+          value: "- Shows server status, character creation status and server congestion.",
           inline: false,
         },
       ]);
