@@ -51,11 +51,11 @@ class SetupCommand extends Command {
     const setups = await SetupsRepository.getAllByGuildId(guildId);
     const setupMap = Object.fromEntries(setups.map((setup) => [setup.type, setup]));
     const {
-      topic: currentTopicChannel,
-      notice: currentNoticeChannel,
-      maintenance: currentMaintenanceChannel,
-      update: currentUpdateChannel,
-      status: currentStatusChannel,
+      topics: currentTopicChannel,
+      notices: currentNoticeChannel,
+      maintenances: currentMaintenanceChannel,
+      updates: currentUpdateChannel,
+      statuses: currentStatusChannel,
     } = setupMap;
 
     const topicChannelMenu = new ChannelSelectMenuBuilder()
