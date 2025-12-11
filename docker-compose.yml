@@ -16,16 +16,7 @@ services:
       - mysql_data_dev:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: [
-        "CMD",
-        "mysqladmin",
-        "ping",
-        "-h",
-        "localhost",
-        "-u",
-        "root",
-        "-p${DB_ROOT_PASSWORD}",
-      ]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -55,7 +46,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: naago-app-dev
     restart: unless-stopped
     depends_on:
@@ -68,22 +59,19 @@ services:
     ]
     volumes:
       - ./src:/app/src
+      - ./deno.json:/app/deno.json
+      - ./deno.lock:/app/deno.lock
     env_file:
       - .env
     environment:
       IS_PROD: false
+    ports:
+      - "3000:3000"
     networks:
       - naago-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
 volumes:
   mysql_data_dev:
-    driver: local
 
 networks:
   naago-network:
-    driver: bridge
