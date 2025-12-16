@@ -53,9 +53,9 @@ export class ProfileCommandHandler {
       ProfilePagesRepository.set(userId, actualProfilePage, subProfilePage);
     }
 
-    const embeds = characterDataDto.isCachedDueToUnavailability
-      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
-      : [];
+    const cachedHint = characterDataDto.isCachedDueToUnavailability
+      ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"
+      : "";
 
     if (actualProfilePage === "portrait") {
       const response = await fetch(character.portrait);
@@ -70,9 +70,9 @@ export class ProfileCommandHandler {
       );
 
       await interaction.editReply({
-        content: `${character.name}🌸${character.server.world}`,
+        content: `${character.name}🌸${character.server.world}${cachedHint}`,
         files: [file],
-        embeds,
+        embeds: [],
         attachments: [],
         components: components,
       });
@@ -88,9 +88,9 @@ export class ProfileCommandHandler {
     const components = ProfileGeneratorService.getComponents(actualProfilePage, subProfilePage, "profile", characterId);
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
+      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
       files: [file],
-      embeds,
+      embeds: [],
       attachments: [],
       components: components,
     });
@@ -135,14 +135,14 @@ export class ProfileCommandHandler {
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", null, "profile", characterId);
 
-    const embeds = characterDataDto.isCachedDueToUnavailability
-      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
-      : [];
+    const cachedHint = characterDataDto.isCachedDueToUnavailability
+      ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"
+      : "";
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
+      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
       files: [file],
-      embeds,
+      embeds: [],
       attachments: [],
       components: components,
     });

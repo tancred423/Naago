@@ -124,9 +124,9 @@ class ProfileCommand extends Command {
       throw new Error("[/profile me] profilePage is undefined");
     }
 
-    const embeds = characterDataDto.isCachedDueToUnavailability
-      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
-      : [];
+    const cachedHint = characterDataDto.isCachedDueToUnavailability
+      ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"
+      : "";
 
     if (profilePage === "portrait") {
       const response = await fetch(character.portrait);
@@ -136,9 +136,9 @@ class ProfileCommand extends Command {
       const components = ProfileGeneratorService.getComponents(profilePage, subProfilePage, "profile", characterId);
 
       await interaction.editReply({
-        content: `${character.name}🌸${character.server.world}`,
+        content: `${character.name}🌸${character.server.world}${cachedHint}`,
         files: [file],
-        embeds,
+        embeds: [],
         attachments: [],
         components: components,
       });
@@ -152,9 +152,9 @@ class ProfileCommand extends Command {
       const components = ProfileGeneratorService.getComponents(profilePage, subProfilePage, "profile", characterId);
 
       await interaction.editReply({
-        content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
+        content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
         files: [file],
-        embeds,
+        embeds: [],
         attachments: [],
         components: components,
       });
@@ -178,7 +178,8 @@ class ProfileCommand extends Command {
       characterIds = await NaagostoneApiService.fetchCharacterIdsByName(name, server);
     } catch (error: unknown) {
       if (error instanceof LodestoneServiceUnavailableError) {
-        await DiscordMessageService.deleteAndFollowUpEphemeralError(interaction, error.message);
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
         return;
       }
       throw error;
@@ -207,7 +208,8 @@ class ProfileCommand extends Command {
       characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
     } catch (error: unknown) {
       if (error instanceof LodestoneServiceUnavailableError) {
-        await DiscordMessageService.deleteAndFollowUpEphemeralError(interaction, error.message);
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
         return;
       }
       throw error;
@@ -231,14 +233,14 @@ class ProfileCommand extends Command {
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", null, "profile", characterId);
 
-    const embeds = characterDataDto.isCachedDueToUnavailability
-      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
-      : [];
+    const cachedHint = characterDataDto.isCachedDueToUnavailability
+      ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"
+      : "";
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
+      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
       files: [file],
-      embeds,
+      embeds: [],
       attachments: [],
       components: components,
     });
