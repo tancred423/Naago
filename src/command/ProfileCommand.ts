@@ -124,6 +124,10 @@ class ProfileCommand extends Command {
       throw new Error("[/profile me] profilePage is undefined");
     }
 
+    const embeds = characterDataDto.isCachedDueToUnavailability
+      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
+      : [];
+
     if (profilePage === "portrait") {
       const response = await fetch(character.portrait);
       const arrayBuffer = await response.arrayBuffer();
@@ -134,7 +138,7 @@ class ProfileCommand extends Command {
       await interaction.editReply({
         content: `${character.name}🌸${character.server.world}`,
         files: [file],
-        embeds: [],
+        embeds,
         attachments: [],
         components: components,
       });
@@ -150,7 +154,7 @@ class ProfileCommand extends Command {
       await interaction.editReply({
         content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
         files: [file],
-        embeds: [],
+        embeds,
         attachments: [],
         components: components,
       });
@@ -227,10 +231,14 @@ class ProfileCommand extends Command {
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", null, "profile", characterId);
 
+    const embeds = characterDataDto.isCachedDueToUnavailability
+      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
+      : [];
+
     await interaction.editReply({
       content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
       files: [file],
-      embeds: [],
+      embeds,
       attachments: [],
       components: components,
     });

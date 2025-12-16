@@ -4,6 +4,7 @@ import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { Command } from "./type/Command.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
+import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 
 class ContextFindCommand extends Command {
@@ -49,10 +50,14 @@ class ContextFindCommand extends Command {
     const components = ProfileGeneratorService.getComponents("profile", null, "profile", targetCharacter?.id);
     const unix = targetCharacterDataDto.latestUpdate.unix();
 
+    const embeds = targetCharacterDataDto.isCachedDueToUnavailability
+      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
+      : [];
+
     await interaction.editReply({
       content: `Latest Update: <t:${unix}:R>`,
       files: [file],
-      embeds: [],
+      embeds,
       attachments: [],
       components: components,
     });

@@ -6,6 +6,7 @@ import { ProfilePagesRepository } from "../database/repository/ProfilePagesRepos
 import { Buffer } from "node:buffer";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { ProfilePageButton, SubProfilePageButton } from "./type/ProfilePageButtonTypes.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 
 export class ProfileCommandHandler {
   public static async handlePageSwapButton(interaction: ButtonInteraction, buttonIdSplit: string[]): Promise<void> {
@@ -18,7 +19,18 @@ export class ProfileCommandHandler {
     const userId = interaction.user.id;
     const verification = await VerificationsRepository.find(userId);
     const isMe = (verification?.isVerified ?? false) && verification?.characterId === characterId;
-    const characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+
+    let characterDataDto;
+    try {
+      characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        return;
+      }
+      throw error;
+    }
 
     if (!characterDataDto) {
       const embed = DiscordEmbedService.getErrorEmbed(`Could not fetch this character.\nPlease try again later.`);
@@ -41,6 +53,10 @@ export class ProfileCommandHandler {
       ProfilePagesRepository.set(userId, actualProfilePage, subProfilePage);
     }
 
+    const embeds = characterDataDto.isCachedDueToUnavailability
+      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
+      : [];
+
     if (actualProfilePage === "portrait") {
       const response = await fetch(character.portrait);
       const arrayBuffer = await response.arrayBuffer();
@@ -56,7 +72,7 @@ export class ProfileCommandHandler {
       await interaction.editReply({
         content: `${character.name}🌸${character.server.world}`,
         files: [file],
-        embeds: [],
+        embeds,
         attachments: [],
         components: components,
       });
@@ -74,7 +90,7 @@ export class ProfileCommandHandler {
     await interaction.editReply({
       content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
       files: [file],
-      embeds: [],
+      embeds,
       attachments: [],
       components: components,
     });
@@ -91,7 +107,17 @@ export class ProfileCommandHandler {
     await interaction.deferReply();
 
     const characterId = parseInt(stringSelectValue[0]);
-    const characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    let characterDataDto;
+    try {
+      characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+      throw error;
+    }
 
     if (!characterDataDto) {
       const embed = DiscordEmbedService.getErrorEmbed(`Could not fetch your character.\nPlease try again later.`);
@@ -109,10 +135,14 @@ export class ProfileCommandHandler {
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", null, "profile", characterId);
 
+    const embeds = characterDataDto.isCachedDueToUnavailability
+      ? [DiscordEmbedService.getErrorEmbed("Lodestone is currently unavailable. Showing cached data.")]
+      : [];
+
     await interaction.editReply({
       content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>`,
       files: [file],
-      embeds: [],
+      embeds,
       attachments: [],
       components: components,
     });

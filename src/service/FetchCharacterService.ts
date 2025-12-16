@@ -79,6 +79,7 @@ export class FetchCharacterService {
           return new CharacterDataDto(
             moment(new Date(cachedData.latestUpdate)),
             JSON.parse(cachedData.jsonString) as Character,
+            true,
           );
         }
         log.error(`[CHARACTER] No cached data available for character ${characterId}`);
