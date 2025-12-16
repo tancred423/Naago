@@ -9,7 +9,6 @@ import { Setup } from "../database/schema/setups.ts";
 import { TopicData } from "../database/schema/lodestone-news.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
-import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
 const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
@@ -20,9 +19,7 @@ export class TopicSenderService {
     try {
       latestTopics = await NaagostoneApiService.fetchLatest10Topics();
     } catch (error: unknown) {
-      if (error instanceof LodestoneServiceUnavailableError) {
-        log.error(`[TOPICS] Lodestone service is unavailable: ${error.message}`);
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         log.error(`[TOPICS] Fetching latest topics was NOT successful: ${error.message}`);
       }
       return 0;

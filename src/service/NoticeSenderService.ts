@@ -8,7 +8,6 @@ import { GlobalClient } from "../index.ts";
 import { Setup } from "../database/schema/setups.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
-import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 import * as log from "@std/log";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
@@ -20,9 +19,7 @@ export class NoticeSenderService {
     try {
       latestNotices = await NaagostoneApiService.fetchLatest10Notices();
     } catch (error: unknown) {
-      if (error instanceof LodestoneServiceUnavailableError) {
-        log.error(`[NOTICES] Lodestone service is unavailable: ${error.message}`);
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         log.error(`[NOTICES] Fetching latest notices was NOT successful: ${error.message}`);
       }
       return 0;
