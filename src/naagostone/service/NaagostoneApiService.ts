@@ -1,5 +1,6 @@
 import { Character, CharacterResponse } from "../type/CharacterTypes.ts";
 import { ApiRequestFailedError } from "../error/ApiRequestFailedError.ts";
+import { WorldStatusUnavailableError } from "../error/WorldStatusUnavailableError.ts";
 import { CharacterSearchResponse } from "../type/CharacterSearchTypes.ts";
 import { Maintenance, MaintenanceResponse } from "../type/Maintenance.ts";
 import { Notice, NoticeResponse } from "../type/Notice.ts";
@@ -103,7 +104,12 @@ export class NaagostoneApiService {
       throw new ApiRequestFailedError(`Failed to fetch world status: ${response.statusText}`);
     }
 
-    const data = await response.json() as WorldStatusResponse;
+    const data = await response.json() as WorldStatusResponse & { error?: string };
+
+    if (data.error) {
+      throw new WorldStatusUnavailableError();
+    }
+
     return data?.worldStatus ?? [];
   }
 }

@@ -7,6 +7,8 @@ import { FavoriteCommandHelper } from "../helper/FavoriteCommandHelper.ts";
 import { ProfileCommandHandler } from "../helper/ProfileCommandHelper.ts";
 import { VerifyCommandHelper } from "../helper/VerifyCommandHelper.ts";
 import { WorldStatusCommandHelper } from "../helper/WorldStatusCommandHelper.ts";
+import { WorldStatusUnavailableError } from "../naagostone/error/WorldStatusUnavailableError.ts";
+import * as log from "@std/log";
 
 export class ButtonInteractionHandler {
   private static cooldown: string[] = [];
@@ -64,7 +66,16 @@ export class ButtonInteractionHandler {
         break;
       case "worldstatus":
         await interaction.deferUpdate();
-        await WorldStatusCommandHelper.handlePageSwapButton(interaction, buttonIdSplit);
+        try {
+          await WorldStatusCommandHelper.handlePageSwapButton(interaction, buttonIdSplit);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof WorldStatusUnavailableError
+            ? error.message
+            : "Failed to fetch world status. Please try again later.";
+          const embed = DiscordEmbedService.getErrorEmbed(errorMessage);
+          await interaction.editReply({ content: "", embeds: [embed], components: [] });
+          log.error(`Failed to fetch world status: ${error instanceof Error ? error.stack : String(error)}`);
+        }
         break;
       default:
         throw new Error(

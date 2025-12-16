@@ -3,6 +3,7 @@ import { Command } from "./type/Command.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
 import { WorldStatusCommandHelper } from "../helper/WorldStatusCommandHelper.ts";
+import { WorldStatusUnavailableError } from "../naagostone/error/WorldStatusUnavailableError.ts";
 import * as log from "@std/log";
 
 class WorldStatusCommand extends Command {
@@ -23,11 +24,14 @@ class WorldStatusCommand extends Command {
         await interaction.editReply(message);
       }
     } catch (error: unknown) {
-      const embed = DiscordEmbedService.getErrorEmbed("Failed to fetch world status. Please try again later.");
+      const errorMessage = error instanceof WorldStatusUnavailableError
+        ? error.message
+        : "Failed to fetch world status. Please try again later.";
+      const embed = DiscordEmbedService.getErrorEmbed(errorMessage);
       if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.editReply({ content: "", embeds: [embed] });
       } else {
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ content: "", embeds: [embed] });
       }
       log.error(`Failed to fetch world status: ${error instanceof Error ? error.stack : String(error)}`);
     }
