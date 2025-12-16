@@ -22,6 +22,7 @@ import { StringManipulationService } from "../service/StringManipulationService.
 import { Command } from "./type/Command.ts";
 import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 
 class ProfileCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -86,7 +87,18 @@ class ProfileCommand extends Command {
     await interaction.deferReply();
 
     const characterId = verification.characterId;
-    const characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    let characterDataDto;
+    try {
+      characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.deleteReply();
+        await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
+        return;
+      }
+      throw error;
+    }
 
     if (!characterDataDto) {
       const embed = DiscordEmbedService.getErrorEmbed(`Could not fetch your character.\nPlease try again later.`);
@@ -157,7 +169,16 @@ class ProfileCommand extends Command {
 
     await interaction.deferReply();
 
-    const characterIds = await NaagostoneApiService.fetchCharacterIdsByName(name, server);
+    let characterIds: number[];
+    try {
+      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(name, server);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        await DiscordMessageService.deleteAndFollowUpEphemeralError(interaction, error.message);
+        return;
+      }
+      throw error;
+    }
 
     if (characterIds.length > 1) {
       await DiscordMessageService.deleteAndFollowUpEphemeralError(
@@ -177,7 +198,16 @@ class ProfileCommand extends Command {
     }
 
     const characterId = characterIds[0];
-    const characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    let characterDataDto;
+    try {
+      characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        await DiscordMessageService.deleteAndFollowUpEphemeralError(interaction, error.message);
+        return;
+      }
+      throw error;
+    }
 
     if (!characterDataDto) {
       await DiscordMessageService.deleteAndFollowUpEphemeralError(

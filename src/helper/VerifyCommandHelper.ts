@@ -4,6 +4,8 @@ import { PurgeUserDataService } from "../service/PurgeUserDataService.ts";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { Character } from "../naagostone/type/CharacterTypes.ts";
 import * as log from "@std/log";
 
 export class VerifyCommandHelper {
@@ -63,7 +65,17 @@ export class VerifyCommandHelper {
       return;
     }
 
-    const character = await NaagostoneApiService.fetchCharacterById(characterId);
+    let character: Character | null;
+    try {
+      character = await NaagostoneApiService.fetchCharacterById(characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+      throw error;
+    }
 
     if (!character) {
       const embed = DiscordEmbedService.getErrorEmbed(`Could not fetch your character.\nPlease try again later.`);

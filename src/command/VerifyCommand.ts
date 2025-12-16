@@ -14,6 +14,7 @@ import { Command } from "./type/Command.ts";
 import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
 import { Verification } from "../database/schema/verifications.ts";
 import { Character } from "../naagostone/type/CharacterTypes.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 import * as log from "@std/log";
 
 class VerifyCommand extends Command {
@@ -69,7 +70,17 @@ class VerifyCommand extends Command {
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const characterIds = await NaagostoneApiService.fetchCharacterIdsByName(name, server);
+    let characterIds: number[];
+    try {
+      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(name, server);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+      throw error;
+    }
 
     if (characterIds.length > 1) {
       const embed = DiscordEmbedService.getErrorEmbed(
@@ -87,7 +98,17 @@ class VerifyCommand extends Command {
     }
 
     const characterId = characterIds[0];
-    const character = await NaagostoneApiService.fetchCharacterById(characterId);
+    let character: Character | null;
+    try {
+      character = await NaagostoneApiService.fetchCharacterById(characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+      throw error;
+    }
 
     if (!character) {
       const embed = DiscordEmbedService.getErrorEmbed(`:x: Character could not be retrieved.\nPlease try again later.`);
@@ -108,7 +129,17 @@ class VerifyCommand extends Command {
     character: Character,
     verification: Verification,
   ): Promise<void> {
-    const verifiedCharacter = await NaagostoneApiService.fetchCharacterById(verification.characterId);
+    let verifiedCharacter: Character | null;
+    try {
+      verifiedCharacter = await NaagostoneApiService.fetchCharacterById(verification.characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+      throw error;
+    }
 
     if (!verifiedCharacter) {
       const embed = DiscordEmbedService.getSuccessEmbed(`Could not fetch character. Please try again later.`);

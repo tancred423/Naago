@@ -9,6 +9,7 @@ import { NotInDatabaseError } from "../database/error/NotInDatabaseError.ts";
 import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { Command } from "./type/Command.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 
 class ContextFavoriteRemoveCommand extends Command {
   public readonly data = new ContextMenuCommandBuilder()
@@ -19,10 +20,19 @@ class ContextFavoriteRemoveCommand extends Command {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.user;
-    const targetCharacterDataDto = await FetchCharacterService.fetchVerifiedCharacterCachedByUserId(
-      interaction,
-      interaction.targetId,
-    );
+    let targetCharacterDataDto;
+    try {
+      targetCharacterDataDto = await FetchCharacterService.fetchVerifiedCharacterCachedByUserId(
+        interaction,
+        interaction.targetId,
+      );
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        await DiscordMessageService.editReplyError(interaction, error.message);
+        return;
+      }
+      throw error;
+    }
 
     if (!targetCharacterDataDto) {
       await DiscordMessageService.editReplyError(interaction, "This user does not have a verified character.");

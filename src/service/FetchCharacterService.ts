@@ -12,6 +12,8 @@ import moment from "moment";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
 import { StringManipulationService } from "./StringManipulationService.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import * as log from "@std/log";
 
 export class FetchCharacterService {
   public static async fetchVerifiedCharacterCachedByUserId(
@@ -59,12 +61,30 @@ export class FetchCharacterService {
   ): Promise<CharacterDataDto | null> {
     await this.prepareInteraction(interaction);
 
-    const character = await NaagostoneApiService.fetchCharacterById(characterId);
-    if (!character) return null;
+    try {
+      const character = await NaagostoneApiService.fetchCharacterById(characterId);
+      if (!character) return null;
 
-    await CharacterDataRepository.set(character);
+      await CharacterDataRepository.set(character);
 
-    return new CharacterDataDto(moment(), character);
+      return new CharacterDataDto(moment(), character);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        log.warn(
+          `[CHARACTER] Lodestone service unavailable, attempting to use cached data for character ${characterId}`,
+        );
+        const cachedData = await CharacterDataRepository.find(characterId);
+        if (cachedData) {
+          log.info(`[CHARACTER] Using cached data for character ${characterId}`);
+          return new CharacterDataDto(
+            moment(new Date(cachedData.latestUpdate)),
+            JSON.parse(cachedData.jsonString) as Character,
+          );
+        }
+        log.error(`[CHARACTER] No cached data available for character ${characterId}`);
+      }
+      throw error;
+    }
   }
 
   private static async prepareInteraction(

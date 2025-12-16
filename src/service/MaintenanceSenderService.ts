@@ -8,6 +8,7 @@ import { GlobalClient } from "../index.ts";
 import { Setup } from "../database/schema/setups.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 import * as log from "@std/log";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
@@ -15,7 +16,17 @@ const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
 
 export class MaintenanceSenderService {
   public static async checkForNew(): Promise<number> {
-    const latestMaintenances = await NaagostoneApiService.fetchLatest10Maintenances();
+    let latestMaintenances: Maintenance[];
+    try {
+      latestMaintenances = await NaagostoneApiService.fetchLatest10Maintenances();
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        log.error(`[MAINTENANCES] Lodestone service is unavailable: ${error.message}`);
+      } else if (error instanceof Error) {
+        log.error(`[MAINTENANCES] Fetching latest maintenances was NOT successful: ${error.message}`);
+      }
+      return 0;
+    }
     const newMaintenances: Maintenance[] = [];
 
     for (const maintenance of latestMaintenances) {

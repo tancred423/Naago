@@ -1,6 +1,7 @@
 import { Character, CharacterResponse } from "../type/CharacterTypes.ts";
 import { ApiRequestFailedError } from "../error/ApiRequestFailedError.ts";
 import { WorldStatusUnavailableError } from "../error/WorldStatusUnavailableError.ts";
+import { LodestoneServiceUnavailableError } from "../error/LodestoneServiceUnavailableError.ts";
 import { CharacterSearchResponse } from "../type/CharacterSearchTypes.ts";
 import { Maintenance, MaintenanceResponse } from "../type/Maintenance.ts";
 import { Notice, NoticeResponse } from "../type/Notice.ts";
@@ -22,6 +23,10 @@ export class NaagostoneApiService {
       `http://${naagostoneHost}:${naagostonePort}/character/search?name=${nameEncoded}&worldname=${server}`,
     );
 
+    if (response.status === 503) {
+      throw new LodestoneServiceUnavailableError();
+    }
+
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to get character ids by name: ${response.statusText}`);
     }
@@ -32,6 +37,10 @@ export class NaagostoneApiService {
 
   public static async fetchCharacterById(id: number): Promise<Character | null> {
     const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/character/${id}`);
+
+    if (response.status === 503) {
+      throw new LodestoneServiceUnavailableError();
+    }
 
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to get character by id: ${response.statusText}`);
@@ -44,6 +53,10 @@ export class NaagostoneApiService {
   public static async fetchLatest10Topics(): Promise<Topic[]> {
     const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/topics`);
 
+    if (response.status === 503) {
+      throw new LodestoneServiceUnavailableError();
+    }
+
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to fetch latest 10 topics: ${response.statusText}`);
     }
@@ -54,6 +67,10 @@ export class NaagostoneApiService {
 
   public static async fetchLatest10Notices(): Promise<Notice[]> {
     const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/notices`);
+
+    if (response.status === 503) {
+      throw new LodestoneServiceUnavailableError();
+    }
 
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to fetch latest 10 notices: ${response.statusText}`);
@@ -66,6 +83,10 @@ export class NaagostoneApiService {
   public static async fetchLatest10Maintenances(): Promise<Maintenance[]> {
     const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/maintenances`);
 
+    if (response.status === 503) {
+      throw new LodestoneServiceUnavailableError();
+    }
+
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to fetch latest 10 maintenances: ${response.statusText}`);
     }
@@ -77,6 +98,10 @@ export class NaagostoneApiService {
   public static async fetchLatest10Updates(): Promise<Update[]> {
     const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/updates`);
 
+    if (response.status === 503) {
+      throw new LodestoneServiceUnavailableError();
+    }
+
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to fetch latest 10 updates: ${response.statusText}`);
     }
@@ -87,6 +112,10 @@ export class NaagostoneApiService {
 
   public static async fetchLatest10Statuses(): Promise<Status[]> {
     const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/statuses`);
+
+    if (response.status === 503) {
+      throw new LodestoneServiceUnavailableError();
+    }
 
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to fetch latest 10 statuses: ${response.statusText}`);
@@ -100,16 +129,15 @@ export class NaagostoneApiService {
     const url = `http://${naagostoneHost}:${naagostonePort}/lodestone/worldstatus`;
     const response = await fetch(url);
 
+    if (response.status === 503) {
+      throw new WorldStatusUnavailableError();
+    }
+
     if (!response.ok) {
       throw new ApiRequestFailedError(`Failed to fetch world status: ${response.statusText}`);
     }
 
-    const data = await response.json() as WorldStatusResponse & { error?: string };
-
-    if (data.error) {
-      throw new WorldStatusUnavailableError();
-    }
-
+    const data = await response.json() as WorldStatusResponse;
     return data?.worldStatus ?? [];
   }
 }

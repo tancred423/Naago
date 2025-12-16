@@ -21,6 +21,7 @@ import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
 import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
 import { Character } from "../naagostone/type/CharacterTypes.ts";
 import { AlreadyInDatabaseError } from "../database/error/AlreadyInDatabaseError.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 
 class FavoriteCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -85,7 +86,17 @@ class FavoriteCommand extends Command {
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-    const characterIds = await NaagostoneApiService.fetchCharacterIdsByName(targetName, targetServer);
+    let characterIds: number[];
+    try {
+      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(targetName, targetServer);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+      throw error;
+    }
 
     if (characterIds.length > 1) {
       const embed = DiscordEmbedService.getErrorEmbed(
@@ -105,7 +116,17 @@ class FavoriteCommand extends Command {
     }
 
     const characterId = characterIds[0];
-    const characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    let characterDataDto;
+    try {
+      characterDataDto = await FetchCharacterService.fetchCharacterCached(interaction, characterId);
+    } catch (error: unknown) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        const embed = DiscordEmbedService.getErrorEmbed(error.message);
+        await interaction.editReply({ embeds: [embed] });
+        return;
+      }
+      throw error;
+    }
 
     if (!characterDataDto) {
       const embed = DiscordEmbedService.getErrorEmbed(`Could not fetch the character.\nPlease try again later.`);
