@@ -8,6 +8,7 @@ import { GlobalClient } from "../index.ts";
 import { Setup } from "../database/schema/setups.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
+import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
 import * as log from "@std/log";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
@@ -69,5 +70,13 @@ export class MaintenanceSenderService {
         continue;
       }
     }
+
+    await BetaComponentsV2Service.sendToBetaChannel("maintenances", {
+      title: maintenance.title,
+      link: maintenance.link,
+      date: maintenance.date,
+      tag: maintenance.tag,
+      description: maintenance.description,
+    });
   }
 }

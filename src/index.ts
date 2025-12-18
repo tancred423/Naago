@@ -283,7 +283,7 @@ client.on("interactionCreate", async (interaction) => {
     if (!command) {
       log.error(`Command not found: ${interaction.commandName}`);
       const embed = DiscordEmbedService.getErrorEmbed(
-        `Command '${interaction.commandName}' not found. Try redeploying commands.`,
+        `Command '${interaction.commandName}' not found. Please try again later.`,
       );
       await interaction.reply({
         embeds: [embed],
@@ -367,7 +367,7 @@ client.on("interactionCreate", async (interaction) => {
     if (!command) {
       log.error(`Command not found: ${interaction.commandName}`);
       const embed = DiscordEmbedService.getErrorEmbed(
-        `Command '${interaction.commandName}' not found. Try redeploying commands.`,
+        `Command '${interaction.commandName}' not found. Please try again later.`,
       );
       await interaction.reply({
         embeds: [embed],

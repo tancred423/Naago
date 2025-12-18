@@ -1,6 +1,9 @@
+import { DiscordComponentsV2 } from "./DiscordComponentsV2.ts";
+
 export interface TopicDescription {
   html: string;
   markdown: string;
+  discord_components_v2?: DiscordComponentsV2;
 }
 
 export interface Topic {

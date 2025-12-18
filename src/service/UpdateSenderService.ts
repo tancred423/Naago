@@ -7,6 +7,8 @@ import { GlobalClient } from "../index.ts";
 import { Setup } from "../database/schema/setups.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
 import * as log from "@std/log";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
@@ -18,7 +20,9 @@ export class UpdateSenderService {
     try {
       latestUpdates = await NaagostoneApiService.fetchLatest10Updates();
     } catch (error: unknown) {
-      if (error instanceof Error) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        log.error(`[UPDATES] Lodestone service is unavailable: ${error.message}`);
+      } else if (error instanceof Error) {
         log.error(`[UPDATES] Fetching latest updates was NOT successful: ${error.message}`);
       }
       return 0;
@@ -65,5 +69,12 @@ export class UpdateSenderService {
         continue;
       }
     }
+
+    await BetaComponentsV2Service.sendToBetaChannel("updates", {
+      title: update.title,
+      link: update.link,
+      date: update.date,
+      description: update.description,
+    });
   }
 }

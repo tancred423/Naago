@@ -9,6 +9,8 @@ import { Setup } from "../database/schema/setups.ts";
 import { TopicData } from "../database/schema/lodestone-news.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
 const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
@@ -19,7 +21,9 @@ export class TopicSenderService {
     try {
       latestTopics = await NaagostoneApiService.fetchLatest10Topics();
     } catch (error: unknown) {
-      if (error instanceof Error) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        log.error(`[TOPICS] Lodestone service is unavailable: ${error.message}`);
+      } else if (error instanceof Error) {
         log.error(`[TOPICS] Fetching latest topics was NOT successful: ${error.message}`);
       }
       return 0;
@@ -66,6 +70,14 @@ export class TopicSenderService {
         continue;
       }
     }
+
+    await BetaComponentsV2Service.sendToBetaChannel("topics", {
+      title: topic.title,
+      link: topic.link,
+      date: topic.date,
+      banner: topic.banner,
+      description: topic.description,
+    });
   }
 
   public static async sendLiveLetterStartedAnnouncement(topic: TopicData): Promise<void> {

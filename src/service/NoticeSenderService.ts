@@ -8,6 +8,8 @@ import { GlobalClient } from "../index.ts";
 import { Setup } from "../database/schema/setups.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
+import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
 import * as log from "@std/log";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
@@ -19,7 +21,9 @@ export class NoticeSenderService {
     try {
       latestNotices = await NaagostoneApiService.fetchLatest10Notices();
     } catch (error: unknown) {
-      if (error instanceof Error) {
+      if (error instanceof LodestoneServiceUnavailableError) {
+        log.error(`[NOTICES] Lodestone service is unavailable: ${error.message}`);
+      } else if (error instanceof Error) {
         log.error(`[NOTICES] Fetching latest notices was NOT successful: ${error.message}`);
       }
       return 0;
@@ -67,5 +71,13 @@ export class NoticeSenderService {
         continue;
       }
     }
+
+    await BetaComponentsV2Service.sendToBetaChannel("notices", {
+      title: notice.title,
+      link: notice.link,
+      date: notice.date,
+      tag: notice.tag,
+      description: notice.description,
+    });
   }
 }
