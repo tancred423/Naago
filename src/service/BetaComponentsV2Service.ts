@@ -1,14 +1,14 @@
 import { ContainerBuilder, MediaGalleryBuilder, MessageFlags, TextChannel, time, TimestampStyles } from "discord.js";
 import { DiscordComponentsV2 } from "../naagostone/type/DiscordComponentsV2.ts";
+import { NewsType } from "../database/schema/lodestone-news.ts";
+import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
 import { GlobalClient } from "../index.ts";
 import * as log from "@std/log";
 
 const MAX_TOTAL_CHARACTERS = 4000;
 const MAX_TOTAL_COMPONENTS = 40;
 
-type NewsType = "topics" | "notices" | "maintenances" | "updates" | "statuses";
-
-interface NewsData {
+export interface NewsData {
   title: string;
   link: string;
   date: number;
@@ -87,7 +87,7 @@ function getNewsEmojiEnvKey(type: NewsType): string {
 }
 
 export class BetaComponentsV2Service {
-  public static async sendToBetaChannel(newsType: NewsType, data: NewsData): Promise<void> {
+  public static async sendToBetaChannel(newsType: NewsType, data: NewsData, newsId?: number): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
 
@@ -107,15 +107,30 @@ export class BetaComponentsV2Service {
       const container = this.buildContainer(newsType, data);
       if (!container) return;
 
-      await (channel as TextChannel).send({
+      const message = await (channel as TextChannel).send({
         components: [container],
         flags: MessageFlags.IsComponentsV2,
       });
+
+      if (newsId !== undefined) {
+        await PostedNewsMessagesRepository.add(
+          newsType,
+          newsId,
+          betaGuildId,
+          betaChannelId,
+          message.id,
+          true,
+        );
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         log.error(`[BETA V2] Sending ${newsType} to beta channel was NOT successful: ${error.stack}`);
       }
     }
+  }
+
+  public static buildContainerForUpdate(newsType: NewsType, data: NewsData): ContainerBuilder | null {
+    return this.buildContainer(newsType, data);
   }
 
   private static buildContainer(newsType: NewsType, data: NewsData): ContainerBuilder | null {

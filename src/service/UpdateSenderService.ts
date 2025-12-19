@@ -3,12 +3,15 @@ import { TextChannel } from "discord.js";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { Update } from "../naagostone/type/Updates.ts";
 import { UpdatesRepository } from "../database/repository/UpdatesRepository.ts";
+import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
 import { GlobalClient } from "../index.ts";
 import { Setup } from "../database/schema/setups.ts";
+import { UpdateData } from "../database/schema/lodestone-news.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
+import { NewsMessageUpdateService } from "./NewsMessageUpdateService.ts";
 import * as log from "@std/log";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
@@ -27,30 +30,70 @@ export class UpdateSenderService {
       }
       return 0;
     }
-    const newUpdates: Update[] = [];
 
-    for (const update of latestUpdates) {
+    let newCount = 0;
+
+    for (const update of latestUpdates.reverse()) {
       if (!update) continue;
 
       const date = moment(update.date).tz("Europe/London").toDate();
-      if (await UpdatesRepository.find(update.title, date)) continue;
+      const existingUpdate = await UpdatesRepository.find(update.title, date);
 
-      newUpdates.push(update);
+      if (existingUpdate) {
+        await this.checkForUpdates(existingUpdate, update);
+        continue;
+      }
+
+      if (saveLodestoneNews) {
+        const newsId = await UpdatesRepository.add(update);
+        if (sendLodestoneNews) await this.send(update, newsId);
+      } else if (sendLodestoneNews) {
+        await this.send(update);
+      }
+      newCount++;
     }
 
-    for (const newUpdate of newUpdates.reverse()) {
-      if (saveLodestoneNews) await UpdatesRepository.add(newUpdate);
-      if (sendLodestoneNews) await this.send(newUpdate);
-    }
-
-    return newUpdates.length;
+    return newCount;
   }
 
-  public static async send(update: Update): Promise<void> {
+  private static async checkForUpdates(existing: UpdateData, update: Update): Promise<void> {
+    const { descriptionChanged, descriptionV2Changed } = UpdatesRepository.hasDescriptionChanged(existing, update);
+
+    if (!descriptionChanged && !descriptionV2Changed) return;
+
+    if (saveLodestoneNews) {
+      await UpdatesRepository.updateDescriptions(
+        existing.id,
+        update.description.markdown,
+        update.description.discord_components_v2 ?? null,
+      );
+    }
+
+    if (!sendLodestoneNews) return;
+
+    const { updated, failed } = await NewsMessageUpdateService.updatePostedMessages(
+      "updates",
+      existing.id,
+      {
+        title: update.title,
+        link: update.link,
+        date: update.date,
+        description: update.description,
+      },
+      () => DiscordEmbedService.getUpdatesEmbed(update),
+      descriptionChanged,
+      descriptionV2Changed,
+    );
+
+    if (updated > 0 || failed > 0) {
+      log.info(`[UPDATES] Updated ${updated} messages, ${failed} failed for update: ${update.title}`);
+    }
+  }
+
+  public static async send(update: Update, newsId?: number): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
     const setups: Setup[] = await SetupsRepository.getAllByType("updates");
-    if (!setups || setups?.length < 1) return;
 
     for (const setup of setups) {
       try {
@@ -60,8 +103,18 @@ export class UpdateSenderService {
         if (!channel) continue;
 
         const embed = DiscordEmbedService.getUpdatesEmbed(update);
+        const message = await (channel as TextChannel).send({ embeds: [embed] });
 
-        await (channel as TextChannel).send({ embeds: [embed] });
+        if (newsId !== undefined) {
+          await PostedNewsMessagesRepository.add(
+            "updates",
+            newsId,
+            setup.guildId,
+            setup.channelId,
+            message.id,
+            false,
+          );
+        }
       } catch (error: unknown) {
         if (error instanceof Error) {
           log.error(`[UPDATES] Sending update to ${setup.guildId} was NOT successful: ${error.message}`);
@@ -75,6 +128,6 @@ export class UpdateSenderService {
       link: update.link,
       date: update.date,
       description: update.description,
-    });
+    }, newsId);
   }
 }

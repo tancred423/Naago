@@ -36,6 +36,20 @@
       "when": 1733414400000,
       "tag": "0004_normalize_setup_types",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1734620400000,
+      "tag": "0005_add_description_v2_to_news_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1734624000000,
+      "tag": "0006_add_posted_news_messages_table",
+      "breakpoints": true
     }
   ]
 }

@@ -23,21 +23,29 @@ export class NoticesRepository {
       )
       .limit(1);
 
-    return result[0];
+    return result[0] ?? null;
   }
 
-  public static async add(
-    notice: Notice,
-  ): Promise<void> {
+  public static async findById(id: number): Promise<NoticeData | null> {
+    const result = await database
+      .select()
+      .from(noticeData)
+      .where(eq(noticeData.id, id))
+      .limit(1);
+
+    return result[0] ?? null;
+  }
+
+  public static async add(notice: Notice): Promise<number> {
     const dateSQL = moment(notice.date).tz("Europe/London").toDate();
-    const currentTopic = await this.find(notice.title, dateSQL);
-    if (currentTopic) {
+    const currentNotice = await this.find(notice.title, dateSQL);
+    if (currentNotice) {
       throw new AlreadyInDatabaseError(
         "This notice is already in the database",
       );
     }
 
-    await database
+    const result = await database
       .insert(noticeData)
       .values({
         tag: notice.tag,
@@ -45,6 +53,33 @@ export class NoticesRepository {
         link: notice.link,
         date: dateSQL,
         description: notice.description.markdown,
-      });
+        descriptionV2: notice.description.discord_components_v2 ?? null,
+      })
+      .$returningId();
+
+    return result[0].id;
+  }
+
+  public static async updateDescriptions(
+    id: number,
+    description: string,
+    descriptionV2: NoticeData["descriptionV2"],
+  ): Promise<void> {
+    await database
+      .update(noticeData)
+      .set({ description, descriptionV2 })
+      .where(eq(noticeData.id, id));
+  }
+
+  public static hasDescriptionChanged(
+    existing: NoticeData,
+    notice: Notice,
+  ): { descriptionChanged: boolean; descriptionV2Changed: boolean } {
+    const descriptionChanged = existing.description !== notice.description.markdown;
+    const existingV2 = JSON.stringify(existing.descriptionV2 ?? null);
+    const newV2 = JSON.stringify(notice.description.discord_components_v2 ?? null);
+    const descriptionV2Changed = existingV2 !== newV2;
+
+    return { descriptionChanged, descriptionV2Changed };
   }
 }

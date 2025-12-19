@@ -23,21 +23,29 @@ export class MaintenancesRepository {
       )
       .limit(1);
 
-    return result[0];
+    return result[0] ?? null;
   }
 
-  public static async add(
-    maintenance: Maintenance,
-  ): Promise<void> {
+  public static async findById(id: number): Promise<MaintenanceData | null> {
+    const result = await database
+      .select()
+      .from(maintenanceData)
+      .where(eq(maintenanceData.id, id))
+      .limit(1);
+
+    return result[0] ?? null;
+  }
+
+  public static async add(maintenance: Maintenance): Promise<number> {
     const dateSQL = moment(maintenance.date).tz("Europe/London").toDate();
-    const currentTopic = await this.find(maintenance.title, dateSQL);
-    if (currentTopic) {
+    const currentMaintenance = await this.find(maintenance.title, dateSQL);
+    if (currentMaintenance) {
       throw new AlreadyInDatabaseError(
         "This maintenance is already in the database",
       );
     }
 
-    await database
+    const result = await database
       .insert(maintenanceData)
       .values({
         tag: maintenance.tag,
@@ -45,11 +53,38 @@ export class MaintenancesRepository {
         link: maintenance.link,
         date: dateSQL,
         description: maintenance.description.markdown,
+        descriptionV2: maintenance.description.discord_components_v2 ?? null,
         startDate: maintenance.start_timestamp
           ? moment(maintenance.start_timestamp).tz("Europe/London").toDate()
           : null,
         endDate: maintenance.end_timestamp ? moment(maintenance.end_timestamp).tz("Europe/London").toDate() : null,
-      });
+      })
+      .$returningId();
+
+    return result[0].id;
+  }
+
+  public static async updateDescriptions(
+    id: number,
+    description: string,
+    descriptionV2: MaintenanceData["descriptionV2"],
+  ): Promise<void> {
+    await database
+      .update(maintenanceData)
+      .set({ description, descriptionV2 })
+      .where(eq(maintenanceData.id, id));
+  }
+
+  public static hasDescriptionChanged(
+    existing: MaintenanceData,
+    maintenance: Maintenance,
+  ): { descriptionChanged: boolean; descriptionV2Changed: boolean } {
+    const descriptionChanged = existing.description !== maintenance.description.markdown;
+    const existingV2 = JSON.stringify(existing.descriptionV2 ?? null);
+    const newV2 = JSON.stringify(maintenance.description.discord_components_v2 ?? null);
+    const descriptionV2Changed = existingV2 !== newV2;
+
+    return { descriptionChanged, descriptionV2Changed };
   }
 
   public static async findActive(): Promise<MaintenanceData[]> {

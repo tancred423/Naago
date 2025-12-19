@@ -23,12 +23,20 @@ export class TopicsRepository {
       )
       .limit(1);
 
-    return result[0];
+    return result[0] ?? null;
   }
 
-  public static async add(
-    topic: Topic,
-  ): Promise<void> {
+  public static async findById(id: number): Promise<TopicData | null> {
+    const result = await database
+      .select()
+      .from(topicData)
+      .where(eq(topicData.id, id))
+      .limit(1);
+
+    return result[0] ?? null;
+  }
+
+  public static async add(topic: Topic): Promise<number> {
     const dateSQL = moment(topic.date).tz("Europe/London").toDate();
     const currentTopic = await this.find(topic.title, dateSQL);
     if (currentTopic) {
@@ -37,7 +45,7 @@ export class TopicsRepository {
 
     const timestampLiveLetterSQL = topic.timestamp_live_letter ? new Date(topic.timestamp_live_letter) : null;
 
-    await database
+    const result = await database
       .insert(topicData)
       .values({
         title: topic.title,
@@ -45,8 +53,35 @@ export class TopicsRepository {
         date: dateSQL,
         banner: topic.banner,
         description: topic.description.markdown,
+        descriptionV2: topic.description.discord_components_v2 ?? null,
         timestampLiveLetter: timestampLiveLetterSQL,
-      });
+      })
+      .$returningId();
+
+    return result[0].id;
+  }
+
+  public static async updateDescriptions(
+    id: number,
+    description: string,
+    descriptionV2: TopicData["descriptionV2"],
+  ): Promise<void> {
+    await database
+      .update(topicData)
+      .set({ description, descriptionV2 })
+      .where(eq(topicData.id, id));
+  }
+
+  public static hasDescriptionChanged(
+    existing: TopicData,
+    topic: Topic,
+  ): { descriptionChanged: boolean; descriptionV2Changed: boolean } {
+    const descriptionChanged = existing.description !== topic.description.markdown;
+    const existingV2 = JSON.stringify(existing.descriptionV2 ?? null);
+    const newV2 = JSON.stringify(topic.description.discord_components_v2 ?? null);
+    const descriptionV2Changed = existingV2 !== newV2;
+
+    return { descriptionChanged, descriptionV2Changed };
   }
 
   public static async getNewestLiveLetterTimestamp(): Promise<Date | null> {

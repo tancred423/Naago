@@ -1,4 +1,5 @@
-import { index, int, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { index, int, json, mysqlTable, text, timestamp, tinyint, varchar } from "drizzle-orm/mysql-core";
+import { DiscordComponentsV2 } from "../../naagostone/type/DiscordComponentsV2.ts";
 
 export const topicData = mysqlTable("topic_data", {
   id: int("id").primaryKey().autoincrement(),
@@ -7,6 +8,7 @@ export const topicData = mysqlTable("topic_data", {
   date: timestamp("date").notNull(),
   banner: text("banner").notNull(),
   description: text("description").notNull(),
+  descriptionV2: json("description_v2").$type<DiscordComponentsV2>(),
   timestampLiveLetter: timestamp("timestamp_live_letter"),
   liveLetterAnnounced: int("live_letter_announced").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -22,6 +24,7 @@ export const noticeData = mysqlTable("notice_data", {
   date: timestamp("date").notNull(),
   link: text("link").notNull(),
   description: text("description").notNull(),
+  descriptionV2: json("description_v2").$type<DiscordComponentsV2>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 }, (table) => ({
@@ -35,6 +38,7 @@ export const maintenanceData = mysqlTable("maintenance_data", {
   date: timestamp("date").notNull(),
   link: text("link").notNull(),
   description: text("description").notNull(),
+  descriptionV2: json("description_v2").$type<DiscordComponentsV2>(),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -53,6 +57,7 @@ export const updateData = mysqlTable("update_data", {
   date: timestamp("date").notNull(),
   link: text("link").notNull(),
   description: text("description").notNull(),
+  descriptionV2: json("description_v2").$type<DiscordComponentsV2>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 }, (table) => ({
@@ -66,10 +71,26 @@ export const statusData = mysqlTable("status_data", {
   date: timestamp("date").notNull(),
   link: text("link").notNull(),
   description: text("description").notNull(),
+  descriptionV2: json("description_v2").$type<DiscordComponentsV2>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 }, (table) => ({
   dateIdx: index("idx_status_date").on(table.date),
+}));
+
+export const postedNewsMessages = mysqlTable("posted_news_messages", {
+  id: int("id").primaryKey().autoincrement(),
+  newsType: varchar("news_type", { length: 20 }).notNull(),
+  newsId: int("news_id").notNull(),
+  guildId: varchar("guild_id", { length: 255 }).notNull(),
+  channelId: varchar("channel_id", { length: 255 }).notNull(),
+  messageId: varchar("message_id", { length: 255 }).notNull(),
+  isV2: tinyint("is_v2").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+}, (table) => ({
+  lookupIdx: index("idx_posted_news_lookup").on(table.newsType, table.newsId),
+  guildIdx: index("idx_posted_news_guild").on(table.guildId),
 }));
 
 export type TopicData = typeof topicData.$inferSelect;
@@ -86,3 +107,8 @@ export type NewUpdateData = typeof updateData.$inferInsert;
 
 export type StatusData = typeof statusData.$inferSelect;
 export type NewStatusData = typeof statusData.$inferInsert;
+
+export type PostedNewsMessage = typeof postedNewsMessages.$inferSelect;
+export type NewPostedNewsMessage = typeof postedNewsMessages.$inferInsert;
+
+export type NewsType = "topics" | "notices" | "maintenances" | "updates" | "statuses";
