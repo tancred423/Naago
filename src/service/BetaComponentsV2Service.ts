@@ -133,9 +133,9 @@ export class BetaComponentsV2Service {
     const newsEmoji = Deno.env.get(getNewsEmojiEnvKey(newsType)) ?? "";
     const lodestoneEmoji = Deno.env.get("EMOJI_LODESTONE") ?? "";
     const typeLabel = `${newsEmoji}  **${getNewsTypeLabel(newsType, data.tag)}**`;
-    const titleMarkdown = `## [${data.title}](${data.link})`;
+    const titleMarkdown = `### [${data.title}](${data.link})`;
     const footerText = `${lodestoneEmoji}  Lodestone · ${
-      time(Math.floor(data.date / 1000), TimestampStyles.LongDateTime)
+      time(Math.floor(data.date / 1000), TimestampStyles.ShortDateTime)
     }`;
 
     totalCharacters += typeLabel.length + titleMarkdown.length + footerText.length;
