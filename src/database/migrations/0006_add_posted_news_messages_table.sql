@@ -1,4 +1,4 @@
-CREATE TABLE `posted_news_messages` (
+CREATE TABLE IF NOT EXISTS `posted_news_messages` (
   `id` int AUTO_INCREMENT NOT NULL,
   `news_type` varchar(20) NOT NULL,
   `news_id` int NOT NULL,
@@ -8,8 +8,7 @@ CREATE TABLE `posted_news_messages` (
   `is_v2` tinyint NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT (now()),
   `updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT `posted_news_messages_id` PRIMARY KEY(`id`)
+  CONSTRAINT `posted_news_messages_id` PRIMARY KEY(`id`),
+  INDEX `idx_posted_news_lookup` (`news_type`, `news_id`),
+  INDEX `idx_posted_news_guild` (`guild_id`)
 );
-
-CREATE INDEX `idx_posted_news_lookup` ON `posted_news_messages` (`news_type`, `news_id`);
-CREATE INDEX `idx_posted_news_guild` ON `posted_news_messages` (`guild_id`);
