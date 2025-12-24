@@ -23,3 +23,6 @@ COPY deno.json deno.lock* ./
 
 # Install npm:canvas
 RUN deno install --allow-scripts=npm:canvas
+
+# Copy fonts directory
+COPY fonts/ /app/fonts/

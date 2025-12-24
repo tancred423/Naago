@@ -238,7 +238,7 @@ class Profile {
     if (this.character.title) {
       ctx.fillStyle = theme.title;
       ctx.font = `normal 35px myriad pro`;
-      ctx.fillText(`< ${this.character.title} >`, 450 / 2, 100, 410);
+      ctx.fillText(`« ${this.character.title} »`, 450 / 2, 100, 410);
     }
 
     // Name

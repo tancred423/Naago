@@ -11,7 +11,7 @@ import {
   MessageFlags,
   ModalSubmitInteraction,
 } from "discord.js";
-import { CanvasRenderingContext2D } from "canvas";
+import { CanvasRenderingContext2D, registerFont } from "canvas";
 import moment from "moment";
 import cron from "node-cron";
 import * as log from "@std/log";
@@ -55,6 +55,23 @@ export class GlobalClient {
 
 // Moment
 moment.locale("en");
+
+// Register custom fonts for canvas
+const fontsPath = join(__dirname, "..", "fonts");
+try {
+  registerFont(join(fontsPath, "MiedingerMediumW00-Regular.ttf"), {
+    family: "MiedingerMediumW00-Regular",
+  });
+  registerFont(join(fontsPath, "MyriadPro-Regular.OTF"), {
+    family: "myriad pro",
+  });
+  registerFont(join(fontsPath, "Romanus.otf"), {
+    family: "romanus",
+  });
+  log.info("Custom fonts registered successfully");
+} catch (err) {
+  log.error(`Failed to register fonts: ${err instanceof Error ? err.stack : String(err)}`);
+}
 
 // Canvas lib - Add roundRect method to CanvasRenderingContext2D
 declare module "canvas" {

@@ -1,0 +1,27 @@
+# Enforce LF line endings for all text files
+* text=auto eol=lf
+
+# Explicitly set LF for common file types
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.ts text eol=lf
+*.js text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+*.sh text eol=lf
+*.bash text eol=lf
+*.dockerfile text eol=lf
+docker-compose*.yml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.otf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+

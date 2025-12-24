@@ -21,6 +21,7 @@ WORKDIR /app
 COPY deno.json deno.lock* ./
 COPY . .
 
+# Copy fonts to both app directory (for registerFont) and system fonts directory
 RUN if [ -d "fonts" ] && [ "$(ls -A fonts 2>/dev/null)" ]; then \
         cp -r fonts/* /usr/share/fonts/custom/ && \
         fc-cache -fv; \
