@@ -10,6 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Theme } from "./type/Theme.ts";
 import { ProfilePage, SubProfilePage } from "./type/ProfilePageTypes.ts";
+import { EorzeanCalendarService } from "./EorzeanCalendarService.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BASE_PATH = join(__dirname, "..");
@@ -238,7 +239,7 @@ class Profile {
     if (this.character.title) {
       ctx.fillStyle = theme.title;
       ctx.font = `normal 35px myriad pro`;
-      ctx.fillText(`« ${this.character.title} »`, 450 / 2, 100, 410);
+      ctx.fillText(`« ${this.character.title} »`, 450 / 2, 95, 410);
     }
 
     // Name
@@ -255,7 +256,7 @@ class Profile {
     ////////////////////////////////////////////
     // Character Info
     ////////////////////////////////////////////
-    const yAdd = 97;
+    const yAdd = 78;
 
     const profileBlock = new ProfileBlock(theme, ctx, yAdd);
     await profileBlock.add(
@@ -299,7 +300,17 @@ class Profile {
         ),
       true,
     );
-    await profileBlock.add("Nameday", this.character.nameday, null, true);
+    const gregorianDate = EorzeanCalendarService.convertToGregorian(this.character.nameday);
+    await profileBlock.add(
+      "Nameday",
+      this.character.nameday,
+      null,
+      true,
+      false,
+      false,
+      null,
+      `On Earth: ${gregorianDate}`,
+    );
     await profileBlock.add(
       `Grand Company: ${this.character.grand_company?.name ?? "-"}`,
       this.character.grand_company?.rank ?? "-",
@@ -1368,6 +1379,7 @@ class ProfileBlock {
     rightSide = false,
     triple = false,
     slot: number | null = null,
+    secondLine: string | null = null,
   ): Promise<void> {
     let x = rightSide ? 230 : 20;
     if (triple && slot === 2) x = 265;
@@ -1379,9 +1391,10 @@ class ProfileBlock {
     if (!rightSide) this.yAdd += 55;
 
     const maxWidth = iconLink ? fWidth - 60 : fWidth - 20;
+    const blockHeight = secondLine ? 69 : 50;
 
     this.ctx.fillStyle = this.theme.block_background;
-    this.ctx.roundRect(x, this.yAdd, fWidth, 50, borderRadius).fill();
+    this.ctx.roundRect(x, this.yAdd, fWidth, blockHeight, borderRadius).fill();
 
     this.ctx.fillStyle = this.theme.block_title;
     this.ctx.font = `normal 16px roboto condensed`;
@@ -1401,11 +1414,24 @@ class ProfileBlock {
       maxWidth,
     );
 
+    if (secondLine) {
+      this.ctx.fillStyle = this.theme.block_content;
+      this.ctx.font = `normal 18px arial`;
+      this.ctx.fillText(
+        secondLine,
+        x + 10 + (triple && slot! > 1 ? 30 : 0),
+        this.yAdd + 45,
+        maxWidth,
+      );
+    }
+
     if (iconLink instanceof Array) {
       for (const link of iconLink) {
         if (link) await this.drawIcon(link, fWidth, rightSide);
       }
     } else if (iconLink) await this.drawIcon(iconLink, fWidth, rightSide);
+
+    if (secondLine) this.yAdd += 19;
   }
 
   private async drawIcon(
