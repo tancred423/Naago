@@ -309,7 +309,7 @@ class Profile {
       false,
       false,
       null,
-      `On Earth: ${gregorianDate}`,
+      gregorianDate,
     );
     await profileBlock.add(
       `Grand Company: ${this.character.grand_company?.name ?? "-"}`,
