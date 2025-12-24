@@ -237,7 +237,7 @@ export class HelpCommandHelper {
           name: "Support",
           value:
             `In order to get help, report a bug or to see updates as I post them, please join the [Support Server](${Deno
-              .env.get("SUPPORT_SERVER_URL")!})`,
+              .env.get("SUPPORT_SERVER_URL")!}).`,
           inline: false,
         },
         { name: "Ping", value: `${client.ws.ping} ms`, inline: true },
