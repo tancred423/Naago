@@ -1,0 +1,2 @@
+ALTER TABLE `posted_news_messages`
+MODIFY COLUMN `id` int UNSIGNED AUTO_INCREMENT NOT NULL;
