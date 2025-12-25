@@ -163,11 +163,27 @@ class Profile {
     ctx.fillText(windowTitle, 10, 8, width / 2);
 
     // Window title name
-    const windowTitleName = this.character.name.toUpperCase();
+    const windowTitleName = this.character.name;
     ctx.fillStyle = theme.window_title_name;
     ctx.textAlign = "right";
-    ctx.font = `normal 20px romanus`;
-    ctx.fillText(windowTitleName, width - 10, 8, width / 2);
+    ctx.font = `normal 22px TrajanProBold`;
+
+    const checkmarkSize = 18;
+    const spacing = 5;
+
+    const nameX = this.isVerified ? width - 10 - checkmarkSize - spacing : width - 10;
+
+    if (this.isVerified) {
+      const verificationCheckmark = await loadImage(
+        join(BASE_PATH, "image", "verified_checkmark.png"),
+      );
+      const checkmarkX = width - 10 - checkmarkSize;
+      const checkmarkY = 10 + (20 - checkmarkSize) / 2;
+      ctx.drawImage(verificationCheckmark, checkmarkX, checkmarkY, checkmarkSize, checkmarkSize);
+    }
+
+    ctx.fillText(windowTitleName, nameX, 11, width / 2);
+
     ctx.textAlign = "left";
 
     // Window title underline
@@ -192,16 +208,6 @@ class Profile {
     // ACJ name
     const acjName = await loadImage(this.character.active_classjob.name);
     ctx.drawImage(acjName, 446 + 50, 75);
-
-    ////////////////////////////////////////////
-    // Verification sticker
-    ////////////////////////////////////////////
-    if (this.isVerified) {
-      const verificationSticker = await loadImage(
-        join(BASE_PATH, "image", "naago_verified.png"),
-      );
-      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50);
-    }
 
     ////////////////////////////////////////////
     // Portrait
@@ -432,11 +438,27 @@ class Profile {
     ctx.fillText(windowTitle, 10, 8, width / 2);
 
     // Window title name
-    const windowTitleName = this.character.name.toUpperCase();
+    const windowTitleName = this.character.name;
     ctx.fillStyle = theme.window_title_name;
     ctx.textAlign = "right";
-    ctx.font = `normal 20px romanus`;
-    ctx.fillText(windowTitleName, width - 10, 8, width / 2);
+    ctx.font = `normal 22px TrajanProBold`;
+
+    const checkmarkSize = 18;
+    const spacing = 5;
+
+    const nameX = this.isVerified ? width - 10 - checkmarkSize - spacing : width - 10;
+
+    if (this.isVerified) {
+      const verificationCheckmark = await loadImage(
+        join(BASE_PATH, "image", "verified_checkmark.png"),
+      );
+      const checkmarkX = width - 10 - checkmarkSize;
+      const checkmarkY = 10 + (20 - checkmarkSize) / 2;
+      ctx.drawImage(verificationCheckmark, checkmarkX, checkmarkY, checkmarkSize, checkmarkSize);
+    }
+
+    ctx.fillText(windowTitleName, nameX, 11, width / 2);
+
     ctx.textAlign = "left";
 
     // Window title underline
@@ -461,16 +483,6 @@ class Profile {
     // ACJ name
     const acjName = await loadImage(this.character.active_classjob.name);
     ctx.drawImage(acjName, 446 + 50, 75);
-
-    ////////////////////////////////////////////
-    // Verification sticker
-    ////////////////////////////////////////////
-    if (this.isVerified) {
-      const verificationSticker = await loadImage(
-        join(BASE_PATH, "image", "naago_verified.png"),
-      );
-      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50);
-    }
 
     ////////////////////////////////////////////
     // Portrait
@@ -679,11 +691,27 @@ class Profile {
     ctx.fillText(windowTitle, 10, 8, width / 2);
 
     // Window title name
-    const windowTitleName = this.character.name.toUpperCase();
+    const windowTitleName = this.character.name;
     ctx.fillStyle = theme.window_title_name;
     ctx.textAlign = "right";
-    ctx.font = `normal 20px romanus`;
-    ctx.fillText(windowTitleName, width - 10, 8, width / 2);
+    ctx.font = `normal 22px TrajanProBold`;
+
+    const checkmarkSize = 18;
+    const spacing = 5;
+
+    const nameX = this.isVerified ? width - 10 - checkmarkSize - spacing : width - 10;
+
+    if (this.isVerified) {
+      const verificationCheckmark = await loadImage(
+        join(BASE_PATH, "image", "verified_checkmark.png"),
+      );
+      const checkmarkX = width - 10 - checkmarkSize;
+      const checkmarkY = 10 + (20 - checkmarkSize) / 2;
+      ctx.drawImage(verificationCheckmark, checkmarkX, checkmarkY, checkmarkSize, checkmarkSize);
+    }
+
+    ctx.fillText(windowTitleName, nameX, 11, width / 2);
+
     ctx.textAlign = "left";
 
     // Window title underline
@@ -708,16 +736,6 @@ class Profile {
     // ACJ name
     const acjName = await loadImage(this.character.active_classjob.name);
     ctx.drawImage(acjName, 446 + 50, 75);
-
-    ////////////////////////////////////////////
-    // Verification sticker
-    ////////////////////////////////////////////
-    if (this.isVerified) {
-      const verificationSticker = await loadImage(
-        join(BASE_PATH, "image", "naago_verified.png"),
-      );
-      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50);
-    }
 
     ////////////////////////////////////////////
     // Portrait
@@ -912,11 +930,27 @@ class Profile {
     ctx.fillText(windowTitle, 10, 8, width / 2);
 
     // Window title name
-    const windowTitleName = this.character.name.toUpperCase();
+    const windowTitleName = this.character.name;
     ctx.fillStyle = theme.window_title_name;
     ctx.textAlign = "right";
-    ctx.font = `normal 20px romanus`;
-    ctx.fillText(windowTitleName, width - 10, 8, width / 2);
+    ctx.font = `normal 22px TrajanProBold`;
+
+    const checkmarkSize = 18;
+    const spacing = 5;
+
+    const nameX = this.isVerified ? width - 10 - checkmarkSize - spacing : width - 10;
+
+    if (this.isVerified) {
+      const verificationCheckmark = await loadImage(
+        join(BASE_PATH, "image", "verified_checkmark.png"),
+      );
+      const checkmarkX = width - 10 - checkmarkSize;
+      const checkmarkY = 10 + (20 - checkmarkSize) / 2;
+      ctx.drawImage(verificationCheckmark, checkmarkX, checkmarkY, checkmarkSize, checkmarkSize);
+    }
+
+    ctx.fillText(windowTitleName, nameX, 11, width / 2);
+
     ctx.textAlign = "left";
 
     // Window title underline
@@ -941,16 +975,6 @@ class Profile {
     // ACJ name
     const acjName = await loadImage(this.character.active_classjob.name);
     ctx.drawImage(acjName, 300 + 30, 93, 280, 30);
-
-    ////////////////////////////////////////////
-    // Verification sticker
-    ////////////////////////////////////////////
-    if (this.isVerified) {
-      const verificationSticker = await loadImage(
-        join(BASE_PATH, "image", "naago_verified.png"),
-      );
-      ctx.drawImage(verificationSticker, 500 - 50, 40, 50, 50);
-    }
 
     ////////////////////////////////////////////
     // Portrait
@@ -1059,11 +1083,27 @@ class Profile {
     ctx.fillText(windowTitle, 10, 8, width / 2);
 
     // Window title name
-    const windowTitleName = this.character.name.toUpperCase();
+    const windowTitleName = this.character.name;
     ctx.fillStyle = theme.window_title_name;
     ctx.textAlign = "right";
-    ctx.font = `normal 20px romanus`;
-    ctx.fillText(windowTitleName, width - 10, 8, width / 2);
+    ctx.font = `normal 22px TrajanProBold`;
+
+    const checkmarkSize = 18;
+    const spacing = 5;
+
+    const nameX = this.isVerified ? width - 10 - checkmarkSize - spacing : width - 10;
+
+    if (this.isVerified) {
+      const verificationCheckmark = await loadImage(
+        join(BASE_PATH, "image", "verified_checkmark.png"),
+      );
+      const checkmarkX = width - 10 - checkmarkSize;
+      const checkmarkY = 10 + (20 - checkmarkSize) / 2;
+      ctx.drawImage(verificationCheckmark, checkmarkX, checkmarkY, checkmarkSize, checkmarkSize);
+    }
+
+    ctx.fillText(windowTitleName, nameX, 11, width / 2);
+
     ctx.textAlign = "left";
 
     // Window title underline
@@ -1088,16 +1128,6 @@ class Profile {
     // ACJ name
     const acjName = await loadImage(this.character.active_classjob.name);
     ctx.drawImage(acjName, 446 + 50, 75);
-
-    ////////////////////////////////////////////
-    // Verification sticker
-    ////////////////////////////////////////////
-    if (this.isVerified) {
-      const verificationSticker = await loadImage(
-        join(BASE_PATH, "image", "naago_verified.png"),
-      );
-      ctx.drawImage(verificationSticker, 800 - 50 - 10, 35, 50, 50);
-    }
 
     ////////////////////////////////////////////
     // Portrait
