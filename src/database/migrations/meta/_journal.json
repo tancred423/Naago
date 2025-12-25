@@ -50,6 +50,13 @@
       "when": 1734624000000,
       "tag": "0006_add_posted_news_messages_table",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1734627600000,
+      "tag": "0007_change_id_type",
+      "breakpoints": true
     }
   ]
 }
