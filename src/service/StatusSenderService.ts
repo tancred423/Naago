@@ -17,6 +17,7 @@ import { NewsMessageUpdateService } from "./NewsMessageUpdateService.ts";
 
 const saveLodestoneNews = Deno.env.get("SAVE_LODESTONE_NEWS") === "true";
 const sendLodestoneNews = Deno.env.get("SEND_LODESTONE_NEWS") === "true";
+const maxNewsSent = parseInt(Deno.env.get("MAX_NEWS_SENT")!, 10);
 
 export default class StatusSenderService {
   public static async checkForNew(): Promise<number> {
@@ -32,9 +33,12 @@ export default class StatusSenderService {
       return 0;
     }
 
-    let newCount = 0;
+    latestStatuses.reverse();
 
-    for (const status of latestStatuses.reverse()) {
+    let newCount = 0;
+    const itemsWithExisting: Array<{ status: Status; existing: StatusData | null }> = [];
+
+    for (const status of latestStatuses) {
       if (!status) continue;
 
       status.tag = StringManipulationService.convertTag("status", status.tag);
@@ -42,6 +46,16 @@ export default class StatusSenderService {
       const date = moment(status.date).tz("Europe/London").toDate();
       const existingStatus = await StatusesRepository.find(status.title, date);
 
+      itemsWithExisting.push({ status, existing: existingStatus });
+
+      if (!existingStatus) {
+        newCount++;
+      }
+    }
+
+    const shouldSend = newCount <= maxNewsSent;
+
+    for (const { status, existing: existingStatus } of itemsWithExisting) {
       if (existingStatus) {
         await this.checkForUpdates(existingStatus, status);
         continue;
@@ -49,11 +63,10 @@ export default class StatusSenderService {
 
       if (saveLodestoneNews) {
         const newsId = await StatusesRepository.add(status);
-        if (sendLodestoneNews) await this.send(status, newsId);
-      } else if (sendLodestoneNews) {
+        if (sendLodestoneNews && shouldSend) await this.send(status, newsId);
+      } else if (sendLodestoneNews && shouldSend) {
         await this.send(status);
       }
-      newCount++;
     }
 
     return newCount;
