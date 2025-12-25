@@ -65,8 +65,8 @@ try {
   registerFont(join(fontsPath, "MyriadPro-Regular.OTF"), {
     family: "myriad pro",
   });
-  registerFont(join(fontsPath, "Romanus.otf"), {
-    family: "romanus",
+  registerFont(join(fontsPath, "TrajanPro-Bold.otf"), {
+    family: "TrajanProBold",
   });
   log.info("Custom fonts registered successfully");
 } catch (err) {
