@@ -196,7 +196,8 @@ export class BetaComponentsV2Service {
       currentComponents += 2;
     }
 
-    for (const component of componentsV2.components) {
+    for (let i = 0; i < componentsV2.components.length; i++) {
+      const component = componentsV2.components[i];
       if (currentComponents >= MAX_TOTAL_COMPONENTS - 2) break;
 
       if (component.type === "textDisplay") {
@@ -204,8 +205,56 @@ export class BetaComponentsV2Service {
         if (remainingChars <= 0) break;
 
         let content = component.content;
-        if (content.length > remainingChars) {
-          content = content.substring(0, remainingChars - 3) + "...";
+        const isTruncated = content.length > remainingChars;
+
+        if (isTruncated) {
+          let canFitMoreTextDisplays = false;
+          let simulatedChars = currentCharacters;
+          let simulatedComponents = currentComponents;
+
+          const truncatedContent = content.substring(0, remainingChars - 3) + "...";
+          simulatedChars += truncatedContent.length;
+          simulatedComponents += 1;
+
+          for (let j = i + 1; j < componentsV2.components.length; j++) {
+            if (simulatedComponents >= MAX_TOTAL_COMPONENTS - 2) break;
+
+            const nextComponent = componentsV2.components[j];
+            if (nextComponent.type === "textDisplay") {
+              const nextRemainingChars = MAX_TOTAL_CHARACTERS - simulatedChars - footerText.length;
+              if (nextRemainingChars >= 3) {
+                canFitMoreTextDisplays = true;
+                break;
+              }
+            } else if (nextComponent.type === "mediaGallery") {
+              const remainingComponentSlots = MAX_TOTAL_COMPONENTS - simulatedComponents - 2;
+              if (remainingComponentSlots > 1) {
+                simulatedComponents += 1 + Math.min(nextComponent.urls.length, remainingComponentSlots - 1);
+              }
+            } else if (nextComponent.type === "separator") {
+              simulatedComponents += 1;
+            }
+          }
+
+          if (!canFitMoreTextDisplays) {
+            const continueReadingText = ` \n\n[*Continue Reading*](${data.link})`;
+            const continueReadingLength = continueReadingText.length;
+            const minCharsNeeded = continueReadingLength + 3;
+
+            if (remainingChars >= minCharsNeeded) {
+              const availableChars = remainingChars - minCharsNeeded;
+              const contentLength = Math.max(1, availableChars);
+              content = content.substring(0, contentLength) + "..." + continueReadingText;
+            } else if (remainingChars >= continueReadingLength) {
+              const availableChars = remainingChars - continueReadingLength;
+              const contentLength = Math.max(1, availableChars);
+              content = content.substring(0, contentLength) + continueReadingText;
+            } else {
+              content = content.substring(0, remainingChars - 3) + "...";
+            }
+          } else {
+            content = content.substring(0, remainingChars - 3) + "...";
+          }
         }
 
         container.addTextDisplayComponents((textDisplay) => textDisplay.setContent(content));
@@ -218,8 +267,8 @@ export class BetaComponentsV2Service {
         const maxItems = Math.min(component.urls.length, remainingComponentSlots - 1);
         const gallery = new MediaGalleryBuilder();
 
-        for (let i = 0; i < maxItems; i++) {
-          gallery.addItems((item) => item.setDescription("Image").setURL(component.urls[i]));
+        for (let j = 0; j < maxItems; j++) {
+          gallery.addItems((item) => item.setDescription("Image").setURL(component.urls[j]));
         }
 
         container.addMediaGalleryComponents(gallery);
