@@ -3,6 +3,12 @@ import { CanvasRenderingContext2D, createCanvas, loadImage } from "canvas";
 import { ActionRowBuilder, ButtonBuilder } from "discord.js";
 import moment from "moment";
 import { Buffer } from "node:buffer";
+
+declare module "canvas" {
+  interface CanvasRenderingContext2D {
+    roundRect(x: number, y: number, w: number, h: number, r: number): this;
+  }
+}
 import { Character, ClassJob, Equipment } from "../naagostone/type/CharacterTypes.ts";
 import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
 import { StatisticsService } from "./StatisticsService.ts";
