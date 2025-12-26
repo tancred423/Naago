@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import { Theme } from "./type/Theme.ts";
 import { ProfilePage, SubProfilePage } from "./type/ProfilePageTypes.ts";
 import { EorzeanCalendarService } from "./EorzeanCalendarService.ts";
+import { MateriaIconService } from "./MateriaIconService.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BASE_PATH = join(__dirname, "..");
@@ -37,8 +38,10 @@ export class ProfileGeneratorService {
     else if (profilePage === "classesjobs") {
       if (subProfilePage === "dohdol") return await profile.getDohDol();
       else return await profile.getDowDom();
-    } else if (profilePage === "equipment") return await profile.getEquipment();
-    else if (profilePage === "attributes") return await profile.getAttributes();
+    } else if (profilePage === "equipment") {
+      if (subProfilePage === "materiadetails") return await profile.getEquipmentMateriaDetails();
+      else return await profile.getEquipment();
+    } else if (profilePage === "attributes") return await profile.getAttributes();
     else if (profilePage === "portrait") return character.portrait;
 
     return character.portrait;
@@ -77,7 +80,7 @@ export class ProfileGeneratorService {
       ),
     );
 
-    if (subProfilePage) {
+    if (subProfilePage && (subProfilePage === "dowdom" || subProfilePage === "dohdol")) {
       components.push(
         new ActionRowBuilder<ButtonBuilder>().addComponents(
           new ButtonBuilder()
@@ -88,6 +91,22 @@ export class ProfileGeneratorService {
             .setLabel("DoH/DoL")
             .setCustomId(`${commandName}.dohdol.${characterId}`)
             .setStyle(subProfilePage === "dohdol" ? 1 : 2),
+        ),
+      );
+    }
+
+    if (profilePage === "equipment") {
+      const equipmentSubPage = subProfilePage === "materiadetails" ? "materiadetails" : "overview";
+      components.push(
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+          new ButtonBuilder()
+            .setLabel("Overview")
+            .setCustomId(`${commandName}.overview.${characterId}`)
+            .setStyle(equipmentSubPage === "overview" ? 1 : 2),
+          new ButtonBuilder()
+            .setLabel("Materia Details")
+            .setCustomId(`${commandName}.materiadetails.${characterId}`)
+            .setStyle(equipmentSubPage === "materiadetails" ? 1 : 2),
         ),
       );
     }
@@ -1031,6 +1050,157 @@ class Profile {
     return canvas.toBuffer("image/png");
   }
 
+  public async getEquipmentMateriaDetails(): Promise<Buffer> {
+    ////////////////////////////////////////////
+    // Theme
+    ////////////////////////////////////////////
+    const theme = await this.getTheme();
+
+    ////////////////////////////////////////////
+    // Canvas
+    ////////////////////////////////////////////
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+
+    ////////////////////////////////////////////
+    // Background
+    ////////////////////////////////////////////
+
+    // Background fill
+    if (theme.background.startsWith("#")) {
+      ctx.fillStyle = theme.background;
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();
+    } else {
+      ctx.save();
+      ctx.lineWidth = 0;
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
+      ctx.clip();
+      const backgroundImage = await loadImage(
+        join(BASE_PATH, "image", "background", theme.background),
+      );
+      ctx.drawImage(backgroundImage, 0, 0);
+      ctx.fillStyle = theme.background_transparency;
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();
+      ctx.restore();
+    }
+
+    // Background border
+    ctx.strokeStyle = theme.background_border;
+    ctx.lineWidth = 3;
+    ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
+
+    ////////////////////////////////////////////
+    // Window
+    ////////////////////////////////////////////
+
+    // Window title
+    const windowTitle = "Character";
+    ctx.fillStyle = theme.window_title;
+    ctx.font = `normal 20px roboto condensed`;
+    ctx.fillText(windowTitle, 10, 8, width / 2);
+
+    // Window title name
+    const windowTitleName = this.character.name;
+    ctx.fillStyle = theme.window_title_name;
+    ctx.textAlign = "right";
+    ctx.font = `normal 22px TrajanProBold`;
+
+    const checkmarkSize = 18;
+    const spacing = 5;
+
+    const nameX = this.isVerified ? width - 10 - checkmarkSize - spacing : width - 10;
+
+    if (this.isVerified) {
+      const verificationCheckmark = await loadImage(
+        join(BASE_PATH, "image", "verified_checkmark.png"),
+      );
+      const checkmarkX = width - 10 - checkmarkSize;
+      const checkmarkY = 10 + (20 - checkmarkSize) / 2;
+      ctx.drawImage(verificationCheckmark, checkmarkX, checkmarkY, checkmarkSize, checkmarkSize);
+    }
+
+    ctx.fillText(windowTitleName, nameX, 11, width / 2);
+
+    ctx.textAlign = "left";
+
+    // Window title underline
+    ctx.strokeStyle = theme.window_title_underline;
+    ctx.lineWidth = 2;
+    ctx.roundRect(10, 35, width - 20, 0, borderRadius).stroke();
+
+    ////////////////////////////////////////////
+    // Active ClassJob (ACJ)
+    ////////////////////////////////////////////
+
+    // ACJ level
+    const acjLevel = `Level ${this.character.active_classjob.level}`;
+    ctx.fillStyle = theme.acj_level;
+    ctx.font = `normal 16px MiedingerMediumW00-Regular`;
+    ctx.fillText(acjLevel, 300, 70, 330);
+
+    // ACJ icon
+    const acjIcon = await loadImage(this.character.active_classjob.icon);
+    ctx.drawImage(acjIcon, 300, 93, 30, 30);
+
+    // ACJ name
+    const acjName = await loadImage(this.character.active_classjob.name);
+    ctx.drawImage(acjName, 300 + 30, 93, 280, 30);
+
+    ////////////////////////////////////////////
+    // Portrait
+    ////////////////////////////////////////////
+
+    // Portrait border
+    ctx.save();
+    ctx.strokeStyle = theme.portrait_border;
+    ctx.lineWidth = 4;
+    ctx.roundRect(300, 137, 200, 450, borderRadius).stroke();
+    ctx.clip();
+
+    // Portrait
+    const portrait = await loadImage(this.character.portrait);
+    ctx.drawImage(portrait, 235, 137, 330, 450);
+
+    // Item level icon
+    const gearIcon = await loadImage(join(BASE_PATH, "image", "gear.png"));
+    ctx.drawImage(gearIcon, 500 - 80, 144);
+
+    // Item level
+    ctx.fillStyle = theme.item_level;
+    ctx.font = `normal 30px roboto condensed`;
+    ctx.fillText(this.character.item_level, 500 - 50, 142, 50);
+    ctx.textAlign = "left";
+
+    ctx.restore();
+
+    ////////////////////////////////////////////
+    // Materia Details
+    ////////////////////////////////////////////
+    const y = 45;
+    let materiaGear = new MateriaGear(theme, ctx, 300, y, true);
+    await materiaGear.add(this.character.mainhand, "weapon", true);
+    await materiaGear.add(this.character.head, "head");
+    await materiaGear.add(this.character.body, "body");
+    await materiaGear.add(this.character.hands, "hands");
+    await materiaGear.add(this.character.legs, "legs");
+    await materiaGear.add(this.character.feet, "feet");
+
+    materiaGear = new MateriaGear(theme, ctx, 500, y, false);
+    await materiaGear.add(this.character.offhand, "weapon", true);
+    await materiaGear.add(this.character.earrings, "earrings");
+    await materiaGear.add(this.character.necklace, "necklace");
+    await materiaGear.add(this.character.bracelets, "bracelets");
+    await materiaGear.add(this.character.ring1, "ring");
+    await materiaGear.add(this.character.ring2, "ring");
+
+    ////////////////////////////////////////////
+    // Return buffer
+    ////////////////////////////////////////////
+    return canvas.toBuffer("image/png");
+  }
+
   public async getAttributes(): Promise<Buffer> {
     ////////////////////////////////////////////
     // Theme
@@ -1679,7 +1849,7 @@ class Gear {
 
     // Materia
     if (gear.materia_1) {
-      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_1));
+      const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_1));
       this.ctx.drawImage(
         materiaIcon,
         this.isLeft ? this.x - 80 - 20 : this.x + 80,
@@ -1690,7 +1860,7 @@ class Gear {
     }
 
     if (gear.materia_2) {
-      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_2));
+      const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_2));
       this.ctx.drawImage(
         materiaIcon,
         this.isLeft ? this.x - 80 - 20 - 20 : this.x + 80 + 20,
@@ -1701,7 +1871,7 @@ class Gear {
     }
 
     if (gear.materia_3) {
-      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_3));
+      const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_3));
       this.ctx.drawImage(
         materiaIcon,
         this.isLeft ? this.x - 80 - 20 - 20 * 2 : this.x + 80 + 20 * 2,
@@ -1712,7 +1882,7 @@ class Gear {
     }
 
     if (gear.materia_4) {
-      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_4));
+      const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_4));
       this.ctx.drawImage(
         materiaIcon,
         this.isLeft ? this.x - 80 - 20 - 20 * 3 : this.x + 80 + 20 * 3,
@@ -1723,7 +1893,7 @@ class Gear {
     }
 
     if (gear.materia_5) {
-      const materiaIcon = await loadImage(this.getMateriaIcon(gear.materia_5));
+      const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_5));
       this.ctx.drawImage(
         materiaIcon,
         this.isLeft ? this.x - 80 - 20 - 20 * 4 : this.x + 80 + 20 * 4,
@@ -1962,337 +2132,267 @@ class Gear {
         );
     }
   }
+}
 
-  private getMateriaIcon(materia: string): string {
-    switch (materia) {
-      case "Savage Aim Materia I":
-        return join(BASE_PATH, "image", "materia", "crt_1.png");
-      case "Savage Aim Materia II":
-        return join(BASE_PATH, "image", "materia", "crt_2.png");
-      case "Savage Aim Materia III":
-        return join(BASE_PATH, "image", "materia", "crt_3.png");
-      case "Savage Aim Materia IV":
-        return join(BASE_PATH, "image", "materia", "crt_4.png");
-      case "Savage Aim Materia V":
-        return join(BASE_PATH, "image", "materia", "crt_5.png");
-      case "Savage Aim Materia VI":
-        return join(BASE_PATH, "image", "materia", "crt_6.png");
-      case "Savage Aim Materia VII":
-        return join(BASE_PATH, "image", "materia", "crt_7.png");
-      case "Savage Aim Materia VIII":
-        return join(BASE_PATH, "image", "materia", "crt_8.png");
-      case "Savage Aim Materia IX":
-        return join(BASE_PATH, "image", "materia", "crt_9.png");
-      case "Savage Aim Materia X":
-        return join(BASE_PATH, "image", "materia", "crt_10.png");
-      case "Savage Aim Materia XI":
-        return join(BASE_PATH, "image", "materia", "crt_11.png");
-      case "Savage Aim Materia XII":
-        return join(BASE_PATH, "image", "materia", "crt_12.png");
+class MateriaGear {
+  private theme: Theme;
+  private ctx: CanvasRenderingContext2D;
+  private x: number;
+  private y: number;
+  private isLeft: boolean;
+  private fWidth: number;
+  private width: number;
+  private height: number;
 
-      case "Heavens' Eye Materia I":
-        return join(BASE_PATH, "image", "materia", "dh_1.png");
-      case "Heavens' Eye Materia II":
-        return join(BASE_PATH, "image", "materia", "dh_2.png");
-      case "Heavens' Eye Materia III":
-        return join(BASE_PATH, "image", "materia", "dh_3.png");
-      case "Heavens' Eye Materia IV":
-        return join(BASE_PATH, "image", "materia", "dh_4.png");
-      case "Heavens' Eye Materia V":
-        return join(BASE_PATH, "image", "materia", "dh_5.png");
-      case "Heavens' Eye Materia VI":
-        return join(BASE_PATH, "image", "materia", "dh_6.png");
-      case "Heavens' Eye Materia VII":
-        return join(BASE_PATH, "image", "materia", "dh_7.png");
-      case "Heavens' Eye Materia VIII":
-        return join(BASE_PATH, "image", "materia", "dh_8.png");
-      case "Heavens' Eye Materia IX":
-        return join(BASE_PATH, "image", "materia", "dh_9.png");
-      case "Heavens' Eye Materia X":
-        return join(BASE_PATH, "image", "materia", "dh_10.png");
-      case "Heavens' Eye Materia XI":
-        return join(BASE_PATH, "image", "materia", "dh_11.png");
-      case "Heavens' Eye Materia XII":
-        return join(BASE_PATH, "image", "materia", "dh_12.png");
+  constructor(
+    theme: Theme,
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    isLeft: boolean,
+  ) {
+    this.theme = theme;
+    this.ctx = ctx;
+    this.x = x;
+    this.y = y;
+    this.isLeft = isLeft;
+    this.fWidth = 280 - 45;
+    this.width = 290;
+    this.height = 87;
+  }
 
-      case "Savage Might Materia I":
-        return join(BASE_PATH, "image", "materia", "det_1.png");
-      case "Savage Might Materia II":
-        return join(BASE_PATH, "image", "materia", "det_2.png");
-      case "Savage Might Materia III":
-        return join(BASE_PATH, "image", "materia", "det_3.png");
-      case "Savage Might Materia IV":
-        return join(BASE_PATH, "image", "materia", "det_4.png");
-      case "Savage Might Materia V":
-        return join(BASE_PATH, "image", "materia", "det_5.png");
-      case "Savage Might Materia VI":
-        return join(BASE_PATH, "image", "materia", "det_6.png");
-      case "Savage Might Materia VII":
-        return join(BASE_PATH, "image", "materia", "det_7.png");
-      case "Savage Might Materia VIII":
-        return join(BASE_PATH, "image", "materia", "det_8.png");
-      case "Savage Might Materia IX":
-        return join(BASE_PATH, "image", "materia", "det_9.png");
-      case "Savage Might Materia X":
-        return join(BASE_PATH, "image", "materia", "det_10.png");
-      case "Savage Might Materia XI":
-        return join(BASE_PATH, "image", "materia", "det_11.png");
-      case "Savage Might Materia XII":
-        return join(BASE_PATH, "image", "materia", "det_12.png");
+  public async add(
+    gear: Equipment | null,
+    type: string,
+    isFirst = false,
+  ): Promise<void> {
+    if (!isFirst) this.y += 92;
 
-      case "Quickarm Materia I":
-        return join(BASE_PATH, "image", "materia", "sks_1.png");
-      case "Quickarm Materia II":
-        return join(BASE_PATH, "image", "materia", "sks_2.png");
-      case "Quickarm Materia III":
-        return join(BASE_PATH, "image", "materia", "sks_3.png");
-      case "Quickarm Materia IV":
-        return join(BASE_PATH, "image", "materia", "sks_4.png");
-      case "Quickarm Materia V":
-        return join(BASE_PATH, "image", "materia", "sks_5.png");
-      case "Quickarm Materia VI":
-        return join(BASE_PATH, "image", "materia", "sks_6.png");
-      case "Quickarm Materia VII":
-        return join(BASE_PATH, "image", "materia", "sks_7.png");
-      case "Quickarm Materia VIII":
-        return join(BASE_PATH, "image", "materia", "sks_8.png");
-      case "Quickarm Materia IX":
-        return join(BASE_PATH, "image", "materia", "sks_9.png");
-      case "Quickarm Materia X":
-        return join(BASE_PATH, "image", "materia", "sks_10.png");
-      case "Quickarm Materia XI":
-        return join(BASE_PATH, "image", "materia", "sks_11.png");
-      case "Quickarm Materia XII":
-        return join(BASE_PATH, "image", "materia", "sks_12.png");
+    if (this.isLeft) this.ctx.textAlign = "right";
+    else this.ctx.textAlign = "left";
 
-      case "Quicktongue Materia I":
-        return join(BASE_PATH, "image", "materia", "sps_1.png");
-      case "Quicktongue Materia II":
-        return join(BASE_PATH, "image", "materia", "sps_2.png");
-      case "Quicktongue Materia III":
-        return join(BASE_PATH, "image", "materia", "sps_3.png");
-      case "Quicktongue Materia IV":
-        return join(BASE_PATH, "image", "materia", "sps_4.png");
-      case "Quicktongue Materia V":
-        return join(BASE_PATH, "image", "materia", "sps_5.png");
-      case "Quicktongue Materia VI":
-        return join(BASE_PATH, "image", "materia", "sps_6.png");
-      case "Quicktongue Materia VII":
-        return join(BASE_PATH, "image", "materia", "sps_7.png");
-      case "Quicktongue Materia VIII":
-        return join(BASE_PATH, "image", "materia", "sps_8.png");
-      case "Quicktongue Materia IX":
-        return join(BASE_PATH, "image", "materia", "sps_9.png");
-      case "Quicktongue Materia X":
-        return join(BASE_PATH, "image", "materia", "sps_10.png");
-      case "Quicktongue Materia XI":
-        return join(BASE_PATH, "image", "materia", "sps_11.png");
-      case "Quicktongue Materia XII":
-        return join(BASE_PATH, "image", "materia", "sps_12.png");
+    this.ctx.fillStyle = this.theme.block_background;
+    const materiaCount = gear ? this.getMateriaCount(gear) : 0;
+    const baseHeight = this.height;
 
-      case "Battledance Materia I":
-        return join(BASE_PATH, "image", "materia", "tenacity_1.png");
-      case "Battledance Materia II":
-        return join(BASE_PATH, "image", "materia", "tenacity_2.png");
-      case "Battledance Materia III":
-        return join(BASE_PATH, "image", "materia", "tenacity_3.png");
-      case "Battledance Materia IV":
-        return join(BASE_PATH, "image", "materia", "tenacity_4.png");
-      case "Battledance Materia V":
-        return join(BASE_PATH, "image", "materia", "tenacity_5.png");
-      case "Battledance Materia VI":
-        return join(BASE_PATH, "image", "materia", "tenacity_6.png");
-      case "Battledance Materia VII":
-        return join(BASE_PATH, "image", "materia", "tenacity_7.png");
-      case "Battledance Materia VIII":
-        return join(BASE_PATH, "image", "materia", "tenacity_8.png");
-      case "Battledance Materia IX":
-        return join(BASE_PATH, "image", "materia", "tenacity_9.png");
-      case "Battledance Materia X":
-        return join(BASE_PATH, "image", "materia", "tenacity_10.png");
-      case "Battledance Materia XI":
-        return join(BASE_PATH, "image", "materia", "tenacity_11.png");
-      case "Battledance Materia XII":
-        return join(BASE_PATH, "image", "materia", "tenacity_12.png");
+    const materiaLineHeight = 16;
+    const materiaExtraHeight = materiaCount > 0 ? (materiaCount * materiaLineHeight) - (baseHeight - 6) : 0;
+    const blockHeight = baseHeight + Math.max(0, materiaExtraHeight);
 
-      case "Piety Materia I":
-        return join(BASE_PATH, "image", "materia", "piety_1.png");
-      case "Piety Materia II":
-        return join(BASE_PATH, "image", "materia", "piety_2.png");
-      case "Piety Materia III":
-        return join(BASE_PATH, "image", "materia", "piety_3.png");
-      case "Piety Materia IV":
-        return join(BASE_PATH, "image", "materia", "piety_4.png");
-      case "Piety Materia V":
-        return join(BASE_PATH, "image", "materia", "piety_5.png");
-      case "Piety Materia VI":
-        return join(BASE_PATH, "image", "materia", "piety_6.png");
-      case "Piety Materia VII":
-        return join(BASE_PATH, "image", "materia", "piety_7.png");
-      case "Piety Materia VIII":
-        return join(BASE_PATH, "image", "materia", "piety_8.png");
-      case "Piety Materia IX":
-        return join(BASE_PATH, "image", "materia", "piety_9.png");
-      case "Piety Materia X":
-        return join(BASE_PATH, "image", "materia", "piety_10.png");
-      case "Piety Materia XI":
-        return join(BASE_PATH, "image", "materia", "piety_11.png");
-      case "Piety Materia XII":
-        return join(BASE_PATH, "image", "materia", "piety_12.png");
+    this.ctx
+      .roundRect(
+        this.isLeft ? 5 : this.x + 5,
+        this.y,
+        this.width,
+        blockHeight,
+        borderRadius,
+      )
+      .fill();
 
-      case "Craftsman's Command Materia I":
-        return join(BASE_PATH, "image", "materia", "control_1.png");
-      case "Craftsman's Command Materia II":
-        return join(BASE_PATH, "image", "materia", "control_2.png");
-      case "Craftsman's Command Materia III":
-        return join(BASE_PATH, "image", "materia", "control_3.png");
-      case "Craftsman's Command Materia IV":
-        return join(BASE_PATH, "image", "materia", "control_4.png");
-      case "Craftsman's Command Materia V":
-        return join(BASE_PATH, "image", "materia", "control_5.png");
-      case "Craftsman's Command Materia VI":
-        return join(BASE_PATH, "image", "materia", "control_6.png");
-      case "Craftsman's Command Materia VII":
-        return join(BASE_PATH, "image", "materia", "control_7.png");
-      case "Craftsman's Command Materia VIII":
-        return join(BASE_PATH, "image", "materia", "control_8.png");
-      case "Craftsman's Command Materia IX":
-        return join(BASE_PATH, "image", "materia", "control_9.png");
-      case "Craftsman's Command Materia X":
-        return join(BASE_PATH, "image", "materia", "control_10.png");
-      case "Craftsman's Command Materia XI":
-        return join(BASE_PATH, "image", "materia", "control_11.png");
-      case "Craftsman's Command Materia XII":
-        return join(BASE_PATH, "image", "materia", "control_12.png");
+    this.x = this.isLeft ? this.x - 10 : this.x + 10;
+    this.y += 3;
 
-      case "Craftsman's Cunning Materia I":
-        return join(BASE_PATH, "image", "materia", "cp_1.png");
-      case "Craftsman's Cunning Materia II":
-        return join(BASE_PATH, "image", "materia", "cp_2.png");
-      case "Craftsman's Cunning Materia III":
-        return join(BASE_PATH, "image", "materia", "cp_3.png");
-      case "Craftsman's Cunning Materia IV":
-        return join(BASE_PATH, "image", "materia", "cp_4.png");
-      case "Craftsman's Cunning Materia V":
-        return join(BASE_PATH, "image", "materia", "cp_5.png");
-      case "Craftsman's Cunning Materia VI":
-        return join(BASE_PATH, "image", "materia", "cp_6.png");
-      case "Craftsman's Cunning Materia VII":
-        return join(BASE_PATH, "image", "materia", "cp_7.png");
-      case "Craftsman's Cunning Materia VIII":
-        return join(BASE_PATH, "image", "materia", "cp_8.png");
-      case "Craftsman's Cunning Materia IX":
-        return join(BASE_PATH, "image", "materia", "cp_9.png");
-      case "Craftsman's Cunning Materia X":
-        return join(BASE_PATH, "image", "materia", "cp_10.png");
-      case "Craftsman's Cunning Materia XI":
-        return join(BASE_PATH, "image", "materia", "cp_11.png");
-      case "Craftsman's Cunning Materia XII":
-        return join(BASE_PATH, "image", "materia", "cp_12.png");
+    const gearIcon = await loadImage(
+      gear ? gear.icon : this.getDefaultIcon(type),
+    );
+    this.ctx.drawImage(
+      gearIcon,
+      this.isLeft ? this.x - 35 : this.x + 5,
+      this.y,
+      30,
+      30,
+    );
 
-      case "Craftsman's Competence Materia I":
-        return join(BASE_PATH, "image", "materia", "cms_1.png");
-      case "Craftsman's Competence Materia II":
-        return join(BASE_PATH, "image", "materia", "cms_2.png");
-      case "Craftsman's Competence Materia III":
-        return join(BASE_PATH, "image", "materia", "cms_3.png");
-      case "Craftsman's Competence Materia IV":
-        return join(BASE_PATH, "image", "materia", "cms_4.png");
-      case "Craftsman's Competence Materia V":
-        return join(BASE_PATH, "image", "materia", "cms_5.png");
-      case "Craftsman's Competence Materia VI":
-        return join(BASE_PATH, "image", "materia", "cms_6.png");
-      case "Craftsman's Competence Materia VII":
-        return join(BASE_PATH, "image", "materia", "cms_7.png");
-      case "Craftsman's Competence Materia VIII":
-        return join(BASE_PATH, "image", "materia", "cms_8.png");
-      case "Craftsman's Competence Materia IX":
-        return join(BASE_PATH, "image", "materia", "cms_9.png");
-      case "Craftsman's Competence Materia X":
-        return join(BASE_PATH, "image", "materia", "cms_10.png");
-      case "Craftsman's Competence Materia XI":
-        return join(BASE_PATH, "image", "materia", "cms_11.png");
-      case "Craftsman's Competence Materia XII":
-        return join(BASE_PATH, "image", "materia", "cms_12.png");
+    if (!gear) {
+      this.x = this.isLeft ? this.x + 10 : this.x - 10;
+      this.y -= 4;
+      return;
+    }
 
-      case "Gatherer's Grasp Materia I":
-        return join(BASE_PATH, "image", "materia", "gp_1.png");
-      case "Gatherer's Grasp Materia II":
-        return join(BASE_PATH, "image", "materia", "gp_2.png");
-      case "Gatherer's Grasp Materia III":
-        return join(BASE_PATH, "image", "materia", "gp_3.png");
-      case "Gatherer's Grasp Materia IV":
-        return join(BASE_PATH, "image", "materia", "gp_4.png");
-      case "Gatherer's Grasp Materia V":
-        return join(BASE_PATH, "image", "materia", "gp_5.png");
-      case "Gatherer's Grasp Materia VI":
-        return join(BASE_PATH, "image", "materia", "gp_6.png");
-      case "Gatherer's Grasp Materia VII":
-        return join(BASE_PATH, "image", "materia", "gp_7.png");
-      case "Gatherer's Grasp Materia VIII":
-        return join(BASE_PATH, "image", "materia", "gp_8.png");
-      case "Gatherer's Grasp Materia IX":
-        return join(BASE_PATH, "image", "materia", "gp_9.png");
-      case "Gatherer's Grasp Materia X":
-        return join(BASE_PATH, "image", "materia", "gp_10.png");
-      case "Gatherer's Grasp Materia XI":
-        return join(BASE_PATH, "image", "materia", "gp_11.png");
-      case "Gatherer's Grasp Materia XII":
-        return join(BASE_PATH, "image", "materia", "gp_12.png");
+    let materiaY = this.y;
+    const materiaList = this.getMateriaList(gear);
 
-      case "Gatherer's Guerdon Materia I":
-        return join(BASE_PATH, "image", "materia", "gathering_1.png");
-      case "Gatherer's Guerdon Materia II":
-        return join(BASE_PATH, "image", "materia", "gathering_2.png");
-      case "Gatherer's Guerdon Materia III":
-        return join(BASE_PATH, "image", "materia", "gathering_3.png");
-      case "Gatherer's Guerdon Materia IV":
-        return join(BASE_PATH, "image", "materia", "gathering_4.png");
-      case "Gatherer's Guerdon Materia V":
-        return join(BASE_PATH, "image", "materia", "gathering_5.png");
-      case "Gatherer's Guerdon Materia VI":
-        return join(BASE_PATH, "image", "materia", "gathering_6.png");
-      case "Gatherer's Guerdon Materia VII":
-        return join(BASE_PATH, "image", "materia", "gathering_7.png");
-      case "Gatherer's Guerdon Materia VIII":
-        return join(BASE_PATH, "image", "materia", "gathering_8.png");
-      case "Gatherer's Guerdon Materia IX":
-        return join(BASE_PATH, "image", "materia", "gathering_9.png");
-      case "Gatherer's Guerdon Materia X":
-        return join(BASE_PATH, "image", "materia", "gathering_10.png");
-      case "Gatherer's Guerdon Materia XI":
-        return join(BASE_PATH, "image", "materia", "gathering_11.png");
-      case "Gatherer's Guerdon Materia XII":
-        return join(BASE_PATH, "image", "materia", "gathering_12.png");
+    if (materiaList.length > 0) {
+      this.ctx.font = `normal 12px roboto condensed`;
+      this.ctx.fillStyle = this.theme.block_content;
 
-      case "Gatherer's Guile Materia I":
-        return join(BASE_PATH, "image", "materia", "perception_1.png");
-      case "Gatherer's Guile Materia II":
-        return join(BASE_PATH, "image", "materia", "perception_2.png");
-      case "Gatherer's Guile Materia III":
-        return join(BASE_PATH, "image", "materia", "perception_3.png");
-      case "Gatherer's Guile Materia IV":
-        return join(BASE_PATH, "image", "materia", "perception_4.png");
-      case "Gatherer's Guile Materia V":
-        return join(BASE_PATH, "image", "materia", "perception_5.png");
-      case "Gatherer's Guile Materia VI":
-        return join(BASE_PATH, "image", "materia", "perception_6.png");
-      case "Gatherer's Guile Materia VII":
-        return join(BASE_PATH, "image", "materia", "perception_7.png");
-      case "Gatherer's Guile Materia VIII":
-        return join(BASE_PATH, "image", "materia", "perception_8.png");
-      case "Gatherer's Guile Materia IX":
-        return join(BASE_PATH, "image", "materia", "perception_9.png");
-      case "Gatherer's Guile Materia X":
-        return join(BASE_PATH, "image", "materia", "perception_10.png");
-      case "Gatherer's Guile Materia XI":
-        return join(BASE_PATH, "image", "materia", "perception_11.png");
-      case "Gatherer's Guile Materia XII":
-        return join(BASE_PATH, "image", "materia", "perception_12.png");
+      for (const materiaItem of materiaList) {
+        if (materiaItem.name) {
+          try {
+            const materiaIcon = await loadImage(MateriaIconService.getIconPath(materiaItem.name));
+            this.ctx.drawImage(
+              materiaIcon,
+              this.isLeft ? this.x - 45 - 20 : this.x + 45,
+              materiaY,
+              16,
+              16,
+            );
+          } catch (err) {
+            log.error(`Error loading materia icon: ${err instanceof Error ? err.stack : String(err)}`);
+          }
 
+          const materiaText = materiaItem.stats
+            ? `${materiaItem.name} (${this.getStatName(materiaItem.stats)})`
+            : materiaItem.name;
+
+          this.ctx.fillText(
+            materiaText,
+            this.isLeft ? this.x - 45 - 20 - 4 : this.x + 45 + 20 + 4,
+            materiaY + 2,
+            this.fWidth - 24,
+          );
+          materiaY += 16;
+        }
+      }
+    }
+
+    this.x = this.isLeft ? this.x + 10 : this.x - 10;
+    this.y -= 4;
+  }
+
+  private getStatName(stats: string): string {
+    const statMappings: Record<string, string> = {
+      "Critical Hit": "CRT",
+      "Determination": "DET",
+      "Direct Hit Rate": "DH",
+      "Tenacity": "TNC",
+      "Spell Speed": "SPS",
+      "Skill Speed": "SKS",
+      "Piety": "PIE",
+      "Craftsmanship": "CRFT",
+      "Control": "CNTL",
+      "CP": "CP",
+      "Gathering": "GATH",
+      "Perception": "PERC",
+      "GP": "GP",
+    };
+
+    let result = stats;
+    for (const [fullName, abbreviation] of Object.entries(statMappings)) {
+      // Replace the full stat name with abbreviation, keeping the rest (e.g., " +54")
+      result = result.replace(new RegExp(fullName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), abbreviation);
+    }
+    return result;
+  }
+
+  private getMateriaCount(gear: Equipment): number {
+    let count = 0;
+    if (gear.materia_1) count++;
+    if (gear.materia_2) count++;
+    if (gear.materia_3) count++;
+    if (gear.materia_4) count++;
+    if (gear.materia_5) count++;
+    return count;
+  }
+
+  private getMateriaList(gear: Equipment): Array<{ name: string; stats: string | null }> {
+    const list: Array<{ name: string; stats: string | null }> = [];
+    if (gear.materia_1) list.push({ name: gear.materia_1, stats: gear.materia_1_stats });
+    if (gear.materia_2) list.push({ name: gear.materia_2, stats: gear.materia_2_stats });
+    if (gear.materia_3) list.push({ name: gear.materia_3, stats: gear.materia_3_stats });
+    if (gear.materia_4) list.push({ name: gear.materia_4, stats: gear.materia_4_stats });
+    if (gear.materia_5) list.push({ name: gear.materia_5, stats: gear.materia_5_stats });
+    return list;
+  }
+
+  private getDefaultIcon(type: string): string {
+    switch (type) {
+      case "head":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_head"],
+        );
+      case "body":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_body"],
+        );
+      case "hands":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_hands"],
+        );
+      case "legs":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_legs"],
+        );
+      case "feet":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_feet"],
+        );
+      case "earrings":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_earrings"],
+        );
+      case "necklace":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_necklace"],
+        );
+      case "bracelets":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_bracelets"],
+        );
+      case "ring":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_ring"],
+        );
+      case "facewear":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_facewear"],
+        );
+      case "soulcrystal":
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_soulcrystal"],
+        );
       default:
-        log.error(`[ERROR] Materia '${materia}' doesn't exist.'`);
-        return join(BASE_PATH, "image", "materia", "fallback.png");
+        return join(
+          BASE_PATH,
+          "image",
+          "gear",
+          this.theme["image_folder"],
+          this.theme["no_weapon"],
+        );
     }
   }
 }

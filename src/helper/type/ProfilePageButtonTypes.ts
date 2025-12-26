@@ -5,8 +5,12 @@ export type ProfilePageButton =
   | "attributes"
   | "portrait"
   | "dowdom"
-  | "dohdol";
+  | "dohdol"
+  | "overview"
+  | "materiadetails";
 
 export type SubProfilePageButton =
   | "dowdom"
-  | "dohdol";
+  | "dohdol"
+  | "overview"
+  | "materiadetails";

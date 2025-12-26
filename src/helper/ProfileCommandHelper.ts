@@ -45,9 +45,15 @@ export class ProfileCommandHandler {
       subProfilePage = profilePage;
     } else if (profilePage === "classesjobs" && !subProfilePage) {
       subProfilePage = "dowdom";
+    } else if (profilePage === "overview" || profilePage === "materiadetails") {
+      subProfilePage = profilePage;
     }
 
-    const actualProfilePage = profilePage === "dowdom" || profilePage === "dohdol" ? "classesjobs" : profilePage;
+    const actualProfilePage = profilePage === "dowdom" || profilePage === "dohdol"
+      ? "classesjobs"
+      : profilePage === "overview" || profilePage === "materiadetails"
+      ? "equipment"
+      : profilePage;
 
     if (isMe) {
       ProfilePagesRepository.set(userId, actualProfilePage, subProfilePage);
