@@ -189,9 +189,7 @@ export class BetaComponentsV2Service {
     currentComponents += 1;
 
     if (data.banner) {
-      const bannerGallery = new MediaGalleryBuilder().addItems((item) =>
-        item.setDescription("Banner image").setURL(data.banner!)
-      );
+      const bannerGallery = new MediaGalleryBuilder().addItems((item) => item.setURL(data.banner!));
       container.addMediaGalleryComponents(bannerGallery);
       currentComponents += 2;
     }
@@ -268,7 +266,7 @@ export class BetaComponentsV2Service {
         const gallery = new MediaGalleryBuilder();
 
         for (let j = 0; j < maxItems; j++) {
-          gallery.addItems((item) => item.setDescription("Image").setURL(component.urls[j]));
+          gallery.addItems((item) => item.setURL(component.urls[j]));
         }
 
         container.addMediaGalleryComponents(gallery);
