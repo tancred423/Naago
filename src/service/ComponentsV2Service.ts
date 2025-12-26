@@ -2,6 +2,8 @@ import { ContainerBuilder, MediaGalleryBuilder, MessageFlags, TextChannel, time,
 import { DiscordComponentsV2 } from "../naagostone/type/DiscordComponentsV2.ts";
 import { NewsType } from "../database/schema/lodestone-news.ts";
 import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
+import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
+import { Setup } from "../database/schema/setups.ts";
 import { GlobalClient } from "../index.ts";
 import * as log from "@std/log";
 
@@ -56,21 +58,6 @@ function getColorEnvKey(type: NewsType): string {
   }
 }
 
-function getBetaChannelEnvKey(type: NewsType): string {
-  switch (type) {
-    case "topics":
-      return "BETA_CHANNEL_ID_TOPICS";
-    case "notices":
-      return "BETA_CHANNEL_ID_NOTICES";
-    case "maintenances":
-      return "BETA_CHANNEL_ID_MAINTENANCES";
-    case "updates":
-      return "BETA_CHANNEL_ID_UPDATES";
-    case "statuses":
-      return "BETA_CHANNEL_ID_STATUSES";
-  }
-}
-
 function getNewsEmojiEnvKey(type: NewsType): string {
   switch (type) {
     case "topics":
@@ -86,45 +73,45 @@ function getNewsEmojiEnvKey(type: NewsType): string {
   }
 }
 
-export class BetaComponentsV2Service {
-  public static async sendToBetaChannel(newsType: NewsType, data: NewsData, newsId?: number): Promise<void> {
+export class ComponentsV2Service {
+  public static async send(newsType: NewsType, data: NewsData, newsId?: number): Promise<void> {
     const client = GlobalClient.client;
     if (!client) return;
 
-    const betaGuildId = Deno.env.get("BETA_GUILD_ID_NEWS");
-    const betaChannelId = Deno.env.get(getBetaChannelEnvKey(newsType));
-
-    if (!betaGuildId || !betaChannelId) return;
-
     if (!data.description.discord_components_v2) return;
 
-    try {
-      const guild = await client.guilds.fetch(betaGuildId);
-      if (!guild) return;
-      const channel = await guild.channels.fetch(betaChannelId);
-      if (!channel) return;
+    const setups: Setup[] = await SetupsRepository.getAllByType(newsType);
 
-      const container = this.buildContainer(newsType, data);
-      if (!container) return;
+    for (const setup of setups) {
+      try {
+        const guild = await client.guilds.fetch(setup.guildId);
+        if (!guild) continue;
+        const channel = await guild.channels.fetch(setup.channelId);
+        if (!channel) continue;
 
-      const message = await (channel as TextChannel).send({
-        components: [container],
-        flags: MessageFlags.IsComponentsV2,
-      });
+        const container = this.buildContainer(newsType, data);
+        if (!container) continue;
 
-      if (newsId !== undefined) {
-        await PostedNewsMessagesRepository.add(
-          newsType,
-          newsId,
-          betaGuildId,
-          betaChannelId,
-          message.id,
-          true,
-        );
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        log.error(`[BETA V2] Sending ${newsType} to beta channel was NOT successful: ${error.stack}`);
+        const message = await (channel as TextChannel).send({
+          components: [container],
+          flags: MessageFlags.IsComponentsV2,
+        });
+
+        if (newsId !== undefined) {
+          await PostedNewsMessagesRepository.add(
+            newsType,
+            newsId,
+            setup.guildId,
+            setup.channelId,
+            message.id,
+            true,
+          );
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          log.error(`[V2] Sending ${newsType} to ${setup.guildId} was NOT successful: ${error.stack}`);
+        }
+        continue;
       }
     }
   }
@@ -173,7 +160,7 @@ export class BetaComponentsV2Service {
 
     if (totalCharacters > MAX_TOTAL_CHARACTERS || totalComponents > MAX_TOTAL_COMPONENTS) {
       log.warn(
-        `[BETA V2] ${newsType} message exceeds limits (chars: ${totalCharacters}/${MAX_TOTAL_CHARACTERS}, components: ${totalComponents}/${MAX_TOTAL_COMPONENTS}). Truncating...`,
+        `[V2] ${newsType} message exceeds limits (chars: ${totalCharacters}/${MAX_TOTAL_CHARACTERS}, components: ${totalComponents}/${MAX_TOTAL_COMPONENTS}). Truncating...`,
       );
     }
 

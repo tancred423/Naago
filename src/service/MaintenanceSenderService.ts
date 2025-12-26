@@ -1,16 +1,10 @@
 import moment from "moment";
-import { TextChannel } from "discord.js";
 import { StringManipulationService } from "./StringManipulationService.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { Maintenance } from "../naagostone/type/Maintenance.ts";
 import { MaintenancesRepository } from "../database/repository/MaintenancesRepository.ts";
-import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
-import { GlobalClient } from "../index.ts";
-import { Setup } from "../database/schema/setups.ts";
 import { MaintenanceData } from "../database/schema/lodestone-news.ts";
-import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
-import { DiscordEmbedService } from "./DiscordEmbedService.ts";
-import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
+import { ComponentsV2Service } from "./ComponentsV2Service.ts";
 import { NewsMessageUpdateService } from "./NewsMessageUpdateService.ts";
 import * as log from "@std/log";
 
@@ -59,11 +53,15 @@ export class MaintenanceSenderService {
         continue;
       }
 
-      if (saveLodestoneNews) {
-        const newsId = await MaintenancesRepository.add(maintenance);
-        if (sendLodestoneNews && shouldSend) await this.send(maintenance, newsId);
-      } else if (sendLodestoneNews && shouldSend) {
-        await this.send(maintenance);
+      const newsId = saveLodestoneNews ? await MaintenancesRepository.add(maintenance) : undefined;
+      if (sendLodestoneNews && shouldSend) {
+        await ComponentsV2Service.send("maintenances", {
+          title: maintenance.title,
+          link: maintenance.link,
+          date: maintenance.date,
+          tag: maintenance.tag,
+          description: maintenance.description,
+        }, newsId);
       }
     }
 
@@ -71,12 +69,13 @@ export class MaintenanceSenderService {
   }
 
   private static async checkForUpdates(existing: MaintenanceData, maintenance: Maintenance): Promise<void> {
-    const { descriptionChanged, descriptionV2Changed } = MaintenancesRepository.hasDescriptionChanged(
-      existing,
-      maintenance,
-    );
+    const { descriptionChanged: _descriptionChanged, descriptionV2Changed } = MaintenancesRepository
+      .hasDescriptionChanged(
+        existing,
+        maintenance,
+      );
 
-    if (!descriptionChanged && !descriptionV2Changed) return;
+    if (!descriptionV2Changed) return;
 
     if (saveLodestoneNews) {
       await MaintenancesRepository.updateDescriptions(
@@ -98,55 +97,10 @@ export class MaintenanceSenderService {
         tag: maintenance.tag,
         description: maintenance.description,
       },
-      () => DiscordEmbedService.getMaintenanceEmbed(maintenance),
-      descriptionChanged,
-      descriptionV2Changed,
     );
 
     if (updated > 0 || failed > 0) {
       log.info(`[MAINTENANCES] Updated ${updated} messages, ${failed} failed for maintenance: ${maintenance.title}`);
     }
-  }
-
-  private static async send(maintenance: Maintenance, newsId?: number): Promise<void> {
-    const client = GlobalClient.client;
-    if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAllByType("maintenances");
-
-    for (const setup of setups) {
-      try {
-        const guild = await client.guilds.fetch(setup.guildId);
-        if (!guild) continue;
-        const channel = await guild.channels.fetch(setup.channelId);
-        if (!channel) continue;
-
-        const embed = DiscordEmbedService.getMaintenanceEmbed(maintenance);
-        const message = await (channel as TextChannel).send({ embeds: [embed] });
-
-        if (newsId !== undefined) {
-          await PostedNewsMessagesRepository.add(
-            "maintenances",
-            newsId,
-            setup.guildId,
-            setup.channelId,
-            message.id,
-            false,
-          );
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          log.error(`[MAINTENANCES] Sending maintenance to ${setup.guildId} was NOT successful: ${error.message}`);
-        }
-        continue;
-      }
-    }
-
-    await BetaComponentsV2Service.sendToBetaChannel("maintenances", {
-      title: maintenance.title,
-      link: maintenance.link,
-      date: maintenance.date,
-      tag: maintenance.tag,
-      description: maintenance.description,
-    }, newsId);
   }
 }

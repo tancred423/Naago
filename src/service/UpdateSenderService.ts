@@ -1,16 +1,10 @@
 import moment from "moment";
-import { TextChannel } from "discord.js";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { Update } from "../naagostone/type/Updates.ts";
 import { UpdatesRepository } from "../database/repository/UpdatesRepository.ts";
-import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
-import { GlobalClient } from "../index.ts";
-import { Setup } from "../database/schema/setups.ts";
 import { UpdateData } from "../database/schema/lodestone-news.ts";
-import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
-import { DiscordEmbedService } from "./DiscordEmbedService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
-import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
+import { ComponentsV2Service } from "./ComponentsV2Service.ts";
 import { NewsMessageUpdateService } from "./NewsMessageUpdateService.ts";
 import * as log from "@std/log";
 
@@ -58,11 +52,14 @@ export class UpdateSenderService {
         continue;
       }
 
-      if (saveLodestoneNews) {
-        const newsId = await UpdatesRepository.add(update);
-        if (sendLodestoneNews && shouldSend) await this.send(update, newsId);
-      } else if (sendLodestoneNews && shouldSend) {
-        await this.send(update);
+      const newsId = saveLodestoneNews ? await UpdatesRepository.add(update) : undefined;
+      if (sendLodestoneNews && shouldSend) {
+        await ComponentsV2Service.send("updates", {
+          title: update.title,
+          link: update.link,
+          date: update.date,
+          description: update.description,
+        }, newsId);
       }
     }
 
@@ -70,9 +67,12 @@ export class UpdateSenderService {
   }
 
   private static async checkForUpdates(existing: UpdateData, update: Update): Promise<void> {
-    const { descriptionChanged, descriptionV2Changed } = UpdatesRepository.hasDescriptionChanged(existing, update);
+    const { descriptionChanged: _descriptionChanged, descriptionV2Changed } = UpdatesRepository.hasDescriptionChanged(
+      existing,
+      update,
+    );
 
-    if (!descriptionChanged && !descriptionV2Changed) return;
+    if (!descriptionV2Changed) return;
 
     if (saveLodestoneNews) {
       await UpdatesRepository.updateDescriptions(
@@ -93,54 +93,10 @@ export class UpdateSenderService {
         date: update.date,
         description: update.description,
       },
-      () => DiscordEmbedService.getUpdatesEmbed(update),
-      descriptionChanged,
-      descriptionV2Changed,
     );
 
     if (updated > 0 || failed > 0) {
       log.info(`[UPDATES] Updated ${updated} messages, ${failed} failed for update: ${update.title}`);
     }
-  }
-
-  public static async send(update: Update, newsId?: number): Promise<void> {
-    const client = GlobalClient.client;
-    if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAllByType("updates");
-
-    for (const setup of setups) {
-      try {
-        const guild = await client.guilds.fetch(setup.guildId);
-        if (!guild) continue;
-        const channel = await guild.channels.fetch(setup.channelId);
-        if (!channel) continue;
-
-        const embed = DiscordEmbedService.getUpdatesEmbed(update);
-        const message = await (channel as TextChannel).send({ embeds: [embed] });
-
-        if (newsId !== undefined) {
-          await PostedNewsMessagesRepository.add(
-            "updates",
-            newsId,
-            setup.guildId,
-            setup.channelId,
-            message.id,
-            false,
-          );
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          log.error(`[UPDATES] Sending update to ${setup.guildId} was NOT successful: ${error.message}`);
-        }
-        continue;
-      }
-    }
-
-    await BetaComponentsV2Service.sendToBetaChannel("updates", {
-      title: update.title,
-      link: update.link,
-      date: update.date,
-      description: update.description,
-    }, newsId);
   }
 }
