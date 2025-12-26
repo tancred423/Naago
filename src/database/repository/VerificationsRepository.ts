@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { type Verification, verifications } from "../schema/verifications.ts";
 import { database } from "../connection.ts";
 
@@ -45,33 +45,12 @@ export class VerificationsRepository {
       ));
   }
 
-  // static async getCharacter(
-  //   userId: string,
-  // ): Promise<{ id: number; name: string; server: any } | undefined> {
-  //   const verification = await database
-  //     .select({ characterId: verifications.characterId })
-  //     .from(verifications)
-  //     .where(eq(verifications.userId, userId))
-  //     .limit(1);
+  public static async countVerifiedCharacters(): Promise<number> {
+    const result = await database
+      .select({ count: sql<number>`COUNT(DISTINCT ${verifications.characterId})` })
+      .from(verifications)
+      .where(eq(verifications.isVerified, true));
 
-  //   if (!verification[0]) return undefined;
-
-  //   const characterId = verification[0].characterId;
-
-  //   const charData = await database
-  //     .select({ jsonString: characterData.jsonString })
-  //     .from(characterData)
-  //     .where(eq(characterData.characterId, characterId))
-  //     .limit(1);
-
-  //   const parsedCharacterData = charData[0]
-  //     ? JSON.parse(charData[0].jsonString!)
-  //     : undefined;
-
-  //   return {
-  //     id: parseInt(characterId),
-  //     name: parsedCharacterData?.name,
-  //     server: parsedCharacterData?.server,
-  //   };
-  // }
+    return result[0]?.count ?? 0;
+  }
 }

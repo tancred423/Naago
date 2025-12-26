@@ -3,7 +3,7 @@ import { TextChannel, time, TimestampStyles } from "discord.js";
 import { Topic } from "../naagostone/type/Topic.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { TopicsRepository } from "../database/repository/TopicsRepository.ts";
-import { GlobalClient } from "../index.ts";
+import { GlobalClient } from "../GlobalClient.ts";
 import * as log from "@std/log";
 import { Setup } from "../database/schema/setups.ts";
 import { TopicData } from "../database/schema/lodestone-news.ts";
