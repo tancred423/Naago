@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Last Updated: 2025/11/15**
+**Last Updated: 2025/12/26**
 
 ## 1. Acceptance of Terms
 
@@ -79,7 +79,7 @@ The Bot stores the following data:
 **Important Note on Character IDs:**
 
 All references to "Character ID" in this document refer to the **public Lodestone character ID** (visible in Lodestone
-URLs, e.g., `https://na.finalfantasyxiv.com/lodestone/character/12345/`). This is **NOT** the internal game account ID
+URLs, e.g., `https://eu.finalfantasyxiv.com/lodestone/character/12345/`). This is **NOT** the internal game account ID
 or any other private identifier. The Bot only uses public Lodestone character IDs that are already visible to anyone who
 views a character's Lodestone profile.
 
@@ -100,6 +100,21 @@ views a character's Lodestone profile.
 - **Guild ID** - Your Discord server's unique identifier
 - **Channel ID** - The channel where Lodestone news notifications should be sent
 - **Notification Type** - Types of notifications enabled (Topics, Notices, Maintenances, Updates, Statuses)
+
+**Anonymous Statistics:**
+
+The Bot collects anonymous usage statistics to understand how the service is used. This includes:
+
+- Daily server count
+- Daily active user count (user IDs are hashed and cannot be reversed)
+- Daily command usage counts (which commands are used, not by whom)
+- Daily profile button usage counts
+- Daily theme usage counts
+- Daily count of servers with Lodestone news configured
+- Daily count of verified characters
+
+All statistics are completely anonymous - user IDs are hashed using SHA-256 and cannot be linked back to individual
+users. No personal information is collected for statistics.
 
 ### 4.2 Data Deletion
 

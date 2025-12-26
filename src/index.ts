@@ -28,6 +28,8 @@ import { ModalInteractionHandler } from "./handler/ModalInteractionHandler.ts";
 import { Command } from "./command/type/Command.ts";
 import { SetupsRepository } from "./database/repository/SetupsRepository.ts";
 import { TopicsRepository } from "./database/repository/TopicsRepository.ts";
+import { StatisticsService } from "./service/StatisticsService.ts";
+import { GlobalClient } from "./GlobalClient.ts";
 
 // Env
 await load({ export: true });
@@ -47,11 +49,6 @@ log.setup({
     },
   },
 });
-
-// Client
-export class GlobalClient {
-  public static client: Client;
-}
 
 // Moment
 moment.locale("en");
@@ -155,6 +152,27 @@ client.once("clientReady", () => {
   cron.schedule("0 3 * * *", async () => {
     await cleanupOrphanedGuilds().catch((err) => {
       log.error(`Failed to cleanup orphaned guilds: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+  });
+
+  cron.schedule("5 3 * * *", async () => {
+    await StatisticsService.recordServerCount().catch((err) => {
+      log.error(`Failed to record server count: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await StatisticsService.aggregateDailyStatistics().catch((err) => {
+      log.error(`Failed to aggregate daily statistics: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await StatisticsService.recordServerCount().catch((err) => {
+      log.error(`Failed to record server count: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await StatisticsService.recordLodestoneNewsSetups().catch((err) => {
+      log.error(`Failed to record lodestone news setups: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await StatisticsService.recordVerifiedCharacters().catch((err) => {
+      log.error(`Failed to record verified characters: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await StatisticsService.cleanupOldActiveUserData().catch((err) => {
+      log.error(`Failed to cleanup old active user data: ${err instanceof Error ? err.stack : String(err)}`);
     });
   });
 });
@@ -310,6 +328,13 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     try {
+      StatisticsService.trackActiveUser(interaction.user.id).catch((err) => {
+        log.error(`Failed to track active user: ${err instanceof Error ? err.stack : String(err)}`);
+      });
+      StatisticsService.trackCommand(interaction.commandName).catch((err) => {
+        log.error(`Failed to track command: ${err instanceof Error ? err.stack : String(err)}`);
+      });
+
       await command.execute(interaction as CommandInteraction);
     } catch (err) {
       log.error(
@@ -348,6 +373,10 @@ client.on("interactionCreate", async (interaction) => {
     }
   } else if (interaction.isButton()) {
     try {
+      StatisticsService.trackActiveUser(interaction.user.id).catch((err) => {
+        log.error(`Failed to track active user: ${err instanceof Error ? err.stack : String(err)}`);
+      });
+
       await ButtonInteractionHandler.execute(interaction as ButtonInteraction);
     } catch (err) {
       log.error(
@@ -363,6 +392,10 @@ client.on("interactionCreate", async (interaction) => {
     }
   } else if (interaction.isModalSubmit()) {
     try {
+      StatisticsService.trackActiveUser(interaction.user.id).catch((err) => {
+        log.error(`Failed to track active user: ${err instanceof Error ? err.stack : String(err)}`);
+      });
+
       await ModalInteractionHandler.execute(
         interaction as ModalSubmitInteraction,
       );
@@ -394,6 +427,13 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     try {
+      StatisticsService.trackActiveUser(interaction.user.id).catch((err) => {
+        log.error(`Failed to track active user: ${err instanceof Error ? err.stack : String(err)}`);
+      });
+      StatisticsService.trackCommand(interaction.commandName).catch((err) => {
+        log.error(`Failed to track command: ${err instanceof Error ? err.stack : String(err)}`);
+      });
+
       await command.execute(interaction as ContextMenuCommandInteraction);
     } catch (err) {
       log.error(

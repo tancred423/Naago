@@ -4,7 +4,7 @@ import { NewsType } from "../database/schema/lodestone-news.ts";
 import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { Setup } from "../database/schema/setups.ts";
-import { GlobalClient } from "../index.ts";
+import { GlobalClient } from "../GlobalClient.ts";
 import * as log from "@std/log";
 
 const MAX_TOTAL_CHARACTERS = 4000;

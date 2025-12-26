@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated: 2025/11/15**
+**Last Updated: 2025/12/26**
 
 ## 1. Introduction
 
@@ -32,7 +32,7 @@ When character information is requested, we cache:
 **Important Note on Character IDs:**
 
 All references to "Character ID" in this document refer to the **public Lodestone character ID** (visible in Lodestone
-URLs, e.g., `https://na.finalfantasyxiv.com/lodestone/character/12345/`). This is **NOT** the internal game account ID
+URLs, e.g., `https://eu.finalfantasyxiv.com/lodestone/character/12345/`). This is **NOT** the internal game account ID
 or any other private identifier. The Bot only uses public Lodestone character IDs that are already visible to anyone who
 views a character's Lodestone profile.
 
@@ -64,13 +64,29 @@ When you configure Lodestone notifications using `/setup lodestone`, we store:
 - **Channel ID** - The text channel ID where you want to receive notifications
 - **Notification Type** - Types of notifications enabled (Topics, Notices, Maintenances, Updates, Statuses)
 
-### 2.6 What We Do NOT Collect
+### 2.6 Anonymous Statistics
+
+The Bot collects anonymous usage statistics to understand service usage patterns:
+
+- **Daily server count** - Total number of servers the bot is in
+- **Daily active user count** - Number of unique users who interact with the bot (user IDs are hashed with SHA-256 and
+  cannot be reversed)
+- **Daily command usage counts** - Which commands are used and how often (not who uses them)
+- **Daily profile button usage counts** - Which profile buttons are clicked and how often
+- **Daily theme usage counts** - Which themes are used and how often
+- **Daily lodestone news setup count** - How many servers have news notifications configured
+- **Daily verified characters count** - Total number of verified characters
+
+All statistics are completely anonymous. User IDs are hashed using SHA-256 with a salt, making it impossible to identify
+individual users from the statistics data.
+
+### 2.7 What We Do NOT Collect
 
 The Bot does **not** collect, store, or process:
 
 - **No message content** - We don't read or store any Discord messages
-- **No usage analytics** - We don't track how often commands are used or by whom
-- **No personal information beyond what's listed above** - Only IDs and configuration data
+- **No personal information in statistics** - Statistics only contain anonymous counts and usage patterns
+- **No identifiable user data in statistics** - User IDs are hashed and cannot be reversed
 
 ## 3. What the Bot Does
 
@@ -112,6 +128,8 @@ Data collection is based on:
 - **Favorites** - Kept until you remove them or delete your verification
 - **Profile settings** - Kept while your character is verified
 - **Guild configuration** - Kept while the bot is in your server and the channel exists
+- **Anonymous statistics** - Daily aggregated statistics are kept indefinitely; temporary tracking data (hashed user
+  IDs) is deleted after 7 days
 
 ### 5.2 Automatic Deletion
 

@@ -5,6 +5,7 @@ import moment from "moment";
 import { Buffer } from "node:buffer";
 import { Character, ClassJob, Equipment } from "../naagostone/type/CharacterTypes.ts";
 import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
+import { StatisticsService } from "./StatisticsService.ts";
 import * as log from "@std/log";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -126,6 +127,12 @@ class Profile {
 
   private async getTheme(): Promise<Theme> {
     const themeName = await ThemeRepository.get(this.character.id);
+
+    // Track theme usage
+    StatisticsService.trackTheme(themeName).catch((err) => {
+      log.error(`Failed to track theme usage: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+
     const themeFile = readFileSync(join(BASE_PATH, "theme", `${themeName}.json`), "utf-8");
     return JSON.parse(themeFile);
   }

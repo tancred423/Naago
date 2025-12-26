@@ -8,6 +8,7 @@ import { ProfileCommandHandler } from "../helper/ProfileCommandHelper.ts";
 import { VerifyCommandHelper } from "../helper/VerifyCommandHelper.ts";
 import { WorldStatusCommandHelper } from "../helper/WorldStatusCommandHelper.ts";
 import { WorldStatusUnavailableError } from "../naagostone/error/WorldStatusUnavailableError.ts";
+import { StatisticsService } from "../service/StatisticsService.ts";
 import * as log from "@std/log";
 
 export class ButtonInteractionHandler {
@@ -46,6 +47,13 @@ export class ButtonInteractionHandler {
 
     switch (commandName) {
       case "profile": {
+        if (buttonIdSplit.length >= 2) {
+          const buttonName = buttonIdSplit[1];
+          StatisticsService.trackProfileButton(buttonName).catch((err) => {
+            log.error(`Failed to track profile button: ${err instanceof Error ? err.stack : String(err)}`);
+          });
+        }
+
         const content = StringManipulationService.buildLoadingText("Generating profile image...");
         await interaction.message.edit({ content });
         await interaction.deferUpdate();

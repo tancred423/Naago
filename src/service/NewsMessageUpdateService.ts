@@ -1,5 +1,5 @@
 import { MessageFlags, TextChannel } from "discord.js";
-import { GlobalClient } from "../index.ts";
+import { GlobalClient } from "../GlobalClient.ts";
 import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
 import { NewsType, PostedNewsMessage } from "../database/schema/lodestone-news.ts";
 import { ComponentsV2Service, NewsData } from "./ComponentsV2Service.ts";
