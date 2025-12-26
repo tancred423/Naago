@@ -1,17 +1,11 @@
 import moment from "moment";
-import { TextChannel } from "discord.js";
 import { StringManipulationService } from "./StringManipulationService.ts";
 import { NoticesRepository } from "../database/repository/NoticesRepository.ts";
-import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { Notice } from "../naagostone/type/Notice.ts";
-import { GlobalClient } from "../index.ts";
-import { Setup } from "../database/schema/setups.ts";
 import { NoticeData } from "../database/schema/lodestone-news.ts";
-import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
-import { DiscordEmbedService } from "./DiscordEmbedService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
-import { BetaComponentsV2Service } from "./BetaComponentsV2Service.ts";
+import { ComponentsV2Service } from "./ComponentsV2Service.ts";
 import { NewsMessageUpdateService } from "./NewsMessageUpdateService.ts";
 import * as log from "@std/log";
 
@@ -61,11 +55,15 @@ export class NoticeSenderService {
         continue;
       }
 
-      if (saveLodestoneNews) {
-        const newsId = await NoticesRepository.add(notice);
-        if (sendLodestoneNews && shouldSend) await this.send(notice, newsId);
-      } else if (sendLodestoneNews && shouldSend) {
-        await this.send(notice);
+      const newsId = saveLodestoneNews ? await NoticesRepository.add(notice) : undefined;
+      if (sendLodestoneNews && shouldSend) {
+        await ComponentsV2Service.send("notices", {
+          title: notice.title,
+          link: notice.link,
+          date: notice.date,
+          tag: notice.tag,
+          description: notice.description,
+        }, newsId);
       }
     }
 
@@ -73,9 +71,12 @@ export class NoticeSenderService {
   }
 
   private static async checkForUpdates(existing: NoticeData, notice: Notice): Promise<void> {
-    const { descriptionChanged, descriptionV2Changed } = NoticesRepository.hasDescriptionChanged(existing, notice);
+    const { descriptionChanged: _descriptionChanged, descriptionV2Changed } = NoticesRepository.hasDescriptionChanged(
+      existing,
+      notice,
+    );
 
-    if (!descriptionChanged && !descriptionV2Changed) return;
+    if (!descriptionV2Changed) return;
 
     if (saveLodestoneNews) {
       await NoticesRepository.updateDescriptions(
@@ -97,55 +98,10 @@ export class NoticeSenderService {
         tag: notice.tag,
         description: notice.description,
       },
-      () => DiscordEmbedService.getNoticesEmbed(notice),
-      descriptionChanged,
-      descriptionV2Changed,
     );
 
     if (updated > 0 || failed > 0) {
       log.info(`[NOTICES] Updated ${updated} messages, ${failed} failed for notice: ${notice.title}`);
     }
-  }
-
-  public static async send(notice: Notice, newsId?: number): Promise<void> {
-    const client = GlobalClient.client;
-    if (!client) return;
-    const setups: Setup[] = await SetupsRepository.getAllByType("notices");
-
-    for (const setup of setups) {
-      try {
-        const guild = await client.guilds.fetch(setup.guildId);
-        if (!guild) continue;
-        const channel = await guild.channels.fetch(setup.channelId);
-        if (!channel) continue;
-
-        const embed = DiscordEmbedService.getNoticesEmbed(notice);
-        const message = await (channel as TextChannel).send({ embeds: [embed] });
-
-        if (newsId !== undefined) {
-          await PostedNewsMessagesRepository.add(
-            "notices",
-            newsId,
-            setup.guildId,
-            setup.channelId,
-            message.id,
-            false,
-          );
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          log.error(`[NOTICES] Sending notice to ${setup.guildId} was NOT successful: ${error.message}`);
-        }
-        continue;
-      }
-    }
-
-    await BetaComponentsV2Service.sendToBetaChannel("notices", {
-      title: notice.title,
-      link: notice.link,
-      date: notice.date,
-      tag: notice.tag,
-      description: notice.description,
-    }, newsId);
   }
 }
