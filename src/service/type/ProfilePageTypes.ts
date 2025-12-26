@@ -5,4 +5,4 @@ export type ProfilePage =
   | "attributes"
   | "portrait";
 
-export type SubProfilePage = "dowdom" | "dohdol" | null;
+export type SubProfilePage = "dowdom" | "dohdol" | "overview" | "materiadetails" | null;
