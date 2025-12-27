@@ -11,6 +11,9 @@ export const topicData = mysqlTable("topic_data", {
   descriptionV2: json("description_v2").$type<DiscordComponentsV2>(),
   timestampLiveLetter: timestamp("timestamp_live_letter"),
   liveLetterAnnounced: int("live_letter_announced").notNull().default(0),
+  eventType: varchar("event_type", { length: 255 }),
+  eventFrom: timestamp("event_from"),
+  eventTo: timestamp("event_to"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 }, (table) => ({
