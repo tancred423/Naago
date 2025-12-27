@@ -151,6 +151,12 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
+          name: "/events",
+          value: "- Lists all currently ongoing and upcoming FFXIV events." +
+            "\n- Shows seasonal events, Moogle Treasure Troves, and Live Letters.",
+          inline: false,
+        },
+        {
           name: "/help",
           value: "- You are already here " + DiscordEmojiService.getAsMarkdown("EMOJI_DOGGO_SMILE"),
           inline: false,

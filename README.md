@@ -28,6 +28,7 @@ to add the bot to your server.
 - `/profile favorite` - Get a favorite character's profile.
 - `/favorite add` - Add a character to your favorites.
 - `/favorite remove` - Remove a character from your favorites.
+- `/events` - Lists all currently ongoing and upcoming FFXIV events.
 - `/liveletter` - Shows information about the next or current Live Letter.
 - `/maintenance` - Current maintenances if any.
 - `/worldstatus` - Shows server status, character creation status and server congestion.
