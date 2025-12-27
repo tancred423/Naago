@@ -1,6 +1,5 @@
 import { index, int, mysqlTable, primaryKey, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-// Server count tracking - daily snapshots
 export const statsServerCounts = mysqlTable("stats_server_counts", {
   date: timestamp("date").notNull(),
   count: int("count").notNull(),
@@ -11,7 +10,7 @@ export const statsServerCounts = mysqlTable("stats_server_counts", {
   dateIdx: index("idx_stats_server_counts_date").on(table.date),
 }));
 
-// Active users daily tracking - temporary table for tracking hashed user IDs per day
+// Temporary table for tracking hashed user IDs per day
 export const statsActiveUsersDaily = mysqlTable("stats_active_users_daily", {
   hashedUserId: varchar("hashed_user_id", { length: 64 }).notNull(),
   date: timestamp("date").notNull(),
@@ -22,7 +21,6 @@ export const statsActiveUsersDaily = mysqlTable("stats_active_users_daily", {
   dateIdx: index("idx_stats_active_users_daily_date").on(table.date),
 }));
 
-// Daily statistics - aggregated daily stats
 export const statsDailyStatistics = mysqlTable("stats_daily_statistics", {
   date: timestamp("date").notNull(),
   activeUserCount: int("active_user_count").notNull().default(0),
@@ -33,7 +31,6 @@ export const statsDailyStatistics = mysqlTable("stats_daily_statistics", {
   dateIdx: index("idx_stats_daily_statistics_date").on(table.date),
 }));
 
-// Command usage tracking - daily command counts
 export const statsCommandUsage = mysqlTable("stats_command_usage", {
   date: timestamp("date").notNull(),
   commandName: varchar("command_name", { length: 100 }).notNull(),
@@ -46,7 +43,6 @@ export const statsCommandUsage = mysqlTable("stats_command_usage", {
   commandIdx: index("idx_stats_command_usage_command").on(table.commandName),
 }));
 
-// Profile button usage tracking - daily button click counts
 export const statsProfileButtonUsage = mysqlTable("stats_profile_button_usage", {
   date: timestamp("date").notNull(),
   buttonName: varchar("button_name", { length: 100 }).notNull(),
@@ -59,7 +55,6 @@ export const statsProfileButtonUsage = mysqlTable("stats_profile_button_usage", 
   buttonIdx: index("idx_stats_profile_button_usage_button").on(table.buttonName),
 }));
 
-// Lodestone news setups tracking - daily count of servers with lodestone news configured
 export const statsLodestoneNewsSetups = mysqlTable("stats_lodestone_news_setups", {
   date: timestamp("date").notNull(),
   serverCount: int("server_count").notNull(),
@@ -70,7 +65,6 @@ export const statsLodestoneNewsSetups = mysqlTable("stats_lodestone_news_setups"
   dateIdx: index("idx_stats_lodestone_news_setups_date").on(table.date),
 }));
 
-// Verified characters tracking - daily count of unique verified characters
 export const statsVerifiedCharacters = mysqlTable("stats_verified_characters", {
   date: timestamp("date").notNull(),
   count: int("count").notNull(),
@@ -81,7 +75,6 @@ export const statsVerifiedCharacters = mysqlTable("stats_verified_characters", {
   dateIdx: index("idx_stats_verified_characters_date").on(table.date),
 }));
 
-// Theme usage tracking - daily theme usage counts
 export const statsThemeUsage = mysqlTable("stats_theme_usage", {
   date: timestamp("date").notNull(),
   themeName: varchar("theme_name", { length: 100 }).notNull(),
