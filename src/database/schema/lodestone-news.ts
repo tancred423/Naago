@@ -108,7 +108,47 @@ export type NewUpdateData = typeof updateData.$inferInsert;
 export type StatusData = typeof statusData.$inferSelect;
 export type NewStatusData = typeof statusData.$inferInsert;
 
+export const newsQueue = mysqlTable("news_queue", {
+  id: int("id").primaryKey().autoincrement(),
+  jobType: varchar("job_type", { length: 20 }).notNull(),
+  newsType: varchar("news_type", { length: 20 }).notNull(),
+  newsId: int("news_id").notNull(),
+  guildId: varchar("guild_id", { length: 255 }).notNull(),
+  channelId: varchar("channel_id", { length: 255 }).notNull(),
+  messageId: varchar("message_id", { length: 255 }),
+  status: varchar("status", { length: 20 }).notNull().default("PENDING"),
+  retryCount: int("retry_count").notNull().default(0),
+  priority: int("priority").notNull().default(0),
+  payload: json("payload").$type<NewsQueuePayload>(),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
+  processedAt: timestamp("processed_at"),
+}, (table) => ({
+  statusIdx: index("idx_news_queue_status").on(table.status),
+  priorityIdx: index("idx_news_queue_priority").on(table.priority, table.createdAt),
+  newsLookupIdx: index("idx_news_queue_news").on(table.newsType, table.newsId),
+}));
+
 export type PostedNewsMessage = typeof postedNewsMessages.$inferSelect;
 export type NewPostedNewsMessage = typeof postedNewsMessages.$inferInsert;
 
+export type NewsQueueJob = typeof newsQueue.$inferSelect;
+export type NewNewsQueueJob = typeof newsQueue.$inferInsert;
+
 export type NewsType = "topics" | "notices" | "maintenances" | "updates" | "statuses";
+export type JobType = "SEND" | "UPDATE";
+export type JobStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+
+export interface NewsQueuePayload {
+  title: string;
+  link: string;
+  date: number;
+  banner?: string;
+  tag?: string | null;
+  description: {
+    html: string;
+    markdown: string;
+    discord_components_v2?: DiscordComponentsV2;
+  };
+}

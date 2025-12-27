@@ -451,13 +451,13 @@ export class EorzeanCalendarService {
     try {
       const parsed = this.parseEorzeanNameday(eorzeanNameday);
       if (!parsed) {
-        return null; // Return null if parsing fails
+        return null;
       }
 
       const { moon, sun } = parsed;
       const gregorian = this.SUN_TO_GREGORIAN[moon]?.[sun];
       if (!gregorian) {
-        return null; // Return null if conversion fails
+        return null;
       }
 
       const [month, day] = gregorian;
@@ -466,7 +466,6 @@ export class EorzeanCalendarService {
 
       return `${daySuffix} ${monthName}`;
     } catch (_error) {
-      // If anything goes wrong, return null
       return null;
     }
   }
@@ -483,9 +482,6 @@ export class EorzeanCalendarService {
     const moonOrdinal = parseInt(match[2], 10);
     const moonType = match[3].toLowerCase();
 
-    // Determine moon number based on ordinal and type
-    // Astral moons: 1, 3, 5, 7, 9, 11
-    // Umbral moons: 2, 4, 6, 8, 10, 12
     let moon: number;
     if (moonType === "astral") {
       moon = (moonOrdinal - 1) * 2 + 1;

@@ -55,9 +55,6 @@ export class StatisticsService {
     }
   }
 
-  /**
-   * Track theme usage
-   */
   public static async trackTheme(themeName: string): Promise<void> {
     try {
       const today = StatisticsService.getTodayDate();
@@ -141,9 +138,6 @@ export class StatisticsService {
     }
   }
 
-  /**
-   * Record verified characters count
-   */
   public static async recordVerifiedCharacters(): Promise<void> {
     try {
       const today = StatisticsService.getTodayDate();

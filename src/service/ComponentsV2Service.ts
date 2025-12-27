@@ -1,10 +1,7 @@
-import { ContainerBuilder, MediaGalleryBuilder, MessageFlags, TextChannel, time, TimestampStyles } from "discord.js";
+import { ContainerBuilder, MediaGalleryBuilder, time, TimestampStyles } from "discord.js";
 import { DiscordComponentsV2 } from "../naagostone/type/DiscordComponentsV2.ts";
 import { NewsType } from "../database/schema/lodestone-news.ts";
-import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
-import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
-import { Setup } from "../database/schema/setups.ts";
-import { GlobalClient } from "../GlobalClient.ts";
+import { NewsQueueService } from "./NewsQueueService.ts";
 import * as log from "@std/log";
 
 const MAX_TOTAL_CHARACTERS = 4000;
@@ -75,52 +72,30 @@ function getNewsEmojiEnvKey(type: NewsType): string {
 
 export class ComponentsV2Service {
   public static async send(newsType: NewsType, data: NewsData, newsId?: number): Promise<void> {
-    const client = GlobalClient.client;
-    if (!client) return;
-
     if (!data.description.discord_components_v2) return;
 
-    const setups: Setup[] = await SetupsRepository.getAllByType(newsType);
-
-    for (const setup of setups) {
-      try {
-        const guild = await client.guilds.fetch(setup.guildId);
-        if (!guild) continue;
-        const channel = await guild.channels.fetch(setup.channelId);
-        if (!channel) continue;
-
-        const container = this.buildContainer(newsType, data);
-        if (!container) continue;
-
-        const message = await (channel as TextChannel).send({
-          components: [container],
-          flags: MessageFlags.IsComponentsV2,
-        });
-
-        if (newsId !== undefined) {
-          await PostedNewsMessagesRepository.add(
-            newsType,
-            newsId,
-            setup.guildId,
-            setup.channelId,
-            message.id,
-            true,
-          );
-        }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          log.error(`[V2] Sending ${newsType} to ${setup.guildId} was NOT successful: ${error.stack}`);
-        }
-        continue;
-      }
+    if (newsId === undefined) {
+      log.warn(`[V2] Cannot queue ${newsType} without newsId`);
+      return;
     }
+
+    const queuePayload = {
+      title: data.title,
+      link: data.link,
+      date: data.date,
+      banner: data.banner,
+      tag: data.tag,
+      description: data.description,
+    };
+
+    await NewsQueueService.enqueueSendJobs(newsType, newsId, queuePayload);
   }
 
   public static buildContainerForUpdate(newsType: NewsType, data: NewsData): ContainerBuilder | null {
     return this.buildContainer(newsType, data);
   }
 
-  private static buildContainer(newsType: NewsType, data: NewsData): ContainerBuilder | null {
+  public static buildContainer(newsType: NewsType, data: NewsData): ContainerBuilder | null {
     const colorHex = Deno.env.get(getColorEnvKey(newsType));
     if (!colorHex) return null;
 

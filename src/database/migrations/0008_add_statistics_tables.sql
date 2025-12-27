@@ -1,5 +1,3 @@
--- Statistics Tables
-
 CREATE TABLE `stats_server_counts` (
 	`date` timestamp NOT NULL,
 	`count` int NOT NULL,

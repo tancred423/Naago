@@ -30,16 +30,19 @@ import { SetupsRepository } from "./database/repository/SetupsRepository.ts";
 import { TopicsRepository } from "./database/repository/TopicsRepository.ts";
 import { StatisticsService } from "./service/StatisticsService.ts";
 import { GlobalClient } from "./GlobalClient.ts";
+import { NewsQueueProcessor } from "./service/NewsQueueProcessor.ts";
+import { NewsQueueRepository } from "./database/repository/NewsQueueRepository.ts";
 
-// Env
 await load({ export: true });
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Logger
 log.setup({
   handlers: {
     console: new log.ConsoleHandler("DEBUG", {
-      formatter: (logRecord) => `${logRecord.datetime.toISOString()} [${logRecord.levelName}] ${logRecord.msg}`,
+      formatter: (logRecord) => {
+        const formattedDate = `[${moment(logRecord.datetime).format("YYYY-MM-DD HH:mm:ss.SSS Z")}]`;
+        return `${formattedDate} [${logRecord.levelName}] ${logRecord.msg}`;
+      },
     }),
   },
   loggers: {
@@ -50,10 +53,8 @@ log.setup({
   },
 });
 
-// Moment
 moment.locale("en");
 
-// Register custom fonts for canvas
 const fontsPath = join(__dirname, "..", "fonts");
 try {
   registerFont(join(fontsPath, "MiedingerMediumW00-Regular.ttf"), {
@@ -70,7 +71,6 @@ try {
   log.error(`Failed to register fonts: ${err instanceof Error ? err.stack : String(err)}`);
 }
 
-// Canvas lib - Add roundRect method to CanvasRenderingContext2D
 declare module "canvas" {
   interface CanvasRenderingContext2D {
     roundRect(x: number, y: number, w: number, h: number, r: number): this;
@@ -96,7 +96,6 @@ CanvasRenderingContext2D.prototype.roundRect = function (
   return this;
 };
 
-// Discord bot setup
 const token = Deno.env.get("DISCORD_TOKEN")!;
 const lodestoneCheckOnStart = Deno.env.get("LODESTONE_CHECK_ON_START") === "true";
 
@@ -130,6 +129,8 @@ client.once("clientReady", () => {
   setPresence().catch((err) => {
     log.error(`Failed to set presence on start: ${err instanceof Error ? err.stack : String(err)}`);
   });
+
+  NewsQueueProcessor.start();
 
   if (lodestoneCheckOnStart) {
     checkLodestone().catch((err) => {
@@ -173,6 +174,9 @@ client.once("clientReady", () => {
     });
     await StatisticsService.cleanupOldActiveUserData().catch((err) => {
       log.error(`Failed to cleanup old active user data: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await NewsQueueRepository.deleteOldCompletedJobs(7).catch((err) => {
+      log.error(`Failed to cleanup old queue jobs: ${err instanceof Error ? err.stack : String(err)}`);
     });
   });
 });
