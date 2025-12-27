@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, lte } from "drizzle-orm";
+import { and, desc, eq, gte, isNotNull, lte, or } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { TopicData, topicData } from "../schema/lodestone-news.ts";
 import moment from "moment-timezone";
@@ -44,6 +44,8 @@ export class TopicsRepository {
     }
 
     const timestampLiveLetterSQL = topic.timestamp_live_letter ? new Date(topic.timestamp_live_letter) : null;
+    const eventFromSQL = topic.event?.from ? new Date(topic.event.from) : null;
+    const eventToSQL = topic.event?.to ? new Date(topic.event.to) : null;
 
     const result = await database
       .insert(topicData)
@@ -55,6 +57,9 @@ export class TopicsRepository {
         description: topic.description.markdown,
         descriptionV2: topic.description.discord_components_v2 ?? null,
         timestampLiveLetter: timestampLiveLetterSQL,
+        eventType: topic.event?.type ?? null,
+        eventFrom: eventFromSQL,
+        eventTo: eventToSQL,
       })
       .$returningId();
 
@@ -70,6 +75,37 @@ export class TopicsRepository {
       .update(topicData)
       .set({ description, descriptionV2 })
       .where(eq(topicData.id, id));
+  }
+
+  public static async updateEvent(
+    id: number,
+    eventType: string | null,
+    eventFrom: Date | null,
+    eventTo: Date | null,
+  ): Promise<void> {
+    await database
+      .update(topicData)
+      .set({ eventType, eventFrom, eventTo })
+      .where(eq(topicData.id, id));
+  }
+
+  public static hasEventChanged(
+    existing: TopicData,
+    topic: Topic,
+  ): boolean {
+    const existingEventType = existing.eventType ?? null;
+    const newEventType = topic.event?.type ?? null;
+    if (existingEventType !== newEventType) return true;
+
+    const existingEventFrom = existing.eventFrom ? existing.eventFrom.getTime() : null;
+    const newEventFrom = topic.event?.from ?? null;
+    if (existingEventFrom !== newEventFrom) return true;
+
+    const existingEventTo = existing.eventTo ? existing.eventTo.getTime() : null;
+    const newEventTo = topic.event?.to ?? null;
+    if (existingEventTo !== newEventTo) return true;
+
+    return false;
   }
 
   public static hasDescriptionChanged(
@@ -127,5 +163,62 @@ export class TopicsRepository {
       .update(topicData)
       .set({ liveLetterAnnounced: 1 })
       .where(eq(topicData.id, id));
+  }
+
+  public static async getOngoingEvents(): Promise<TopicData[]> {
+    const now = new Date();
+    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+
+    const result = await database
+      .select()
+      .from(topicData)
+      .where(
+        or(
+          and(
+            isNotNull(topicData.eventType),
+            isNotNull(topicData.eventFrom),
+            isNotNull(topicData.eventTo),
+            lte(topicData.eventFrom, now),
+            gte(topicData.eventTo, now),
+          ),
+          and(
+            isNotNull(topicData.timestampLiveLetter),
+            lte(topicData.timestampLiveLetter, now),
+            gte(topicData.timestampLiveLetter, twoHoursAgo),
+          ),
+        ),
+      );
+
+    return result.sort((a, b) => {
+      const aEnd = a.eventTo?.getTime() ?? a.timestampLiveLetter?.getTime() ?? 0;
+      const bEnd = b.eventTo?.getTime() ?? b.timestampLiveLetter?.getTime() ?? 0;
+      return aEnd - bEnd;
+    });
+  }
+
+  public static async getUpcomingEvents(): Promise<TopicData[]> {
+    const now = new Date();
+    const result = await database
+      .select()
+      .from(topicData)
+      .where(
+        or(
+          and(
+            isNotNull(topicData.eventType),
+            isNotNull(topicData.eventFrom),
+            gte(topicData.eventFrom, now),
+          ),
+          and(
+            isNotNull(topicData.timestampLiveLetter),
+            gte(topicData.timestampLiveLetter, now),
+          ),
+        ),
+      );
+
+    return result.sort((a, b) => {
+      const aStart = a.eventFrom?.getTime() ?? a.timestampLiveLetter?.getTime() ?? 0;
+      const bStart = b.eventFrom?.getTime() ?? b.timestampLiveLetter?.getTime() ?? 0;
+      return aStart - bStart;
+    });
   }
 }

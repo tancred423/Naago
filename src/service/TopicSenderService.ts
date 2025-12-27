@@ -77,15 +77,28 @@ export class TopicSenderService {
       existing,
       topic,
     );
+    const eventChanged = TopicsRepository.hasEventChanged(existing, topic);
 
-    if (!descriptionV2Changed) return;
+    if (!descriptionV2Changed && !eventChanged) return;
 
     if (saveLodestoneNews) {
-      await TopicsRepository.updateDescriptions(
-        existing.id,
-        topic.description.markdown,
-        topic.description.discord_components_v2 ?? null,
-      );
+      if (descriptionV2Changed) {
+        await TopicsRepository.updateDescriptions(
+          existing.id,
+          topic.description.markdown,
+          topic.description.discord_components_v2 ?? null,
+        );
+      }
+      if (eventChanged) {
+        const eventFromSQL = topic.event?.from ? new Date(topic.event.from) : null;
+        const eventToSQL = topic.event?.to ? new Date(topic.event.to) : null;
+        await TopicsRepository.updateEvent(
+          existing.id,
+          topic.event?.type ?? null,
+          eventFromSQL,
+          eventToSQL,
+        );
+      }
     }
 
     if (!sendLodestoneNews) return;

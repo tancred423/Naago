@@ -1,4 +1,6 @@
 export type EmojiName =
+  | "EMOJI_ARROW_GREEN"
+  | "EMOJI_ARROW_YELLOW"
   | "EMOJI_DOGGO_SMILE"
   | "EMOJI_LOADING"
   | "EMOJI_NEWS_TOPIC"
