@@ -1339,7 +1339,7 @@ class Profile {
     ctx.textAlign = "right";
     ctx.fillStyle = theme.block_content_highlight;
     ctx.font = `normal 32px roboto condensed`;
-    ctx.fillText(this.character.hp.toString(), 195, yAdd + 25);
+    ctx.fillText((this.character.attributes.hp ?? 0).toString(), 195, yAdd + 25);
 
     ctx.fillStyle = theme.green;
     ctx.roundRect(x + 20, yAdd + 60, 165, 7, 0).fill();
@@ -1348,7 +1348,7 @@ class Profile {
     ctx.fillStyle = theme.block_content;
     ctx.font = `normal 16px MiedingerMediumW00-Regular`;
     ctx.fillText(
-      this.character.mp_gp_cp_parameter_name,
+      this.character.attributes.mp_gp_cp_parameter_name ?? "MP",
       fWidth / 2 + 40,
       yAdd + 40,
     );
@@ -1356,7 +1356,7 @@ class Profile {
     ctx.textAlign = "right";
     ctx.fillStyle = theme.block_content_highlight;
     ctx.font = `normal 32px roboto condensed`;
-    ctx.fillText(this.character.mp_gp_cp.toString(), fWidth, yAdd + 25);
+    ctx.fillText((this.character.attributes.mp_gp_cp ?? 0).toString(), fWidth, yAdd + 25);
 
     ctx.fillStyle = theme.purple;
     ctx.roundRect(fWidth / 2 + 40, yAdd + 60, 165, 7, 0).fill();
@@ -1382,15 +1382,15 @@ class Profile {
 
     // Stats left
     let stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Strength", this.character.strength, theme.green);
-    stats.add("Dexterity", this.character.dexterity, theme.green);
-    stats.add("Vitality", this.character.vitality, theme.green);
+    stats.add("Strength", this.character.attributes.strength, theme.green);
+    stats.add("Dexterity", this.character.attributes.dexterity, theme.green);
+    stats.add("Vitality", this.character.attributes.vitality, theme.green);
 
     // Stats right
     x = 225;
     stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Intelligence", this.character.intelligence, theme.purple);
-    stats.add("Mind", this.character.mind, theme.purple);
+    stats.add("Intelligence", this.character.attributes.intelligence, theme.purple);
+    stats.add("Mind", this.character.attributes.mind, theme.purple);
 
     ////////////////////////////////////////////
     // Offensive Properties
@@ -1416,9 +1416,9 @@ class Profile {
 
     // Stats
     stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Critical Hit", this.character.critical_hit_rate);
-    stats.add("Determination", this.character.determination);
-    stats.add("Direct Hit Rate", this.character.direct_hit_rate);
+    stats.add("Critical Hit", this.character.attributes.critical_hit_rate);
+    stats.add("Determination", this.character.attributes.determination);
+    stats.add("Direct Hit Rate", this.character.attributes.direct_hit_rate);
 
     ////////////////////////////////////////////
     // Defensive Properties
@@ -1443,8 +1443,8 @@ class Profile {
 
     // Stats
     stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Defense", this.character.defense);
-    stats.add("Magic Defense", this.character.magic_defense);
+    stats.add("Defense", this.character.attributes.defense);
+    stats.add("Magic Defense", this.character.attributes.magic_defense);
 
     ////////////////////////////////////////////
     // Physical Properties
@@ -1470,8 +1470,8 @@ class Profile {
 
     // Stats
     stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Attack Power", this.character.attack_power);
-    stats.add("Skill Speed", this.character.skill_speed);
+    stats.add("Attack Power", this.character.attributes.attack_power);
+    stats.add("Skill Speed", this.character.attributes.skill_speed);
 
     ////////////////////////////////////////////
     // Mental Properties
@@ -1496,9 +1496,9 @@ class Profile {
 
     // Stats
     stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Attack Magic Potency", this.character.attack_magic_potency);
-    stats.add("Healing Magic Potency", this.character.healing_magic_potency);
-    stats.add("Spell Speed", this.character.spell_speed);
+    stats.add("Attack Magic Potency", this.character.attributes.attack_magic_potency);
+    stats.add("Healing Magic Potency", this.character.attributes.healing_magic_potency);
+    stats.add("Spell Speed", this.character.attributes.spell_speed);
 
     ////////////////////////////////////////////
     // Gear
@@ -1545,8 +1545,8 @@ class Profile {
 
     // Stats
     stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Tenacity", this.character.tenacity);
-    stats.add("Piety", this.character.piety);
+    stats.add("Tenacity", this.character.attributes.tenacity);
+    stats.add("Piety", this.character.attributes.piety);
 
     ////////////////////////////////////////////
     // Return buffer
@@ -2098,7 +2098,7 @@ class Stats {
 
   public add(
     title: string,
-    content: string | number,
+    content: string | number | null,
     color: string = this.theme.block_title,
   ): void {
     this.yAdd += 20;
@@ -2110,7 +2110,7 @@ class Stats {
     this.ctx.fillStyle = this.theme.block_title;
     this.ctx.textAlign = "right";
     this.ctx.fillText(
-      content?.toString() ?? "0",
+      content !== null && content !== undefined ? content.toString() : "-",
       this.x > 200 ? this.fWidth : this.fWidth / 2,
       this.yAdd + 23,
     );
