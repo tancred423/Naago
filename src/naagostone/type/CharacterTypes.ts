@@ -66,6 +66,33 @@ export interface Eureka {
   name: string;
 }
 
+export interface Attributes {
+  strength: number | null;
+  dexterity: number | null;
+  vitality: number | null;
+  intelligence: number | null;
+  mind: number | null;
+  critical_hit_rate: number | null;
+  determination: number | null;
+  direct_hit_rate: number | null;
+  defense: number | null;
+  magic_defense: number | null;
+  attack_power: number | null;
+  skill_speed: number | null;
+  attack_magic_potency: number | null;
+  healing_magic_potency: number | null;
+  spell_speed: number | null;
+  tenacity: number | null;
+  piety: number | null;
+  hp: number | null;
+  mp_gp_cp: number | null;
+  mp_gp_cp_parameter_name: string | null;
+  craftsmanship: number | null;
+  control: number | null;
+  gathering: number | null;
+  perception: number | null;
+}
+
 export interface Equipment {
   name: string;
   icon: string;
@@ -146,26 +173,7 @@ export interface Character {
   grand_company: GrandCompany | null;
   free_company: FreeCompany | null;
   pvp_team: string | null;
-  strength: number;
-  dexterity: number;
-  vitality: number;
-  intelligence: number;
-  mind: number;
-  critical_hit_rate: number;
-  determination: number;
-  direct_hit_rate: number;
-  defense: number;
-  magic_defense: number;
-  attack_power: number;
-  skill_speed: number;
-  attack_magic_potency: number;
-  healing_magic_potency: number;
-  spell_speed: number;
-  tenacity: number;
-  piety: number;
-  hp: number;
-  mp_gp_cp: number;
-  mp_gp_cp_parameter_name: string;
+  attributes: Attributes;
   bozja: Bozja | null;
   eureka: Eureka | null;
   paladin: ClassJob;
