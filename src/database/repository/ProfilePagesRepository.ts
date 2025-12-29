@@ -18,12 +18,11 @@ export class ProfilePagesRepository {
   public static async set(
     userId: string,
     profilePage: string,
-    subProfilePage: string | null,
   ): Promise<void> {
     await database
       .insert(profilePages)
-      .values({ userId, profilePage, subProfilePage })
-      .onDuplicateKeyUpdate({ set: { profilePage, subProfilePage } });
+      .values({ userId, profilePage })
+      .onDuplicateKeyUpdate({ set: { profilePage } });
   }
 
   public static async delete(userId: string): Promise<void> {

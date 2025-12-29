@@ -3,7 +3,6 @@ import { mysqlTable, timestamp, varchar } from "drizzle-orm/mysql-core";
 export const profilePages = mysqlTable("profile_pages", {
   userId: varchar("user_id", { length: 255 }).primaryKey().notNull(),
   profilePage: varchar("profile_page", { length: 100 }).notNull(),
-  subProfilePage: varchar("sub_profile_page", { length: 100 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });

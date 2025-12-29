@@ -46,7 +46,7 @@ class ContextFindCommand extends Command {
     }
 
     const file = new AttachmentBuilder(profileImage);
-    const components = ProfileGeneratorService.getComponents("profile", null, "profile", targetCharacter?.id);
+    const components = ProfileGeneratorService.getComponents("profile", "profile", targetCharacter?.id);
     const unix = targetCharacterDataDto.latestUpdate.unix();
 
     const cachedHint = targetCharacterDataDto.isCachedDueToUnavailability

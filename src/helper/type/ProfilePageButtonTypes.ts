@@ -1,16 +1,9 @@
 export type ProfilePageButton =
   | "profile"
-  | "classesjobs"
+  | "battlejobs"
+  | "craftersgatherers"
   | "equipment"
+  | "materiadetails"
   | "attributes"
-  | "portrait"
-  | "dowdom"
-  | "dohdol"
-  | "overview"
-  | "materiadetails";
-
-export type SubProfilePageButton =
-  | "dowdom"
-  | "dohdol"
-  | "overview"
-  | "materiadetails";
+  | "raidprogression"
+  | "portrait";
