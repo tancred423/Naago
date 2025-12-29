@@ -91,6 +91,40 @@ export interface Equipment {
   item_level: string | null;
 }
 
+export interface RaidClear {
+  cleared: boolean;
+  date: number | null;
+  week: number | null;
+}
+
+export interface UltimateProgression {
+  ucob: RaidClear;
+  uwu: RaidClear;
+  tea: RaidClear;
+  dsr: RaidClear;
+  top: RaidClear;
+  fru: RaidClear;
+  ultimate_count: number;
+}
+
+export interface SavageExpansion {
+  [key: string]: RaidClear;
+}
+
+export interface SavageProgression {
+  arr: SavageExpansion;
+  hw: SavageExpansion;
+  sb: SavageExpansion;
+  shb: SavageExpansion;
+  ew: SavageExpansion;
+  dt: SavageExpansion;
+}
+
+export interface RaidProgression {
+  ultimates: UltimateProgression;
+  savage: SavageProgression;
+}
+
 export interface Character {
   id: number;
   bio: Bio;
@@ -182,6 +216,7 @@ export interface Character {
   soulcrystal: Equipment | null;
   facewear: Equipment | null;
   item_level: string;
+  raid_progression: RaidProgression | null;
 }
 
 export interface CharacterResponse {

@@ -5,7 +5,7 @@ import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { ProfilePagesRepository } from "../database/repository/ProfilePagesRepository.ts";
 import { Buffer } from "node:buffer";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
-import { ProfilePageButton, SubProfilePageButton } from "./type/ProfilePageButtonTypes.ts";
+import { ProfilePageType } from "../service/type/ProfilePageTypes.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 
 export class ProfileCommandHandler {
@@ -14,7 +14,7 @@ export class ProfileCommandHandler {
       throw new Error("[/profile - button] button id length is !== 3");
     }
 
-    const profilePage = buttonIdSplit[1] as ProfilePageButton;
+    const profilePage = buttonIdSplit[1] as ProfilePageType;
     const characterId = parseInt(buttonIdSplit[2]);
     const userId = interaction.user.id;
     const verification = await VerificationsRepository.find(userId);
@@ -40,37 +40,21 @@ export class ProfileCommandHandler {
 
     const character = characterDataDto.character;
 
-    let subProfilePage: SubProfilePageButton | null = null;
-    if (profilePage === "dowdom" || profilePage === "dohdol") {
-      subProfilePage = profilePage;
-    } else if (profilePage === "classesjobs" && !subProfilePage) {
-      subProfilePage = "dowdom";
-    } else if (profilePage === "overview" || profilePage === "materiadetails") {
-      subProfilePage = profilePage;
-    }
-
-    const actualProfilePage = profilePage === "dowdom" || profilePage === "dohdol"
-      ? "classesjobs"
-      : profilePage === "overview" || profilePage === "materiadetails"
-      ? "equipment"
-      : profilePage;
-
     if (isMe) {
-      ProfilePagesRepository.set(userId, actualProfilePage, subProfilePage);
+      ProfilePagesRepository.set(userId, profilePage);
     }
 
     const cachedHint = characterDataDto.isCachedDueToUnavailability
       ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"
       : "";
 
-    if (actualProfilePage === "portrait") {
+    if (profilePage === "portrait") {
       const response = await fetch(character.portrait);
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const file = new AttachmentBuilder(buffer);
       const components = ProfileGeneratorService.getComponents(
-        actualProfilePage,
-        subProfilePage,
+        profilePage,
         "profile",
         characterId,
       );
@@ -86,12 +70,12 @@ export class ProfileCommandHandler {
       return;
     }
 
-    const profileImage = await ProfileGeneratorService.getImage(character, isMe, actualProfilePage, subProfilePage);
+    const profileImage = await ProfileGeneratorService.getImage(character, isMe, profilePage);
 
     if (!profileImage) throw new Error("profileImage is undefined");
 
     const file = new AttachmentBuilder(profileImage);
-    const components = ProfileGeneratorService.getComponents(actualProfilePage, subProfilePage, "profile", characterId);
+    const components = ProfileGeneratorService.getComponents(profilePage, "profile", characterId);
 
     await interaction.editReply({
       content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
@@ -139,7 +123,7 @@ export class ProfileCommandHandler {
     }
 
     const file = new AttachmentBuilder(profileImage);
-    const components = ProfileGeneratorService.getComponents("profile", null, "profile", characterId);
+    const components = ProfileGeneratorService.getComponents("profile", "profile", characterId);
 
     const cachedHint = characterDataDto.isCachedDueToUnavailability
       ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"

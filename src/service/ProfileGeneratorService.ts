@@ -16,7 +16,7 @@ import * as log from "@std/log";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Theme } from "./type/Theme.ts";
-import { ProfilePage, SubProfilePage } from "./type/ProfilePageTypes.ts";
+import { ProfilePageType } from "./type/ProfilePageTypes.ts";
 import { EorzeanCalendarService } from "./EorzeanCalendarService.ts";
 import { MateriaIconService } from "./MateriaIconService.ts";
 
@@ -36,27 +36,23 @@ export class ProfileGeneratorService {
   public static async getImage(
     character: Character,
     isVerified: boolean,
-    profilePage: ProfilePage,
-    subProfilePage: SubProfilePage = null,
+    profilePage: ProfilePageType,
   ): Promise<Buffer | string> {
     const profile = new Profile(character, isVerified);
 
-    if (profilePage === "profile") return await profile.getProfile();
-    else if (profilePage === "classesjobs") {
-      if (subProfilePage === "dohdol") return await profile.getDohDol();
-      else return await profile.getDowDom();
-    } else if (profilePage === "equipment") {
-      if (subProfilePage === "materiadetails") return await profile.getEquipmentMateriaDetails();
-      else return await profile.getEquipment();
-    } else if (profilePage === "attributes") return await profile.getAttributes();
+    if (profilePage === "battlejobs") return await profile.getDowDom();
+    else if (profilePage === "craftersgatherers") return await profile.getDohDol();
+    else if (profilePage === "equipment") return await profile.getEquipment();
+    else if (profilePage === "materiadetails") return await profile.getEquipmentMateriaDetails();
+    else if (profilePage === "attributes") return await profile.getAttributes();
+    else if (profilePage === "raidprogression") return await profile.getRaidProgression();
     else if (profilePage === "portrait") return character.portrait;
 
-    return character.portrait;
+    return await profile.getProfile();
   }
 
   public static getComponents(
-    profilePage: ProfilePage,
-    subProfilePage: SubProfilePage,
+    profilePage: ProfilePageType,
     commandName: string,
     characterId: number,
   ): ActionRowBuilder<ButtonBuilder>[] {
@@ -69,17 +65,13 @@ export class ProfileGeneratorService {
           .setCustomId(`${commandName}.profile.${characterId}`)
           .setStyle(profilePage === "profile" ? 1 : 2),
         new ButtonBuilder()
-          .setLabel("Classes/Jobs")
-          .setCustomId(`${commandName}.classesjobs.${characterId}`)
-          .setStyle(profilePage === "classesjobs" ? 1 : 2),
-        new ButtonBuilder()
-          .setLabel("Equipment")
-          .setCustomId(`${commandName}.equipment.${characterId}`)
-          .setStyle(profilePage === "equipment" ? 1 : 2),
-        new ButtonBuilder()
-          .setLabel("Attributes")
+          .setLabel("Attribute")
           .setCustomId(`${commandName}.attributes.${characterId}`)
           .setStyle(profilePage === "attributes" ? 1 : 2),
+        new ButtonBuilder()
+          .setLabel("Raid")
+          .setCustomId(`${commandName}.raidprogression.${characterId}`)
+          .setStyle(profilePage === "raidprogression" ? 1 : 2),
         new ButtonBuilder()
           .setLabel("Portrait")
           .setCustomId(`${commandName}.portrait.${characterId}`)
@@ -87,36 +79,26 @@ export class ProfileGeneratorService {
       ),
     );
 
-    if (subProfilePage && (subProfilePage === "dowdom" || subProfilePage === "dohdol")) {
-      components.push(
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setLabel("DoW/DoM")
-            .setCustomId(`${commandName}.dowdom.${characterId}`)
-            .setStyle(subProfilePage === "dowdom" ? 1 : 2),
-          new ButtonBuilder()
-            .setLabel("DoH/DoL")
-            .setCustomId(`${commandName}.dohdol.${characterId}`)
-            .setStyle(subProfilePage === "dohdol" ? 1 : 2),
-        ),
-      );
-    }
-
-    if (profilePage === "equipment") {
-      const equipmentSubPage = subProfilePage === "materiadetails" ? "materiadetails" : "overview";
-      components.push(
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-          new ButtonBuilder()
-            .setLabel("Overview")
-            .setCustomId(`${commandName}.overview.${characterId}`)
-            .setStyle(equipmentSubPage === "overview" ? 1 : 2),
-          new ButtonBuilder()
-            .setLabel("Materia Details")
-            .setCustomId(`${commandName}.materiadetails.${characterId}`)
-            .setStyle(equipmentSubPage === "materiadetails" ? 1 : 2),
-        ),
-      );
-    }
+    components.push(
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setLabel("Jobs")
+          .setCustomId(`${commandName}.battlejobs.${characterId}`)
+          .setStyle(profilePage === "battlejobs" ? 1 : 2),
+        new ButtonBuilder()
+          .setLabel("DoH/DoL")
+          .setCustomId(`${commandName}.craftersgatherers.${characterId}`)
+          .setStyle(profilePage === "craftersgatherers" ? 1 : 2),
+        new ButtonBuilder()
+          .setLabel("Equip")
+          .setCustomId(`${commandName}.equipment.${characterId}`)
+          .setStyle(profilePage === "equipment" ? 1 : 2),
+        new ButtonBuilder()
+          .setLabel("Materia")
+          .setCustomId(`${commandName}.materiadetails.${characterId}`)
+          .setStyle(profilePage === "materiadetails" ? 1 : 2),
+      ),
+    );
 
     return components;
   }
@@ -1571,6 +1553,368 @@ class Profile {
     ////////////////////////////////////////////
     return canvas.toBuffer("image/png");
   }
+
+  public async getRaidProgression(): Promise<Buffer> {
+    const theme = await this.getTheme();
+
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext("2d");
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+
+    if (theme.background.startsWith("#")) {
+      ctx.fillStyle = theme.background;
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();
+    } else {
+      ctx.save();
+      ctx.lineWidth = 0;
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
+      ctx.clip();
+      const backgroundImage = await loadImage(
+        join(BASE_PATH, "image", "background", theme.background),
+      );
+      ctx.drawImage(backgroundImage, 0, 0);
+      ctx.fillStyle = theme.background_transparency;
+      ctx.roundRect(0, 0, width, height, borderRadiusOuter).fill();
+      ctx.restore();
+    }
+
+    ctx.strokeStyle = theme.background_border;
+    ctx.lineWidth = 3;
+    ctx.roundRect(0, 0, width, height, borderRadiusOuter).stroke();
+
+    const windowTitle = "Character";
+    ctx.fillStyle = theme.window_title;
+    ctx.font = `normal 20px roboto condensed`;
+    ctx.fillText(windowTitle, 10, 8, width / 2);
+
+    const windowTitleName = this.character.name;
+    ctx.fillStyle = theme.window_title_name;
+    ctx.textAlign = "right";
+    ctx.font = `normal 22px TrajanProBold`;
+
+    const checkmarkSize = 18;
+    const spacing = 5;
+
+    const nameX = this.isVerified ? width - 10 - checkmarkSize - spacing : width - 10;
+
+    if (this.isVerified) {
+      const verificationCheckmark = await loadImage(
+        join(BASE_PATH, "image", "verified_checkmark.png"),
+      );
+      const checkmarkX = width - 10 - checkmarkSize;
+      const checkmarkY = 10 + (20 - checkmarkSize) / 2;
+      ctx.drawImage(verificationCheckmark, checkmarkX, checkmarkY, checkmarkSize, checkmarkSize);
+    }
+
+    ctx.fillText(windowTitleName, nameX, 11, width / 2);
+    ctx.textAlign = "left";
+
+    ctx.strokeStyle = theme.window_title_underline;
+    ctx.lineWidth = 2;
+    ctx.roundRect(10, 35, width - 20, 0, borderRadius).stroke();
+
+    const raidProg = this.character.raid_progression;
+
+    if (!raidProg) {
+      ctx.fillStyle = theme.block_background;
+      ctx.roundRect(10, 50, width - 20, 100, borderRadius).fill();
+
+      ctx.fillStyle = theme.block_content;
+      ctx.font = `normal 20px roboto condensed`;
+      ctx.textAlign = "center";
+      ctx.fillText(
+        "Raid progression data is not available.",
+        width / 2,
+        75,
+        width - 40,
+      );
+      ctx.fillText(
+        "The character's achievements may be set to private on the Lodestone.",
+        width / 2,
+        105,
+        width - 40,
+      );
+      ctx.textAlign = "left";
+
+      return canvas.toBuffer("image/png");
+    }
+
+    let y = 45;
+    const x = 10;
+    const fWidth = width - 20;
+    const padding = 10;
+    const gap = 5;
+
+    ctx.fillStyle = theme.block_background;
+    ctx.roundRect(x, y, fWidth, 130, borderRadius).fill();
+
+    ctx.fillStyle = theme.block_title;
+    ctx.font = `normal 18px roboto condensed`;
+    ctx.fillText("Ultimate Raids", x + 10, y + 8);
+
+    let legendName = null;
+    switch (raidProg.ultimates.ultimate_count) {
+      case 1:
+        legendName = "Legend";
+        break;
+      case 2:
+        legendName = "Double Legend";
+        break;
+      case 3:
+        legendName = "Triple Legend";
+        break;
+      case 4:
+        legendName = "Quadruple Legend";
+        break;
+      case 5:
+        legendName = "Penta Legend";
+        break;
+      case 6:
+        legendName = "Hexa Legend";
+        break;
+      case 7:
+        legendName = "Septa Legend";
+        break;
+      case 8:
+        legendName = "Octa Legend";
+        break;
+      case 9:
+        legendName = "Ennea Legend";
+        break;
+      case 10:
+        legendName = "Deca Legend";
+        break;
+    }
+
+    ctx.fillStyle = theme.block_content_highlight;
+    ctx.font = `bold 16px roboto condensed`;
+    ctx.textAlign = "right";
+    ctx.fillText(
+      `${raidProg.ultimates.ultimate_count}/6 Cleared` + (legendName ? ` | ${legendName}` : ""),
+      x + fWidth - 10,
+      y + 8,
+    );
+    ctx.textAlign = "left";
+
+    const ultimates = [
+      { name: "UWU", key: "uwu", full: "The Weapon's Refrain" },
+      { name: "UCoB", key: "ucob", full: "The Unending Coil of Bahamut" },
+      { name: "TEA", key: "tea", full: "The Epic of Alexander" },
+      { name: "DSR", key: "dsr", full: "Dragonsong's Reprise" },
+      { name: "TOP", key: "top", full: "The Omega Protocol" },
+      { name: "FRU", key: "fru", full: "Futures Rewritten" },
+    ];
+
+    let ux = x + padding;
+    const uy = y + 35;
+    const boxWidth = (fWidth - (padding * 2) - (gap * 5)) / 6;
+
+    for (const ult of ultimates) {
+      const ultData = raidProg.ultimates[ult.key as keyof typeof raidProg.ultimates];
+      if (typeof ultData === "number") continue;
+      const cleared = ultData.cleared;
+
+      ctx.fillStyle = cleared ? theme.green : theme.block_background;
+      ctx.strokeStyle = cleared ? theme.green : theme.block_title;
+      ctx.lineWidth = 2;
+      ctx.roundRect(ux, uy, boxWidth, 85, borderRadius).fill();
+      ctx.roundRect(ux, uy, boxWidth, 85, borderRadius).stroke();
+
+      ctx.fillStyle = cleared ? "#FFFFFF" : theme.block_content;
+      ctx.font = `bold 22px roboto condensed`;
+      ctx.textAlign = "center";
+      ctx.fillText(ult.name, ux + boxWidth / 2, uy + 8, boxWidth - 10);
+
+      ctx.font = `bold 16px roboto condensed`;
+      if (cleared && ultData.date) {
+        const date = moment(ultData.date);
+        ctx.fillText(date.format("MMM D, YYYY"), ux + boxWidth / 2, uy + 33, boxWidth - 10);
+
+        if (ultData.week !== null && ultData.week !== undefined) {
+          ctx.fillText(`Week ${ultData.week}`, ux + boxWidth / 2, uy + 50, boxWidth - 10);
+        }
+      } else {
+        ctx.fillText("—", ux + boxWidth / 2, uy + 38, boxWidth - 10);
+      }
+
+      ctx.fillStyle = cleared ? "#FFFFFF" : theme.block_title;
+      const centerX = ux + boxWidth / 2;
+      const centerY = uy + 75;
+      const size = 12;
+
+      if (cleared) {
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.beginPath();
+        ctx.moveTo(centerX - size * 0.4, centerY);
+        ctx.lineTo(centerX - size * 0.1, centerY + size * 0.3);
+        ctx.lineTo(centerX + size * 0.4, centerY - size * 0.3);
+        ctx.stroke();
+      } else {
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = theme.block_title;
+        ctx.beginPath();
+        ctx.moveTo(centerX - size * 0.4, centerY - size * 0.4);
+        ctx.lineTo(centerX + size * 0.4, centerY + size * 0.4);
+        ctx.moveTo(centerX + size * 0.4, centerY - size * 0.4);
+        ctx.lineTo(centerX - size * 0.4, centerY + size * 0.4);
+        ctx.stroke();
+      }
+
+      ux += boxWidth + gap;
+    }
+
+    ctx.textAlign = "left";
+
+    y = 185;
+
+    const savageExpansions = [
+      {
+        name: "A Realm Reborn",
+        key: "arr",
+        raids: [
+          { name: "Binding Coil", key: "the_binding_coil_of_bahamut" },
+          { name: "Second Coil", key: "the_second_coil_of_bahamut" },
+          { name: "Final Coil", key: "the_final_coil_of_bahamut" },
+        ],
+      },
+      {
+        name: "Heavensward (Savage)",
+        key: "hw",
+        raids: [
+          { name: "Gordias", key: "alexander_gordias" },
+          { name: "Midas", key: "alexander_midas" },
+          { name: "The Creator", key: "alexander_the_creator" },
+        ],
+      },
+      {
+        name: "Stormblood (Savage)",
+        key: "sb",
+        raids: [
+          { name: "Deltascape", key: "omega_deltascape" },
+          { name: "Sigmascape", key: "omega_sigmascape" },
+          { name: "Alphascape", key: "omega_alphascape" },
+        ],
+      },
+      {
+        name: "Shadowbringers (Savage)",
+        key: "shb",
+        raids: [
+          { name: "Eden's Gate", key: "edens_gate" },
+          { name: "Eden's Verse", key: "edens_verse" },
+          { name: "Eden's Promise", key: "edens_promise" },
+        ],
+      },
+      {
+        name: "Endwalker (Savage)",
+        key: "ew",
+        raids: [
+          { name: "Asphodelos", key: "pandaemonium_asphodelos" },
+          { name: "Abyssos", key: "pandaemonium_abyssos" },
+          { name: "Anabaseios", key: "pandaemonium_anabaseios" },
+        ],
+      },
+      {
+        name: "Dawntrail (Savage)",
+        key: "dt",
+        raids: [
+          { name: "Light-heavyweight", key: "aac_light_heavyweight_tier" },
+          { name: "Cruiserweight", key: "aac_cruiserweight_tier" },
+          { name: "Heavyweight", key: "aac_heavyweight_tier" },
+        ],
+      },
+    ];
+
+    const colWidth = (fWidth - 5) / 2;
+    let col = 0;
+    let row = 0;
+    const expansionHeight = 105;
+    const expansionPadding = 10;
+    const raidGap = 3;
+
+    for (const expansion of savageExpansions) {
+      const expX = x + (col * (colWidth + 5));
+      const expY = y + (row * (expansionHeight + 5));
+
+      ctx.fillStyle = theme.block_background;
+      ctx.roundRect(expX, expY, colWidth, expansionHeight, borderRadius).fill();
+
+      ctx.fillStyle = theme.block_title;
+      ctx.font = `bold 14px roboto condensed`;
+      ctx.textAlign = "left";
+      ctx.fillText(expansion.name, expX + expansionPadding, expY + 8, colWidth - (expansionPadding * 2));
+
+      const savageData = raidProg.savage[expansion.key as keyof typeof raidProg.savage];
+      let raidX = expX + expansionPadding;
+      const raidY = expY + 30;
+      const raidBoxWidth = (colWidth - (expansionPadding * 2) - (raidGap * 2)) / 3;
+
+      for (const raid of expansion.raids) {
+        const raidClear = savageData[raid.key];
+        const cleared = raidClear?.cleared ?? false;
+
+        ctx.fillStyle = cleared ? theme.green : theme.block_background;
+        ctx.strokeStyle = cleared ? theme.green : theme.block_title;
+        ctx.lineWidth = 1;
+        ctx.roundRect(raidX, raidY, raidBoxWidth, 65, borderRadius / 2).fill();
+        ctx.roundRect(raidX, raidY, raidBoxWidth, 65, borderRadius / 2).stroke();
+
+        ctx.fillStyle = cleared ? "#FFFFFF" : theme.block_content;
+        ctx.font = `bold 14px roboto condensed`;
+        ctx.textAlign = "center";
+        ctx.fillText(raid.name, raidX + raidBoxWidth / 2, raidY + 5, raidBoxWidth - 8);
+
+        ctx.font = `bold 12px roboto condensed`;
+        if (cleared && raidClear?.date) {
+          const date = moment(raidClear.date);
+          ctx.fillText(date.format("MMM D, YYYY"), raidX + raidBoxWidth / 2, raidY + 22, raidBoxWidth - 8);
+
+          if (raidClear?.week !== null && raidClear?.week !== undefined) {
+            ctx.fillText(`Week ${raidClear.week}`, raidX + raidBoxWidth / 2, raidY + 37, raidBoxWidth - 8);
+          }
+        } else {
+          ctx.fillText("—", raidX + raidBoxWidth / 2, raidY + 25, raidBoxWidth - 8);
+        }
+
+        ctx.fillStyle = cleared ? "#FFFFFF" : theme.block_title;
+        const centerX = raidX + raidBoxWidth / 2;
+        const centerY = raidY + 57;
+        const size = 8;
+
+        if (cleared) {
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#FFFFFF";
+          ctx.beginPath();
+          ctx.moveTo(centerX - size * 0.4, centerY);
+          ctx.lineTo(centerX - size * 0.1, centerY + size * 0.3);
+          ctx.lineTo(centerX + size * 0.4, centerY - size * 0.3);
+          ctx.stroke();
+        } else {
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = theme.block_title;
+          ctx.beginPath();
+          ctx.moveTo(centerX - size * 0.4, centerY - size * 0.4);
+          ctx.lineTo(centerX + size * 0.4, centerY + size * 0.4);
+          ctx.moveTo(centerX + size * 0.4, centerY - size * 0.4);
+          ctx.lineTo(centerX - size * 0.4, centerY + size * 0.4);
+          ctx.stroke();
+        }
+
+        raidX += raidBoxWidth + raidGap;
+      }
+
+      col++;
+      if (col >= 2) {
+        col = 0;
+        row++;
+      }
+    }
+
+    ctx.textAlign = "left";
+
+    return canvas.toBuffer("image/png");
+  }
 }
 
 class ProfileBlock {
@@ -1701,7 +2045,7 @@ class ClassJobBlock {
 
     this.ctx.fillStyle = this.theme.block_content;
     this.ctx.font = `bold 16px arial`;
-    this.ctx.fillText(job.unlockstate, this.x + 92, this.yAdd + 27);
+    this.ctx.fillText(job.unlockstate, this.x + 92, this.yAdd + 27, 100);
 
     this.ctx.fillStyle = this.theme.exp_bar;
     this.ctx.roundRect(this.x + 92, this.yAdd + 47, 100, 5, borderRadius)
@@ -1766,7 +2110,7 @@ class Stats {
     this.ctx.fillStyle = this.theme.block_title;
     this.ctx.textAlign = "right";
     this.ctx.fillText(
-      content.toString() ?? "0",
+      content?.toString() ?? "0",
       this.x > 200 ? this.fWidth : this.fWidth / 2,
       this.yAdd + 23,
     );

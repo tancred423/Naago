@@ -14,6 +14,7 @@ import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
 import { Character } from "../naagostone/type/CharacterTypes.ts";
 import { ProfilePagesRepository } from "../database/repository/ProfilePagesRepository.ts";
+import { ProfilePageType } from "../service/type/ProfilePageTypes.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { FfxivServerValidationService } from "../service/FfxivServerValidationService.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
@@ -108,17 +109,8 @@ class ProfileCommand extends Command {
     }
     const character = characterDataDto.character;
 
-    const profilePages = await ProfilePagesRepository.find(userId);
-    const profilePage = (profilePages?.profilePage ?? "profile") as
-      | "profile"
-      | "classesjobs"
-      | "equipment"
-      | "attributes"
-      | "portrait";
-    const subProfilePage = profilePages?.subProfilePage as
-      | "dowdom"
-      | "dohdol"
-      | null;
+    const profilePagesRow = await ProfilePagesRepository.find(userId);
+    const profilePage = (profilePagesRow?.profilePage ?? "profile") as ProfilePageType;
 
     if (!profilePage) {
       throw new Error("[/profile me] profilePage is undefined");
@@ -133,7 +125,7 @@ class ProfileCommand extends Command {
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const file = new AttachmentBuilder(buffer);
-      const components = ProfileGeneratorService.getComponents(profilePage, subProfilePage, "profile", characterId);
+      const components = ProfileGeneratorService.getComponents(profilePage, "profile", characterId);
 
       await interaction.editReply({
         content: `${character.name}🌸${character.server.world}${cachedHint}`,
@@ -143,13 +135,13 @@ class ProfileCommand extends Command {
         components: components,
       });
     } else {
-      const profileImage = await ProfileGeneratorService.getImage(character, true, profilePage, subProfilePage);
+      const profileImage = await ProfileGeneratorService.getImage(character, true, profilePage);
       if (!profileImage) {
         throw new Error("[/profile me] profileImage is undefined");
       }
 
       const file = new AttachmentBuilder(profileImage);
-      const components = ProfileGeneratorService.getComponents(profilePage, subProfilePage, "profile", characterId);
+      const components = ProfileGeneratorService.getComponents(profilePage, "profile", characterId);
 
       await interaction.editReply({
         content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
@@ -231,7 +223,7 @@ class ProfileCommand extends Command {
     }
 
     const file = new AttachmentBuilder(profileImage);
-    const components = ProfileGeneratorService.getComponents("profile", null, "profile", characterId);
+    const components = ProfileGeneratorService.getComponents("profile", "profile", characterId);
 
     const cachedHint = characterDataDto.isCachedDueToUnavailability
       ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"

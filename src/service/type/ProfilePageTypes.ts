@@ -1,8 +1,9 @@
-export type ProfilePage =
+export type ProfilePageType =
   | "profile"
-  | "classesjobs"
+  | "battlejobs"
+  | "craftersgatherers"
   | "equipment"
+  | "materiadetails"
   | "attributes"
+  | "raidprogression"
   | "portrait";
-
-export type SubProfilePage = "dowdom" | "dohdol" | "overview" | "materiadetails" | null;
