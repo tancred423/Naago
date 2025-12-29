@@ -1525,7 +1525,7 @@ class Profile {
     stats.add("Average Item Level", this.character.item_level);
 
     ////////////////////////////////////////////
-    // Role
+    // Role / Crafting / Gathering
     ////////////////////////////////////////////
     ctx.textAlign = "left";
     x = 225;
@@ -1533,20 +1533,45 @@ class Profile {
     ctx.fillStyle = theme.block_background;
     ctx.roundRect(x, yAdd, fWidth / 2, 100, borderRadius).fill();
 
-    const roleIcon = await loadImage(join(BASE_PATH, "image", "role.png"));
+    const isCrafter = this.character.attributes.craftsmanship !== null && this.character.attributes.control !== null;
+    const isGatherer = this.character.attributes.gathering !== null && this.character.attributes.perception !== null;
+
+    let roleIconPath: string;
+    let roleTitle: string;
+
+    if (isCrafter) {
+      roleIconPath = join(BASE_PATH, "image", "crafting.png");
+      roleTitle = "Crafting";
+    } else if (isGatherer) {
+      roleIconPath = join(BASE_PATH, "image", "gathering.png");
+      roleTitle = "Gathering";
+    } else {
+      roleIconPath = join(BASE_PATH, "image", "role.png");
+      roleTitle = "Role";
+    }
+
+    const roleIcon = await loadImage(roleIconPath);
     ctx.drawImage(roleIcon, x + 10, yAdd + 8, 20, 20);
 
     ctx.fillStyle = theme.block_content;
     ctx.font = `normal 16px roboto condensed`;
-    ctx.fillText("Role", x + 35, yAdd + 8);
+    ctx.fillText(roleTitle, x + 35, yAdd + 8);
 
     ctx.fillStyle = theme.block_title;
     ctx.font = `normal 16px roboto condensed`;
 
     // Stats
     stats = new Stats(theme, ctx, x, yAdd, fWidth);
-    stats.add("Tenacity", this.character.attributes.tenacity);
-    stats.add("Piety", this.character.attributes.piety);
+    if (isCrafter) {
+      stats.add("Craftsmanship", this.character.attributes.craftsmanship);
+      stats.add("Control", this.character.attributes.control);
+    } else if (isGatherer) {
+      stats.add("Gathering", this.character.attributes.gathering);
+      stats.add("Perception", this.character.attributes.perception);
+    } else {
+      stats.add("Tenacity", this.character.attributes.tenacity);
+      stats.add("Piety", this.character.attributes.piety);
+    }
 
     ////////////////////////////////////////////
     // Return buffer
