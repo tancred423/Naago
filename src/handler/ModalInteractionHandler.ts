@@ -40,12 +40,12 @@ export class ModalInteractionHandler {
           case "filters":
             await SetupCommandHelper.handleFiltersModal(interaction);
             break;
-          case "theme":
-            await SetupCommandHelper.handleThemeModal(interaction);
-            break;
           default:
             throw new InvalidSubCommandError(subCommand);
         }
+        break;
+      case "theme":
+        await SetupCommandHelper.handleThemeModal(interaction);
         break;
       default:
         throw new InvalidCommandError(command);

@@ -218,7 +218,7 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
-          name: "/setup theme",
+          name: "/theme",
           value: "- Set a theme for your verified character's profile.",
           inline: false,
         },
