@@ -85,6 +85,13 @@
       "when": 1735488000000,
       "tag": "0011_drop_sub_profile_page",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1735574400000,
+      "tag": "0012_add_blacklist_keywords_to_setups",
+      "breakpoints": true
     }
   ]
 }

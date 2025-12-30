@@ -33,6 +33,7 @@ to add the bot to your server.
 - `/maintenance` - Current maintenances if any.
 - `/worldstatus` - Shows server status, character creation status and server congestion.
 - `/setup lodestone` - Set up automated lodestone news notifications.
+- `/setup filters` - Set up keyword filter blacklist to exclude certain Lodestone news.
 
 ## For developers
 

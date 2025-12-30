@@ -6,6 +6,14 @@ import * as log from "@std/log";
 import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
 
 export class SetupCommandHelper {
+  private static readonly typeNameMap: Record<string, string> = {
+    "topics": "Topics",
+    "notices": "Notices",
+    "maintenances": "Maintenances",
+    "updates": "Updates",
+    "statuses": "Statuses",
+  };
+
   public static async handleLodestoneModal(interaction: ModalSubmitInteraction): Promise<void> {
     const guildId = interaction.guild!.id;
     const fields = interaction.fields;
@@ -18,19 +26,11 @@ export class SetupCommandHelper {
       "setup_status_channel_select": "statuses",
     };
 
-    const typeNameMap: Record<string, string> = {
-      "topics": "Topics",
-      "notices": "Notices",
-      "maintenances": "Maintenances",
-      "updates": "Updates",
-      "statuses": "Statuses",
-    };
-
     const results: string[] = [];
 
     for (const [customId, type] of Object.entries(typeMap)) {
       const channelValues = fields.getSelectedChannels(customId);
-      const typeName = typeNameMap[type];
+      const typeName = this.typeNameMap[type];
 
       if (channelValues && channelValues?.size > 1) {
         throw new InvalidSelectionError(
@@ -62,6 +62,60 @@ export class SetupCommandHelper {
           `\`${typeName}\` notification channel could not be set: ${
             error instanceof Error ? error.stack : String(error)
           }`,
+        );
+      }
+    }
+
+    const embed = DiscordEmbedService.getSuccessEmbed(results.join("\n") || "No changes were made.");
+    await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+  }
+
+  public static async handleFiltersModal(interaction: ModalSubmitInteraction): Promise<void> {
+    const guildId = interaction.guild!.id;
+    const fields = interaction.fields;
+
+    const blacklistMap: Record<string, string> = {
+      "setup_topics_blacklist": "topics",
+      "setup_notices_blacklist": "notices",
+      "setup_maintenances_blacklist": "maintenances",
+      "setup_updates_blacklist": "updates",
+      "setup_statuses_blacklist": "statuses",
+    };
+
+    const results: string[] = [];
+
+    for (const [customId, type] of Object.entries(blacklistMap)) {
+      const typeName = this.typeNameMap[type];
+      let blacklistValue: string | null = null;
+
+      try {
+        blacklistValue = fields.getTextInputValue(customId);
+      } catch {
+        continue;
+      }
+
+      const hasChannel = await SetupsRepository.getChannelId(guildId, type);
+      if (!hasChannel) {
+        if (blacklistValue?.trim()) {
+          results.push(`\`${typeName}\` filter ignored (no channel set up).`);
+        }
+        continue;
+      }
+
+      try {
+        const normalizedValue = blacklistValue?.trim() || null;
+        await SetupsRepository.setBlacklistKeywords(guildId, type, normalizedValue);
+
+        if (normalizedValue) {
+          const keywords = normalizedValue.split(",").map((k) => k.trim()).filter((k) => k.length > 0);
+          results.push(`\`${typeName}\` filter set (${keywords.length} keyword${keywords.length !== 1 ? "s" : ""}).`);
+        } else {
+          results.push(`\`${typeName}\` filter cleared.`);
+        }
+      } catch (error: unknown) {
+        results.push(`\`${typeName}\` filter could not be set. Please try again later.`);
+        log.error(
+          `\`${typeName}\` filter could not be set: ${error instanceof Error ? error.stack : String(error)}`,
         );
       }
     }

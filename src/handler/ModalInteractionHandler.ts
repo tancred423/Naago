@@ -37,6 +37,9 @@ export class ModalInteractionHandler {
           case "lodestone":
             await SetupCommandHelper.handleLodestoneModal(interaction);
             break;
+          case "filters":
+            await SetupCommandHelper.handleFiltersModal(interaction);
+            break;
           case "theme":
             await SetupCommandHelper.handleThemeModal(interaction);
             break;
