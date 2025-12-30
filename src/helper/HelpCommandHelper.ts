@@ -209,6 +209,15 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
+          name: "/setup filters",
+          value: "- Set up keyword filter blacklist to exclude certain Lodestone news." +
+            "\n- Configure comma-separated keywords for each news category." +
+            "\n- If any keyword matches content in a news article, it will not be posted." +
+            "\n- Filters are applied per category (topics, notices, maintenances, updates, statuses)." +
+            "\n- By default, this command requires \`Manage Channels\` permission to execute.",
+          inline: false,
+        },
+        {
           name: "/setup theme",
           value: "- Set a theme for your verified character's profile.",
           inline: false,
