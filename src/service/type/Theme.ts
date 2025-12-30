@@ -19,6 +19,8 @@ export interface Theme {
   green: string;
   purple: string;
   mirage_border_color: string;
+  materia_border_normal: string;
+  materia_border_overmeld: string;
   epic: string;
   rare: string;
   uncommon: string;

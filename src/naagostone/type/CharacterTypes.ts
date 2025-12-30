@@ -106,14 +106,19 @@ export interface Equipment {
   amount_dye_slots: number | null;
   materia_1: string | null;
   materia_1_stats: string | null;
+  materia_1_is_overmeld: boolean | null;
   materia_2: string | null;
   materia_2_stats: string | null;
+  materia_2_is_overmeld: boolean | null;
   materia_3: string | null;
   materia_3_stats: string | null;
+  materia_3_is_overmeld: boolean | null;
   materia_4: string | null;
   materia_4_stats: string | null;
+  materia_4_is_overmeld: boolean | null;
   materia_5: string | null;
   materia_5_stats: string | null;
+  materia_5_is_overmeld: boolean | null;
   type: string | null;
   item_level: string | null;
 }

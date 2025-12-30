@@ -2031,7 +2031,7 @@ class ProfileBlock {
         32,
       );
     } catch (err) {
-      log.error(`Error: ${err instanceof Error ? err.stack : String(err)}`);
+      log.error(`Error with iconLink ${iconLink}: ${err instanceof Error ? err.stack : String(err)}`);
     }
   }
 }
@@ -2224,65 +2224,105 @@ class Gear {
       this.ctx.fillText(
         gear.item_level ?? "",
         this.isLeft ? this.x - 45 : this.x + 45,
-        this.y,
+        this.y - 2,
         30,
       );
     }
 
     // Materia
-    if (gear.materia_1) {
+    const materiaX1 = this.isLeft ? this.x - 80 - 20 : this.x + 80;
+    if (gear.materia_1 && gear.materia_1 !== "empty") {
       const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_1));
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 : this.x + 80,
-        this.y,
+        materiaX1,
+        this.y + 1,
         16,
         16,
       );
     }
+    if (gear.materia_1) {
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = gear.materia_1_is_overmeld
+        ? this.theme.materia_border_overmeld
+        : this.theme.materia_border_normal;
+      this.ctx.roundRect(materiaX1, this.y + 1, 16, 16, 2).stroke();
+    }
 
-    if (gear.materia_2) {
+    const materiaX2 = this.isLeft ? this.x - 80 - 20 - 20 : this.x + 80 + 20;
+    if (gear.materia_2 && gear.materia_2 !== "empty") {
       const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_2));
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 20 : this.x + 80 + 20,
-        this.y,
+        materiaX2,
+        this.y + 1,
         16,
         16,
       );
     }
+    if (gear.materia_2) {
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = gear.materia_2_is_overmeld
+        ? this.theme.materia_border_overmeld
+        : this.theme.materia_border_normal;
+      this.ctx.roundRect(materiaX2, this.y + 1, 16, 16, 2).stroke();
+    }
 
-    if (gear.materia_3) {
+    const materiaX3 = this.isLeft ? this.x - 80 - 20 - 20 * 2 : this.x + 80 + 20 * 2;
+    if (gear.materia_3 && gear.materia_3 !== "empty") {
       const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_3));
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 20 * 2 : this.x + 80 + 20 * 2,
-        this.y,
+        materiaX3,
+        this.y + 1,
         16,
         16,
       );
     }
+    if (gear.materia_3) {
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = gear.materia_3_is_overmeld
+        ? this.theme.materia_border_overmeld
+        : this.theme.materia_border_normal;
+      this.ctx.roundRect(materiaX3, this.y + 1, 16, 16, 2).stroke();
+    }
 
-    if (gear.materia_4) {
+    const materiaX4 = this.isLeft ? this.x - 80 - 20 - 20 * 3 : this.x + 80 + 20 * 3;
+    if (gear.materia_4 && gear.materia_4 !== "empty") {
       const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_4));
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 20 * 3 : this.x + 80 + 20 * 3,
-        this.y,
+        materiaX4,
+        this.y + 1,
         16,
         16,
       );
     }
+    if (gear.materia_4) {
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = gear.materia_4_is_overmeld
+        ? this.theme.materia_border_overmeld
+        : this.theme.materia_border_normal;
+      this.ctx.roundRect(materiaX4, this.y + 1, 16, 16, 2).stroke();
+    }
 
-    if (gear.materia_5) {
+    const materiaX5 = this.isLeft ? this.x - 80 - 20 - 20 * 4 : this.x + 80 + 20 * 4;
+    if (gear.materia_5 && gear.materia_5 !== "empty") {
       const materiaIcon = await loadImage(MateriaIconService.getIconPath(gear.materia_5));
       this.ctx.drawImage(
         materiaIcon,
-        this.isLeft ? this.x - 80 - 20 - 20 * 4 : this.x + 80 + 20 * 4,
-        this.y,
+        materiaX5,
+        this.y + 1,
         16,
         16,
       );
+    }
+    if (gear.materia_5) {
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = gear.materia_5_is_overmeld
+        ? this.theme.materia_border_overmeld
+        : this.theme.materia_border_normal;
+      this.ctx.roundRect(materiaX5, this.y + 1, 16, 16, 2).stroke();
     }
 
     // Item name
@@ -2554,11 +2594,11 @@ class MateriaGear {
     else this.ctx.textAlign = "left";
 
     this.ctx.fillStyle = this.theme.block_background;
-    const materiaCount = gear ? this.getMateriaCount(gear) : 0;
+    const materiaSlotCount = gear ? this.getMateriaSlotCount(gear) : 0;
     const baseHeight = this.height;
 
     const materiaLineHeight = 16;
-    const materiaExtraHeight = materiaCount > 0 ? (materiaCount * materiaLineHeight) - (baseHeight - 6) : 0;
+    const materiaExtraHeight = materiaSlotCount > 0 ? (materiaSlotCount * materiaLineHeight) - (baseHeight - 6) : 0;
     const blockHeight = baseHeight + Math.max(0, materiaExtraHeight);
 
     this.ctx
@@ -2591,40 +2631,55 @@ class MateriaGear {
       return;
     }
 
-    let materiaY = this.y;
-    const materiaList = this.getMateriaList(gear);
+    let materiaY = this.y - 1;
+    const materiaSlotList = this.getMateriaSlotList(gear);
 
-    if (materiaList.length > 0) {
+    if (materiaSlotList.length > 0) {
       this.ctx.font = `normal 12px roboto condensed`;
-      this.ctx.fillStyle = this.theme.block_content;
 
-      for (const materiaItem of materiaList) {
-        if (materiaItem.name) {
+      for (const materiaSlot of materiaSlotList) {
+        const boxX = this.isLeft ? this.x - 45 - 20 : this.x + 45;
+        const boxSize = 15;
+        const iconSize = 15;
+
+        if (!materiaSlot.isEmpty && materiaSlot.name) {
           try {
-            const materiaIcon = await loadImage(MateriaIconService.getIconPath(materiaItem.name));
+            const materiaIcon = await loadImage(MateriaIconService.getIconPath(materiaSlot.name));
             this.ctx.drawImage(
               materiaIcon,
-              this.isLeft ? this.x - 45 - 20 : this.x + 45,
+              boxX,
               materiaY,
-              16,
-              16,
+              iconSize,
+              iconSize,
             );
           } catch (err) {
             log.error(`Error loading materia icon: ${err instanceof Error ? err.stack : String(err)}`);
           }
-
-          const materiaText = materiaItem.stats
-            ? `${materiaItem.name} (${this.getStatName(materiaItem.stats)})`
-            : materiaItem.name;
-
-          this.ctx.fillText(
-            materiaText,
-            this.isLeft ? this.x - 45 - 20 - 4 : this.x + 45 + 20 + 4,
-            materiaY + 2,
-            this.fWidth - 24,
-          );
-          materiaY += 16;
         }
+
+        this.ctx.fillStyle = this.theme.block_content;
+
+        let materiaText = "Empty Slot";
+        if (materiaSlot.stats && materiaSlot.name) {
+          materiaText = `${materiaSlot.name} (${this.getStatName(materiaSlot.stats)})`;
+        } else if (materiaSlot.name) {
+          materiaText = materiaSlot.name;
+        }
+
+        this.ctx.fillText(
+          materiaText,
+          this.isLeft ? boxX - 4 : boxX + boxSize + 4,
+          materiaY,
+          this.fWidth - 24,
+        );
+
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeStyle = materiaSlot.isOvermeld
+          ? this.theme.materia_border_overmeld
+          : this.theme.materia_border_normal;
+        this.ctx.roundRect(boxX, materiaY, boxSize, boxSize, 2).stroke();
+
+        materiaY += 17;
       }
     }
 
@@ -2657,23 +2712,60 @@ class MateriaGear {
     return result;
   }
 
-  private getMateriaCount(gear: Equipment): number {
+  private getMateriaSlotCount(gear: Equipment): number {
     let count = 0;
-    if (gear.materia_1) count++;
-    if (gear.materia_2) count++;
-    if (gear.materia_3) count++;
-    if (gear.materia_4) count++;
-    if (gear.materia_5) count++;
+    if (gear.materia_1 !== null) count++;
+    if (gear.materia_2 !== null) count++;
+    if (gear.materia_3 !== null) count++;
+    if (gear.materia_4 !== null) count++;
+    if (gear.materia_5 !== null) count++;
     return count;
   }
 
-  private getMateriaList(gear: Equipment): Array<{ name: string; stats: string | null }> {
-    const list: Array<{ name: string; stats: string | null }> = [];
-    if (gear.materia_1) list.push({ name: gear.materia_1, stats: gear.materia_1_stats });
-    if (gear.materia_2) list.push({ name: gear.materia_2, stats: gear.materia_2_stats });
-    if (gear.materia_3) list.push({ name: gear.materia_3, stats: gear.materia_3_stats });
-    if (gear.materia_4) list.push({ name: gear.materia_4, stats: gear.materia_4_stats });
-    if (gear.materia_5) list.push({ name: gear.materia_5, stats: gear.materia_5_stats });
+  private getMateriaSlotList(
+    gear: Equipment,
+  ): Array<{ name: string | null; stats: string | null; isEmpty: boolean; isOvermeld: boolean }> {
+    const list: Array<{ name: string | null; stats: string | null; isEmpty: boolean; isOvermeld: boolean }> = [];
+    if (gear.materia_1 !== null) {
+      list.push({
+        name: gear.materia_1 === "empty" ? null : gear.materia_1,
+        stats: gear.materia_1_stats === "empty" ? null : gear.materia_1_stats,
+        isEmpty: gear.materia_1 === "empty",
+        isOvermeld: gear.materia_1_is_overmeld ?? false,
+      });
+    }
+    if (gear.materia_2 !== null) {
+      list.push({
+        name: gear.materia_2 === "empty" ? null : gear.materia_2,
+        stats: gear.materia_2_stats === "empty" ? null : gear.materia_2_stats,
+        isEmpty: gear.materia_2 === "empty",
+        isOvermeld: gear.materia_2_is_overmeld ?? false,
+      });
+    }
+    if (gear.materia_3 !== null) {
+      list.push({
+        name: gear.materia_3 === "empty" ? null : gear.materia_3,
+        stats: gear.materia_3_stats === "empty" ? null : gear.materia_3_stats,
+        isEmpty: gear.materia_3 === "empty",
+        isOvermeld: gear.materia_3_is_overmeld ?? false,
+      });
+    }
+    if (gear.materia_4 !== null) {
+      list.push({
+        name: gear.materia_4 === "empty" ? null : gear.materia_4,
+        stats: gear.materia_4_stats === "empty" ? null : gear.materia_4_stats,
+        isEmpty: gear.materia_4 === "empty",
+        isOvermeld: gear.materia_4_is_overmeld ?? false,
+      });
+    }
+    if (gear.materia_5 !== null) {
+      list.push({
+        name: gear.materia_5 === "empty" ? null : gear.materia_5,
+        stats: gear.materia_5_stats === "empty" ? null : gear.materia_5_stats,
+        isEmpty: gear.materia_5 === "empty",
+        isOvermeld: gear.materia_5_is_overmeld ?? false,
+      });
+    }
     return list;
   }
 

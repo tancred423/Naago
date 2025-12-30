@@ -19,6 +19,8 @@
   "green": "#77B22D",
   "purple": "#E2648D",
   "mirage_border_color": "#DDDDDD",
+  "materia_border_normal": "#377398",
+  "materia_border_overmeld": "#943f51",
 
   "epic": "#b38cff",
   "rare": "#5990ff",
@@ -29,7 +31,6 @@
   "image_folder": "dark",
   "emoji_female": "emoji_female.png",
   "emoji_male": "emoji_male.png",
-
   "no_weapon": "no_weapon.png",
   "no_head": "no_head.png",
   "no_body": "no_body.png",

@@ -19,6 +19,8 @@
   "green": "#4A6D10",
   "purple": "#863C6E",
   "mirage_border_color": "#5D422E",
+  "materia_border_normal": "#4d8ab1",
+  "materia_border_overmeld": "#d67087",
 
   "epic": "#8A5EC4",
   "rare": "#648EDB",
