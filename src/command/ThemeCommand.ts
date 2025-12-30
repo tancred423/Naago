@@ -33,6 +33,8 @@ class ThemeCommand extends Command {
     const lightEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_LIGHT");
     const classicEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_CLASSIC");
     const clearBlueEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_CLEAR_BLUE");
+    const clearGreenEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_CLEAR_GREEN");
+    const clearWhiteEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_CLEAR_WHITE");
     const characterSelectionEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_CHARACTER_SELECTION");
     const amaurotEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_AMAUROT");
     const moonEmoji = DiscordEmojiService.getAsEmojiData("EMOJI_THEME_MOON");
@@ -70,6 +72,20 @@ class ThemeCommand extends Command {
           value: "clear_blue",
           default: currentTheme === "clear_blue",
           ...(clearBlueEmoji && { emoji: clearBlueEmoji }),
+        },
+        {
+          label: "Clear Green UI",
+          description: "The clear green UI like in-game",
+          value: "clear_green",
+          default: currentTheme === "clear_green",
+          ...(clearGreenEmoji && { emoji: clearGreenEmoji }),
+        },
+        {
+          label: "Clear White UI",
+          description: "The clear white UI like in-game",
+          value: "clear_white",
+          default: currentTheme === "clear_white",
+          ...(clearWhiteEmoji && { emoji: clearWhiteEmoji }),
         },
         {
           label: "Character Selection",
