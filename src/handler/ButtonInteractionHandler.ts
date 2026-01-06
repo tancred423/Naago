@@ -6,6 +6,7 @@ import { StringManipulationService } from "../service/StringManipulationService.
 import { FavoriteCommandHelper } from "../helper/FavoriteCommandHelper.ts";
 import { ProfileCommandHandler } from "../helper/ProfileCommandHelper.ts";
 import { VerifyCommandHelper } from "../helper/VerifyCommandHelper.ts";
+import { WhenIsResetCommandHelper } from "../helper/WhenIsResetCommandHelper.ts";
 import { WorldStatusCommandHelper } from "../helper/WorldStatusCommandHelper.ts";
 import { WorldStatusUnavailableError } from "../naagostone/error/WorldStatusUnavailableError.ts";
 import { StatisticsService } from "../service/StatisticsService.ts";
@@ -84,6 +85,10 @@ export class ButtonInteractionHandler {
           await interaction.editReply({ content: "", embeds: [embed], components: [] });
           log.error(`Failed to fetch world status: ${error instanceof Error ? error.stack : String(error)}`);
         }
+        break;
+      case "whenisreset":
+        await interaction.deferUpdate();
+        await WhenIsResetCommandHelper.handlePageSwapButton(interaction, buttonIdSplit);
         break;
       default:
         throw new Error(

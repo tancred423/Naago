@@ -7,34 +7,34 @@ const DEFAULT_WORLD_ID = 56;
 
 interface CacheEntry<T> {
   data: T;
-  timestamp: number;
+  expiresAt: number;
 }
 
 const cache = new Map<string, CacheEntry<unknown>>();
 
-function getCached<T>(key: string): T | null {
+function getCached<T>(key: string): { hit: true; data: T } | { hit: false } {
   const entry = cache.get(key) as CacheEntry<T> | undefined;
-  if (!entry) return null;
+  if (!entry) return { hit: false };
 
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+  if (Date.now() > entry.expiresAt) {
     cache.delete(key);
-    return null;
+    return { hit: false };
   }
 
-  return entry.data;
+  return { hit: true, data: entry.data };
 }
 
-function setCache<T>(key: string, data: T): void {
-  cache.set(key, { data, timestamp: Date.now() });
+function setCache<T>(key: string, data: T, ttlMs: number = CACHE_TTL_MS): void {
+  cache.set(key, { data, expiresAt: Date.now() + ttlMs });
 }
 
 export class PaissaApiService {
   static async fetchWorldDetail(worldId: number = DEFAULT_WORLD_ID): Promise<WorldDetail | null> {
     const cacheKey = `world_${worldId}`;
 
-    const cachedData = getCached<WorldDetail>(cacheKey);
-    if (cachedData) {
-      return cachedData;
+    const cached = getCached<WorldDetail>(cacheKey);
+    if (cached.hit) {
+      return cached.data;
     }
 
     try {
@@ -61,11 +61,23 @@ export class PaissaApiService {
   }
 
   static async getCurrentLotteryPhase(): Promise<LotteryPhaseInfo | null> {
+    const cacheKey = "lottery_phase";
+    const cached = getCached<LotteryPhaseInfo | null>(cacheKey);
+    if (cached.hit) {
+      return cached.data;
+    }
+
     const worldDetail = await this.fetchWorldDetail();
-    if (!worldDetail) return null;
+    if (!worldDetail) {
+      setCache(cacheKey, null);
+      return null;
+    }
 
     const plotWithNextOrLatestPhaseChange = this.getPlotWithNextOrLatestPhaseChange(worldDetail);
-    if (!plotWithNextOrLatestPhaseChange) return null;
+    if (!plotWithNextOrLatestPhaseChange) {
+      setCache(cacheKey, null);
+      return null;
+    }
 
     const phase = plotWithNextOrLatestPhaseChange.lotto_phase ?? null;
     const phaseName = phase ? this.getPhaseName(phase) : null;
@@ -73,15 +85,21 @@ export class PaissaApiService {
     const isCurrent = until ? (until > (Date.now() / 1000)) : false;
 
     if (!phase || !phaseName || !until) {
+      setCache(cacheKey, null);
       return null;
     }
 
-    return {
+    const result: LotteryPhaseInfo = {
       phase,
       phaseName,
       until,
       isCurrent,
     };
+
+    const ttlMs = isCurrent ? Math.max((until * 1000) - Date.now(), CACHE_TTL_MS) : CACHE_TTL_MS;
+    setCache(cacheKey, result, ttlMs);
+
+    return result;
   }
 
   private static getPlotWithNextOrLatestPhaseChange(worldDetail: WorldDetail): OpenPlotDetail | null {
