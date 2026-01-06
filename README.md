@@ -4,12 +4,12 @@ A FFXIV Discord Bot for character profiles and lodestone news.
 
 ## Features
 
-- Automated Lodestone news notifications (Topics, Notices, Maintenances, Updates, Statuses)
-- Command to view active maintenances
-- Character profile lookup from FFXIV Lodestone
-- Customizable profile themes
-- Character favorites system
-- Character verification
+- 📰 Automated Lodestone news notifications (Topics, Notices, Maintenances, Updates, Statuses)
+- 🛠️ Command to view active maintenances
+- 🎮 Character profile lookup from FFXIV Lodestone
+- 🎨 Customizable profile themes
+- ⭐ Character favorites system
+- ✅ Character verification
 
 ## Add the bot to your server
 
@@ -40,6 +40,7 @@ to add the bot to your server.
 - `/events` - Lists all currently ongoing and upcoming FFXIV events.
 - `/liveletter` - Shows information about the next or current Live Letter.
 - `/maintenance` - Current maintenances if any.
+- `/when-is-reset` - Shows daily and weekly reset times.
 - `/worldstatus` - Shows server status, character creation status and server congestion.
 
 ### Setup Commands

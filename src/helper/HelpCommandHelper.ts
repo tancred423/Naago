@@ -173,6 +173,12 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
+          name: "/when-is-reset",
+          value: "- Shows daily and weekly reset times for FFXIV." +
+            "\n- Includes duty roulettes, GC missions, tomestone caps, fashion report and more.",
+          inline: false,
+        },
+        {
           name: "/worldstatus",
           value: "- Shows server status, character creation status and server congestion.",
           inline: false,
