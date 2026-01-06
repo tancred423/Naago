@@ -242,7 +242,7 @@ export class ComponentsV2Service {
     container.addSeparatorComponents((separator) => separator);
     currentComponents += 1;
 
-    container.addTextDisplayComponents((textDisplay) => textDisplay.setContent(footerText));
+    container.addTextDisplayComponents((textDisplay) => textDisplay.setContent("-# " + footerText));
     currentCharacters += footerText.length;
     currentComponents += 1;
 
