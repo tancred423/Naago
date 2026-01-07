@@ -217,10 +217,15 @@ export class HelpCommandHelper {
         {
           name: "/setup filters",
           value: "- Set up keyword filter blacklist to exclude certain Lodestone news." +
-            "\n- Configure comma-separated keywords for each news category." +
-            "\n- If any keyword matches content in a news article, it will not be posted." +
+            '\n- Configure comma-separated keywords for each news category. E.g. "ddos, difficulty logging in to north america"' +
+            "\n- If any keyword matches content in a news article, it will not be posted. The keywords are case-insensitive." +
             "\n- Filters are applied per category (topics, notices, maintenances, updates, statuses)." +
-            "\n- By default, this command requires \`Manage Channels\` permission to execute.",
+            "\n- By default, this command requires \`Manage Channels\` permission to execute." +
+            "\n- _For tech savvy power users only:_" +
+            "\n  - Use regex patterns with `/pattern/flags` syntax (e.g. `/north\\s+america/i`)." +
+            "\n  - Supported flags: `i` (case-insensitive), `g` (global), `m` (multiline), `s` (dotAll), `u` (unicode)." +
+            "\n   - Flags are not applied by default so if you need case-insensitivity, you have to provide the `i` flag." +
+            '\n   - You can have both regex and normal keywords, e.g. "ddos,/data cent(er|re)/i".',
           inline: false,
         },
         {

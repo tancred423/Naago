@@ -2,6 +2,7 @@ import { NewNewsQueueJob, NewsQueuePayload, NewsType } from "../database/schema/
 import { NewsQueueRepository } from "../database/repository/NewsQueueRepository.ts";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
+import { FilterExpressionService } from "./FilterExpressionService.ts";
 import * as log from "@std/log";
 
 export class NewsQueueService {
@@ -13,20 +14,6 @@ export class NewsQueueService {
     if (newsData.description?.markdown) parts.push(newsData.description.markdown);
 
     return parts.join(" ");
-  }
-
-  private static parseBlacklistKeywords(keywords: string | null | undefined): string[] {
-    if (!keywords) return [];
-    return keywords
-      .split(",")
-      .map((k) => k.trim().toLowerCase())
-      .filter((k) => k.length > 0);
-  }
-
-  private static isBlacklisted(content: string, keywords: string[]): boolean {
-    if (keywords.length === 0) return false;
-    const lowerContent = content.toLowerCase();
-    return keywords.some((keyword) => lowerContent.includes(keyword));
   }
 
   public static async enqueueSendJobs(
@@ -42,9 +29,9 @@ export class NewsQueueService {
 
     const jobs: NewNewsQueueJob[] = [];
     for (const setup of setups) {
-      const blacklistKeywords = this.parseBlacklistKeywords(setup.blacklistKeywords);
+      const { patterns } = FilterExpressionService.parseFilterString(setup.blacklistKeywords);
 
-      if (this.isBlacklisted(searchableContent, blacklistKeywords)) {
+      if (FilterExpressionService.isBlacklisted(searchableContent, patterns)) {
         skippedCount++;
         log.info(
           `[QUEUE] Skipping ${newsType} for guild ${setup.guildId} due to blacklist match`,
