@@ -1,6 +1,7 @@
 import { MessageFlags, ModalSubmitInteraction } from "discord.js";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
+import { FilterExpressionService } from "../service/FilterExpressionService.ts";
 import { InvalidSelectionError } from "./error/InvalidSelectionError.ts";
 import * as log from "@std/log";
 import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
@@ -107,8 +108,19 @@ export class SetupCommandHelper {
         await SetupsRepository.setBlacklistKeywords(guildId, type, normalizedValue);
 
         if (normalizedValue) {
-          const keywords = normalizedValue.split(",").map((k) => k.trim()).filter((k) => k.length > 0);
-          results.push(`\`${typeName}\` filter set (${keywords.length} keyword${keywords.length !== 1 ? "s" : ""}).`);
+          const { patterns, warnings } = FilterExpressionService.parseFilterString(normalizedValue);
+          const validCount = FilterExpressionService.getValidPatternCount(patterns);
+          const displayText = FilterExpressionService.formatPatternsForDisplay(patterns);
+
+          if (validCount > 0) {
+            results.push(`\`${typeName}\` filter set (${displayText}).`);
+          } else if (patterns.length > 0) {
+            results.push(`\`${typeName}\` filter set but all patterns are invalid.`);
+          }
+
+          for (const warning of warnings) {
+            results.push(`⚠️ \`${typeName}\`: ${warning}`);
+          }
         } else {
           results.push(`\`${typeName}\` filter cleared.`);
         }
