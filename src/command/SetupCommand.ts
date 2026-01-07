@@ -133,7 +133,7 @@ class SetupCommand extends Command {
       .setPlaceholder("e.g. new optional items, crystalline conflict")
       .setStyle(TextInputStyle.Short)
       .setRequired(false)
-      .setMaxLength(500);
+      .setMaxLength(4000);
     if (setupMap.topics?.blacklistKeywords) {
       topicBlacklistInput.setValue(setupMap.topics.blacklistKeywords);
     }
@@ -146,7 +146,7 @@ class SetupCommand extends Command {
       .setPlaceholder("e.g. eternal bonding reservation, against in-game rmt")
       .setStyle(TextInputStyle.Short)
       .setRequired(false)
-      .setMaxLength(500);
+      .setMaxLength(4000);
     if (setupMap.notices?.blacklistKeywords) {
       noticeBlacklistInput.setValue(setupMap.notices.blacklistKeywords);
     }
@@ -159,7 +159,7 @@ class SetupCommand extends Command {
       .setPlaceholder("e.g. companion app, online store")
       .setStyle(TextInputStyle.Short)
       .setRequired(false)
-      .setMaxLength(500);
+      .setMaxLength(4000);
     if (setupMap.maintenances?.blacklistKeywords) {
       maintenanceBlacklistInput.setValue(setupMap.maintenances.blacklistKeywords);
     }
@@ -172,7 +172,7 @@ class SetupCommand extends Command {
       .setPlaceholder("e.g. companion app, the lodestone updated")
       .setStyle(TextInputStyle.Short)
       .setRequired(false)
-      .setMaxLength(500);
+      .setMaxLength(4000);
     if (setupMap.updates?.blacklistKeywords) {
       updateBlacklistInput.setValue(setupMap.updates.blacklistKeywords);
     }
@@ -185,7 +185,7 @@ class SetupCommand extends Command {
       .setPlaceholder("e.g. ddos attack, crystal, chaos")
       .setStyle(TextInputStyle.Short)
       .setRequired(false)
-      .setMaxLength(500);
+      .setMaxLength(4000);
     if (setupMap.statuses?.blacklistKeywords) {
       statusBlacklistInput.setValue(setupMap.statuses.blacklistKeywords);
     }
