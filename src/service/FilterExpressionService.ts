@@ -11,10 +11,14 @@ export interface ParseResult {
 }
 
 const DANGEROUS_PATTERNS = [
+  // Nested quantifiers
   /\([^)]*[+*][^)]*\)[+*]/,
+  // Ambiguous alternation with repetition
   /\([^)]*\|[^)]*\)[+*]/,
+  // Dangerous dot quantifiers
   /\.{2,}[+*]/,
-  /\(\?[^:)]/,
+  // Variable-length lookbehinds only
+  /\(\?<=[^)]*[+*]|\(\?<![^)]*[+*]/,
 ];
 
 const MAX_REGEX_LENGTH = 200;
