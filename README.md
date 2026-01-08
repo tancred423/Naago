@@ -4,12 +4,12 @@ A FFXIV Discord Bot for character profiles and lodestone news.
 
 ## Features
 
-- 📰 Automated Lodestone news notifications (Topics, Notices, Maintenances, Updates, Statuses)
-- 🛠️ Command to view active maintenances
-- 🎮 Character profile lookup from FFXIV Lodestone
-- 🎨 Customizable profile themes
-- ⭐ Character favorites system
-- ✅ Character verification
+- Automated Lodestone news notifications (Topics, Notices, Maintenances, Updates, Statuses)
+- Command to view active maintenances
+- Character profile lookup from FFXIV Lodestone
+- Customizable profile themes
+- Character favorites system
+- Character verification
 
 ## Add the bot to your server
 
