@@ -67,7 +67,17 @@ export class SetupCommandHelper {
       }
     }
 
-    const embed = DiscordEmbedService.getSuccessEmbed(results.join("\n") || "No changes were made.");
+    const activeChannels = results.filter((r) => r.includes("notifications are active"));
+    const activeChannelCount = activeChannels.length;
+    let message = results.join("\n") || "No changes were made.";
+    if (activeChannelCount > 0) {
+      const channelText = activeChannelCount === 1 ? "channel" : "channels";
+      const supportServerUrl = Deno.env.get("SUPPORT_SERVER_URL")!;
+      message +=
+        `\n\n⚠️ **Important:** Make sure the bot has permission to view and send messages in the selected ${channelText}. Otherwise, news posts will fail silently. If you have any issues with news posts, feel free to join the [Support Server](${supportServerUrl}).`;
+    }
+
+    const embed = DiscordEmbedService.getSuccessEmbed(message);
     await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
   }
 

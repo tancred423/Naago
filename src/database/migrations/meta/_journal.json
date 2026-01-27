@@ -99,6 +99,13 @@
       "when": 1737964800000,
       "tag": "0013_increase_news_queue_status_length",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1737968400000,
+      "tag": "0014_update_stopped_job_statuses",
+      "breakpoints": true
     }
   ]
 }

@@ -141,7 +141,15 @@ export type NewNewsQueueJob = typeof newsQueue.$inferInsert;
 
 export type NewsType = "topics" | "notices" | "maintenances" | "updates" | "statuses";
 export type JobType = "SEND" | "UPDATE";
-export type JobStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "STOPPED_MISSING_PERMISSIONS";
+export type JobStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "COMPLETED"
+  | "FAILED"
+  | "STOPPED_MISSING_PERMISSIONS"
+  | "STOPPED_UNKNOWN_CHANNEL"
+  | "STOPPED_UNKNOWN_GUILD"
+  | "STOPPED_MISSING_ACCESS";
 
 export interface NewsQueuePayload {
   title: string;

@@ -90,6 +90,39 @@ export class NewsQueueRepository {
       .where(eq(newsQueue.id, id));
   }
 
+  public static async markAsStoppedUnknownChannel(id: number): Promise<void> {
+    await database
+      .update(newsQueue)
+      .set({
+        status: "STOPPED_UNKNOWN_CHANNEL",
+        errorMessage: "Unknown Channel",
+        updatedAt: sql`NOW()`,
+      })
+      .where(eq(newsQueue.id, id));
+  }
+
+  public static async markAsStoppedUnknownGuild(id: number): Promise<void> {
+    await database
+      .update(newsQueue)
+      .set({
+        status: "STOPPED_UNKNOWN_GUILD",
+        errorMessage: "Unknown Guild",
+        updatedAt: sql`NOW()`,
+      })
+      .where(eq(newsQueue.id, id));
+  }
+
+  public static async markAsStoppedMissingAccess(id: number): Promise<void> {
+    await database
+      .update(newsQueue)
+      .set({
+        status: "STOPPED_MISSING_ACCESS",
+        errorMessage: "Missing Access",
+        updatedAt: sql`NOW()`,
+      })
+      .where(eq(newsQueue.id, id));
+  }
+
   public static async resetStuckJobs(): Promise<number> {
     const result = await database
       .update(newsQueue)

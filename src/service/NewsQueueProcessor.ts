@@ -183,6 +183,21 @@ export class NewsQueueProcessor {
         return;
       }
 
+      if (errorMessage === "Unknown Channel") {
+        await NewsQueueRepository.markAsStoppedUnknownChannel(job.id);
+        return;
+      }
+
+      if (errorMessage === "Unknown Guild") {
+        await NewsQueueRepository.markAsStoppedUnknownGuild(job.id);
+        return;
+      }
+
+      if (errorMessage === "Missing Access") {
+        await NewsQueueRepository.markAsStoppedMissingAccess(job.id);
+        return;
+      }
+
       log.error(`[QUEUE PROCESSOR] Job ${job.id} failed: ${errorMessage}`);
       await NewsQueueRepository.markAsFailed(job.id, errorMessage, job.retryCount);
 
