@@ -119,7 +119,7 @@ export const newsQueue = mysqlTable("news_queue", {
   guildId: varchar("guild_id", { length: 255 }).notNull(),
   channelId: varchar("channel_id", { length: 255 }).notNull(),
   messageId: varchar("message_id", { length: 255 }),
-  status: varchar("status", { length: 20 }).notNull().default("PENDING"),
+  status: varchar("status", { length: 50 }).notNull().default("PENDING"),
   retryCount: int("retry_count").notNull().default(0),
   priority: int("priority").notNull().default(0),
   payload: json("payload").$type<NewsQueuePayload>(),
@@ -141,7 +141,7 @@ export type NewNewsQueueJob = typeof newsQueue.$inferInsert;
 
 export type NewsType = "topics" | "notices" | "maintenances" | "updates" | "statuses";
 export type JobType = "SEND" | "UPDATE";
-export type JobStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED";
+export type JobStatus = "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "STOPPED_MISSING_PERMISSIONS";
 
 export interface NewsQueuePayload {
   title: string;

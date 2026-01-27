@@ -177,6 +177,12 @@ export class NewsQueueProcessor {
       await NewsQueueRepository.markAsCompleted(job.id);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
+
+      if (errorMessage === "Missing Permissions") {
+        await NewsQueueRepository.markAsStoppedMissingPermissions(job.id);
+        return;
+      }
+
       log.error(`[QUEUE PROCESSOR] Job ${job.id} failed: ${errorMessage}`);
       await NewsQueueRepository.markAsFailed(job.id, errorMessage, job.retryCount);
 

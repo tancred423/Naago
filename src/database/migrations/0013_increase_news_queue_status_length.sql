@@ -1,0 +1,1 @@
+ALTER TABLE `news_queue` MODIFY COLUMN `status` varchar(50) NOT NULL DEFAULT 'PENDING';

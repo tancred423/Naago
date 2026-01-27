@@ -79,6 +79,17 @@ export class NewsQueueRepository {
       .where(eq(newsQueue.id, id));
   }
 
+  public static async markAsStoppedMissingPermissions(id: number): Promise<void> {
+    await database
+      .update(newsQueue)
+      .set({
+        status: "STOPPED_MISSING_PERMISSIONS",
+        errorMessage: "Missing Permissions",
+        updatedAt: sql`NOW()`,
+      })
+      .where(eq(newsQueue.id, id));
+  }
+
   public static async resetStuckJobs(): Promise<number> {
     const result = await database
       .update(newsQueue)

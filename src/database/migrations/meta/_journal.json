@@ -92,6 +92,13 @@
       "when": 1735574400000,
       "tag": "0012_add_blacklist_keywords_to_setups",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1737964800000,
+      "tag": "0013_increase_news_queue_status_length",
+      "breakpoints": true
     }
   ]
 }
