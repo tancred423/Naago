@@ -21,7 +21,7 @@ const DANGEROUS_PATTERNS = [
   /\(\?<=[^)]*[+*]|\(\?<![^)]*[+*]/,
 ];
 
-const MAX_REGEX_LENGTH = 200;
+const MAX_REGEX_LENGTH = 4000;
 
 export class FilterExpressionService {
   public static parseFilterString(input: string | null | undefined): ParseResult {
