@@ -178,7 +178,7 @@ class VerifyCommand extends Command {
     );
 
     await interaction.editReply({
-      content: `Hey ${name}!` +
+      content: `Hey ${character.name}!` +
         `\n\nYou are already verified with ${verifiedCharacter.name}! If you want to change your character, follow the instructions below.` +
         "\n\nPlease add this verification code to your lodestone bio:" +
         `\n\`${verificationCode}\`` +
@@ -216,7 +216,7 @@ class VerifyCommand extends Command {
     );
 
     await interaction.editReply({
-      content: `Hey ${name}!` +
+      content: `Hey ${character.name}!` +
         "\n\nPlease add this verification code to your lodestone bio:" +
         `\n\`${verificationCode}\`` +
         "\n\nAfter changing your bio, click on `Verify me`.",
