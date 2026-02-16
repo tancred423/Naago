@@ -7,6 +7,7 @@ import { Buffer } from "node:buffer";
 import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { ProfilePageType } from "../service/type/ProfilePageTypes.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 
 export class ProfileCommandHandler {
   public static async handlePageSwapButton(interaction: ButtonInteraction, buttonIdSplit: string[]): Promise<void> {
@@ -116,6 +117,15 @@ export class ProfileCommandHandler {
     }
 
     const character = characterDataDto.character;
+
+    if (character.active_classjob === null || character.portrait === null) {
+      await DiscordMessageService.deleteAndFollowUpEphemeralError(
+        interaction,
+        `Cannot display character profile as profile page is private.`,
+      );
+      return;
+    }
+
     const profileImage = await ProfileGeneratorService.getImage(character, false, "profile");
 
     if (!profileImage) {

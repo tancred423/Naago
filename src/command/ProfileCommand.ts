@@ -109,6 +109,13 @@ class ProfileCommand extends Command {
     }
     const character = characterDataDto.character;
 
+    if (character.active_classjob === null || character.portrait === null) {
+      const embed = DiscordEmbedService.getErrorEmbed(`Cannot display character profile as profile page is private.`);
+      await interaction.deleteReply();
+      await interaction.followUp({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      return;
+    }
+
     const profilePagesRow = await ProfilePagesRepository.find(userId);
     const profilePage = (profilePagesRow?.profilePage ?? "profile") as ProfilePageType;
 
@@ -216,6 +223,15 @@ class ProfileCommand extends Command {
     }
 
     const character = characterDataDto.character;
+
+    if (character.active_classjob === null || character.portrait === null) {
+      await DiscordMessageService.deleteAndFollowUpEphemeralError(
+        interaction,
+        `Cannot display character profile as profile page is private.`,
+      );
+      return;
+    }
+
     const profileImage = await ProfileGeneratorService.getImage(character, false, "profile");
 
     if (!profileImage) {

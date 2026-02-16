@@ -3,6 +3,7 @@ import {
   ChatInputCommandInteraction,
   ContextMenuCommandInteraction,
   MessageFlags,
+  ModalSubmitInteraction,
 } from "discord.js";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
 
@@ -24,7 +25,11 @@ export class DiscordMessageService {
   }
 
   public static async deleteAndFollowUpEphemeralError(
-    interaction: ContextMenuCommandInteraction | ButtonInteraction | ChatInputCommandInteraction,
+    interaction:
+      | ContextMenuCommandInteraction
+      | ButtonInteraction
+      | ChatInputCommandInteraction
+      | ModalSubmitInteraction,
     message: string,
   ): Promise<void> {
     const embed = DiscordEmbedService.getErrorEmbed(message);
