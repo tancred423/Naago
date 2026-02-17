@@ -1,6 +1,10 @@
 name: Deploy
 
 on:
+  pull_request:
+    branches:
+      - main
+
   push:
     branches:
       - main
@@ -9,6 +13,7 @@ jobs:
   check:
     name: Check Code Quality
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,9 +36,13 @@ jobs:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: check
+
+    if: github.event_name == 'push'
+
     permissions:
       contents: read
       packages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -70,6 +79,9 @@ jobs:
     name: Deploy to Server
     runs-on: ubuntu-latest
     needs: build
+
+    if: github.event_name == 'push'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
