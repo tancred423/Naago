@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, time, TimestampStyles } from "discord.js";
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder, time, TimestampStyles } from "discord.js";
 import { TopicsRepository } from "../database/repository/TopicsRepository.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { Command } from "./type/Command.ts";
@@ -24,19 +24,21 @@ class LiveLetterCommand extends Command {
     if (diffMs > 0) {
       const timestampFull = time(newestLiveLetterTopic.timestampLiveLetter, TimestampStyles.LongDateTime);
       const timestampRelative = time(newestLiveLetterTopic.timestampLiveLetter, TimestampStyles.RelativeTime);
-      const embed = DiscordEmbedService.getTopicEmbedFromData(newestLiveLetterTopic);
-      await interaction.reply({
-        content: `# This is the next Live Letter\nIt will start at ${timestampFull} (${timestampRelative})`,
-        embeds: [embed],
-      });
+      const header = DiscordEmbedService.buildTextContainer(
+        `# This is the next Live Letter\nIt will start at ${timestampFull} (${timestampRelative})`,
+        "COLOR_TOPICS",
+      );
+      const topic = DiscordEmbedService.getTopicContainerFromData(newestLiveLetterTopic);
+      await interaction.reply({ components: [header, topic], flags: MessageFlags.IsComponentsV2 });
     } else if (diffMs >= -twoHoursInMs) {
       const timestampFull = time(newestLiveLetterTopic.timestampLiveLetter, TimestampStyles.LongDateTime);
       const timestampRelative = time(newestLiveLetterTopic.timestampLiveLetter, TimestampStyles.RelativeTime);
-      const embed = DiscordEmbedService.getTopicEmbedFromData(newestLiveLetterTopic);
-      await interaction.reply({
-        content: `# This live letter is currently live!\nIt started at ${timestampFull} (${timestampRelative})`,
-        embeds: [embed],
-      });
+      const header = DiscordEmbedService.buildTextContainer(
+        `# This live letter is currently live!\nIt started at ${timestampFull} (${timestampRelative})`,
+        "COLOR_TOPICS",
+      );
+      const topic = DiscordEmbedService.getTopicContainerFromData(newestLiveLetterTopic);
+      await interaction.reply({ components: [header, topic], flags: MessageFlags.IsComponentsV2 });
     } else {
       await interaction.reply({ content: "No Live Letter is currently planned." });
     }

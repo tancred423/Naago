@@ -229,6 +229,14 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
+          name: "/setup event-reminders",
+          value: "- Set up reminders for events that are ending soon." +
+            "\n- By default, reminders are enabled and sent to the topics news channel." +
+            "\n- You can disable reminders or override the channel." +
+            "\n- By default, this command requires \`Manage Channels\` permission to execute.",
+          inline: false,
+        },
+        {
           name: "/theme",
           value: "- Set a theme for your verified character's profile.",
           inline: false,

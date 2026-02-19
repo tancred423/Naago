@@ -32,6 +32,9 @@ import { StatisticsService } from "./service/StatisticsService.ts";
 import { GlobalClient } from "./GlobalClient.ts";
 import { NewsQueueProcessor } from "./service/NewsQueueProcessor.ts";
 import { NewsQueueRepository } from "./database/repository/NewsQueueRepository.ts";
+import { EventReminderService } from "./service/EventReminderService.ts";
+import { LiveLetterAnnouncementService } from "./service/LiveLetterAnnouncementService.ts";
+import { EventReminderSetupsRepository } from "./database/repository/EventReminderSetupsRepository.ts";
 
 await load({ export: true });
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -136,11 +139,23 @@ client.once("clientReady", () => {
     checkLodestone().catch((err) => {
       log.error(`Lodestone check failed on start: ${err instanceof Error ? err.stack : String(err)}`);
     });
+    EventReminderService.checkAndSendReminders().catch((err) => {
+      log.error(`Event reminder check failed on start: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    LiveLetterAnnouncementService.checkAndSendAnnouncements().catch((err) => {
+      log.error(`Live letter announcement check failed on start: ${err instanceof Error ? err.stack : String(err)}`);
+    });
   }
 
   cron.schedule("1-56/5 * * * *", async () => {
     await checkLodestone().catch((err) => {
       log.error(`Lodestone check failed: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await EventReminderService.checkAndSendReminders().catch((err) => {
+      log.error(`Event reminder check failed: ${err instanceof Error ? err.stack : String(err)}`);
+    });
+    await LiveLetterAnnouncementService.checkAndSendAnnouncements().catch((err) => {
+      log.error(`Live letter announcement check failed: ${err instanceof Error ? err.stack : String(err)}`);
     });
   });
 
@@ -238,12 +253,6 @@ async function setPresence(): Promise<void> {
         presenceState = `Live Letter in ${buildTimeString(diffSeconds)}`;
       } else if (diffMs >= -twoHoursInMs) {
         presenceState = "Live Letter is currently live!";
-
-        if (newestLiveLetterTopic.liveLetterAnnounced === 0) {
-          await TopicSenderService.sendLiveLetterStartedAnnouncement(newestLiveLetterTopic);
-          await TopicsRepository.markLiveLetterAsAnnounced(newestLiveLetterTopic.id);
-          log.info(`Sent live letter started announcement for: ${newestLiveLetterTopic.title}`);
-        }
       }
     }
 
@@ -299,6 +308,7 @@ async function cleanupOrphanedGuilds(): Promise<void> {
     for (const guildId of guildIdsInDatabase) {
       if (!guildIdsInClient.has(guildId)) {
         await SetupsRepository.deleteAll(guildId);
+        await EventReminderSetupsRepository.delete(guildId);
         deletedCount++;
         log.info(`Cleaned up orphaned guild data for guild ${guildId}`);
       }
@@ -466,6 +476,7 @@ client.on("interactionCreate", async (interaction) => {
 client.on("guildDelete", async (guild) => {
   try {
     await SetupsRepository.deleteAll(guild.id);
+    await EventReminderSetupsRepository.delete(guild.id);
     log.info(`Deleted all configuration data for guild ${guild.id} (${guild.name})`);
   } catch (err) {
     log.error(

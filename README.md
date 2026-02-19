@@ -45,9 +45,10 @@ to add the bot to your server.
 
 ### Setup Commands
 
-- `/theme` - Set a theme for your verified character's profile.
+- `/theme` - Choose a theme for your verified character's profile.
 - `/setup lodestone` - Set up automated lodestone news notifications.
 - `/setup filters` - Set up keyword filter blacklists to exclude certain Lodestone news.
+- `/setup event-reminders` - Set up reminders for events that are ending soon.
 
 ### Development, Contributing and Self Hosting
 

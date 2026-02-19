@@ -6,10 +6,13 @@ import {
   ModalBuilder,
   PermissionsBitField,
   SlashCommandBuilder,
+  StringSelectMenuBuilder,
+  StringSelectMenuOptionBuilder,
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
+import { EventReminderSetupsRepository } from "../database/repository/EventReminderSetupsRepository.ts";
 import { Command } from "./type/Command.ts";
 import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
 
@@ -27,6 +30,11 @@ class SetupCommand extends Command {
         .setName("filters")
         .setDescription("Set up keyword filter blacklist to exclude certain Lodestone news.")
     )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("event-reminders")
+        .setDescription("Set up reminders for events that are ending soon and live letters that are starting.")
+    )
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageChannels);
 
   public async execute(interaction: ChatInputCommandInteraction): Promise<void> {
@@ -37,6 +45,9 @@ class SetupCommand extends Command {
         break;
       case "filters":
         await this.handleFilters(interaction);
+        break;
+      case "event-reminders":
+        await this.handleEventReminders(interaction);
         break;
       default:
         throw new InvalidSubCommandError(`/setup ${subCommand}`);
@@ -119,6 +130,46 @@ class SetupCommand extends Command {
       .setCustomId("setup.lodestone")
       .setTitle("Lodestone News Channels")
       .addLabelComponents(topicRow, noticeRow, maintenanceRow, updateRow, statusRow);
+
+    await interaction.showModal(modal);
+  }
+
+  private async handleEventReminders(interaction: ChatInputCommandInteraction): Promise<void> {
+    const guildId = interaction.guild!.id;
+    const existing = await EventReminderSetupsRepository.get(guildId);
+
+    const enabledSelect = new StringSelectMenuBuilder()
+      .setCustomId("setup_event_reminders_enabled")
+      .addOptions(
+        new StringSelectMenuOptionBuilder()
+          .setLabel("Yes, enable reminders")
+          .setValue("enabled")
+          .setDefault(existing ? existing.enabled === 1 : true),
+        new StringSelectMenuOptionBuilder()
+          .setLabel("No, disable reminders")
+          .setValue("disabled")
+          .setDefault(existing ? existing.enabled === 0 : false),
+      );
+    const enabledRow = new LabelBuilder()
+      .setLabel("Do you want to enable event reminders?")
+      .setStringSelectMenuComponent(enabledSelect);
+
+    const channelMenu = new ChannelSelectMenuBuilder()
+      .setCustomId("setup_event_reminders_channel")
+      .setPlaceholder("Leave empty for topics channel")
+      .setChannelTypes(ChannelType.GuildText)
+      .setRequired(false);
+    if (existing?.channelId) {
+      channelMenu.setDefaultChannels(existing.channelId);
+    }
+    const channelRow = new LabelBuilder()
+      .setLabel("Do you want to override the default channel?")
+      .setChannelSelectMenuComponent(channelMenu);
+
+    const modal = new ModalBuilder()
+      .setCustomId("setup.event-reminders")
+      .setTitle("Event Reminders")
+      .addLabelComponents(enabledRow, channelRow);
 
     await interaction.showModal(modal);
   }

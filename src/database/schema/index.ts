@@ -5,4 +5,5 @@ export * from "./themes.ts";
 export * from "./favorites.ts";
 export * from "./lodestone-news.ts";
 export * from "./setups.ts";
+export * from "./event-reminder-setups.ts";
 export * from "./statistics.ts";

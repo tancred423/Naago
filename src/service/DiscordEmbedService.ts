@@ -1,26 +1,22 @@
-import { ColorResolvable, EmbedBuilder } from "discord.js";
-import moment from "moment";
+import {
+  ColorResolvable,
+  ContainerBuilder,
+  EmbedBuilder,
+  MediaGalleryBuilder,
+  time,
+  TimestampStyles,
+} from "discord.js";
 import { MaintenanceData, TopicData } from "../database/schema/lodestone-news.ts";
-import { Maintenance } from "../naagostone/type/Maintenance.ts";
-import { Notice } from "../naagostone/type/Notice.ts";
-import { Topic } from "../naagostone/type/Topic.ts";
-import { Update } from "../naagostone/type/Updates.ts";
-import { Status } from "../naagostone/type/Status.ts";
+import { DiscordComponentsV2 } from "../naagostone/type/DiscordComponentsV2.ts";
 
 const green = Deno.env.get("COLOR_GREEN")!;
 const red = Deno.env.get("COLOR_RED")!;
 
-const colorTopics = Deno.env.get("COLOR_TOPICS")!;
-const colorNotices = Deno.env.get("COLOR_NOTICES")!;
-const colorMaintenances = Deno.env.get("COLOR_MAINTENANCES")!;
-const colorUpdates = Deno.env.get("COLOR_UPDATES")!;
-const colorStatus = Deno.env.get("COLOR_STATUS")!;
-const topicIconLink = Deno.env.get("ICON_TOPICS")!;
-const noticeIconLink = Deno.env.get("ICON_NOTICES")!;
-const maintenanceIconLink = Deno.env.get("ICON_MAINTENANCES")!;
-const updateIconLink = Deno.env.get("ICON_UPDATES")!;
-const statusIconLink = Deno.env.get("ICON_STATUS")!;
-const lodestoneIconLink = Deno.env.get("ICON_LODESTONE")!;
+const MAX_DESCRIPTION_LENGTH = 2000;
+
+function hexToNumber(hex: string): number {
+  return parseInt(hex.replace("#", ""), 16);
+}
 
 export class DiscordEmbedService {
   public static getSuccessEmbed(message: string): EmbedBuilder {
@@ -35,82 +31,88 @@ export class DiscordEmbedService {
       .setDescription(message);
   }
 
-  public static getTopicEmbed(topic: Topic): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(colorTopics as ColorResolvable)
-      .setAuthor({ name: "Topic", iconURL: topicIconLink })
-      .setTitle(topic.title)
-      .setURL(topic.link)
-      .setDescription(topic.description.markdown)
-      .setImage(topic.banner)
-      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
-      .setTimestamp(moment(topic.date).toDate());
+  public static buildTextContainer(text: string, colorEnvKey: string): ContainerBuilder {
+    const colorHex = Deno.env.get(colorEnvKey) ?? "#000000";
+    const container = new ContainerBuilder().setAccentColor(hexToNumber(colorHex));
+    container.addTextDisplayComponents((td) => td.setContent(text));
+    return container;
   }
 
-  public static getTopicEmbedFromData(topic: TopicData): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(colorTopics as ColorResolvable)
-      .setAuthor({ name: "Topic", iconURL: topicIconLink })
-      .setTitle(topic.title)
-      .setURL(topic.link)
-      .setDescription(topic.description)
-      .setImage(topic.banner)
-      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
-      .setTimestamp(moment(topic.date).toDate());
+  public static getTopicContainerFromData(topic: TopicData): ContainerBuilder {
+    const colorHex = Deno.env.get("COLOR_TOPICS")!;
+    const newsEmoji = Deno.env.get("EMOJI_NEWS_TOPIC") ?? "";
+    const lodestoneEmoji = Deno.env.get("EMOJI_LODESTONE") ?? "";
+
+    const container = new ContainerBuilder().setAccentColor(hexToNumber(colorHex));
+
+    container.addTextDisplayComponents((td) => td.setContent(`${newsEmoji}  **Topic**`));
+    container.addTextDisplayComponents((td) => td.setContent(`### [${topic.title}](${topic.link})`));
+
+    if (topic.banner) {
+      const gallery = new MediaGalleryBuilder().addItems((item) => item.setURL(topic.banner));
+      container.addMediaGalleryComponents(gallery);
+    }
+
+    this.addDescription(container, topic.description, topic.descriptionV2, topic.link);
+
+    container.addSeparatorComponents((s) => s);
+    const footer = `${lodestoneEmoji}  Lodestone · ${
+      time(Math.floor(topic.date.getTime() / 1000), TimestampStyles.ShortDateTime)
+    }`;
+    container.addTextDisplayComponents((td) => td.setContent("-# " + footer));
+
+    return container;
   }
 
-  public static getNoticesEmbed(notice: Notice): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(colorNotices as ColorResolvable)
-      .setAuthor({ name: notice.tag ?? "Notice", iconURL: noticeIconLink })
-      .setTitle(notice.title)
-      .setURL(notice.link)
-      .setDescription(notice.description.markdown)
-      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
-      .setTimestamp(notice.date);
+  public static getMaintenanceContainerFromData(maintenance: MaintenanceData): ContainerBuilder {
+    const colorHex = Deno.env.get("COLOR_MAINTENANCES")!;
+    const newsEmoji = Deno.env.get("EMOJI_NEWS_MAINTENANCE") ?? "";
+    const lodestoneEmoji = Deno.env.get("EMOJI_LODESTONE") ?? "";
+
+    const container = new ContainerBuilder().setAccentColor(hexToNumber(colorHex));
+
+    const typeLabel = maintenance.tag ?? "Maintenance";
+    container.addTextDisplayComponents((td) => td.setContent(`${newsEmoji}  **${typeLabel}**`));
+    container.addTextDisplayComponents((td) => td.setContent(`### [${maintenance.title}](${maintenance.link})`));
+
+    this.addDescription(container, maintenance.description, maintenance.descriptionV2, maintenance.link);
+
+    container.addSeparatorComponents((s) => s);
+    const footer = `${lodestoneEmoji}  Lodestone · ${
+      time(Math.floor(maintenance.date.getTime() / 1000), TimestampStyles.ShortDateTime)
+    }`;
+    container.addTextDisplayComponents((td) => td.setContent("-# " + footer));
+
+    return container;
   }
 
-  public static getMaintenanceEmbedFromData(maintenanceData: MaintenanceData): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(colorMaintenances as ColorResolvable)
-      .setAuthor({ name: maintenanceData.tag ?? "Maintenance", iconURL: maintenanceIconLink })
-      .setTitle(maintenanceData.title)
-      .setURL(maintenanceData.link)
-      .setDescription(maintenanceData.description)
-      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
-      .setTimestamp(maintenanceData.date);
-  }
-
-  public static getMaintenanceEmbed(maintenance: Maintenance): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(colorMaintenances as ColorResolvable)
-      .setAuthor({ name: maintenance.tag ?? "Maintenance", iconURL: maintenanceIconLink })
-      .setTitle(maintenance.title)
-      .setURL(maintenance.link)
-      .setDescription(maintenance.description.markdown)
-      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
-      .setTimestamp(maintenance.date);
-  }
-
-  public static getUpdatesEmbed(update: Update): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(colorUpdates as ColorResolvable)
-      .setAuthor({ name: "Update", iconURL: updateIconLink })
-      .setTitle(update.title)
-      .setURL(update.link)
-      .setDescription(update.description.markdown)
-      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
-      .setTimestamp(update.date);
-  }
-
-  public static getStatusEmbed(status: Status): EmbedBuilder {
-    return new EmbedBuilder()
-      .setColor(colorStatus as ColorResolvable)
-      .setAuthor({ name: status.tag ?? "Status", iconURL: statusIconLink })
-      .setTitle(status.title)
-      .setURL(status.link)
-      .setDescription(status.description.markdown)
-      .setFooter({ text: "Lodestone", iconURL: lodestoneIconLink })
-      .setTimestamp(status.date);
+  private static addDescription(
+    container: ContainerBuilder,
+    markdown: string,
+    descriptionV2: DiscordComponentsV2 | null,
+    link: string,
+  ): void {
+    if (descriptionV2?.components?.length) {
+      for (const component of descriptionV2.components) {
+        if (component.type === "textDisplay") {
+          container.addTextDisplayComponents((td) => td.setContent(component.content));
+        } else if (component.type === "mediaGallery") {
+          const gallery = new MediaGalleryBuilder();
+          for (const url of component.urls) {
+            gallery.addItems((item) => item.setURL(url));
+          }
+          container.addMediaGalleryComponents(gallery);
+        } else if (component.type === "separator") {
+          container.addSeparatorComponents((s) => s);
+        }
+      }
+    } else {
+      let desc = markdown;
+      if (desc.length > MAX_DESCRIPTION_LENGTH) {
+        const truncateAt = MAX_DESCRIPTION_LENGTH - 30;
+        desc = desc.substring(0, truncateAt) + `...\n\n[*Continue Reading*](${link})`;
+      }
+      container.addTextDisplayComponents((td) => td.setContent(desc));
+    }
   }
 }

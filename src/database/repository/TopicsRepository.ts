@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, isNotNull, lte, or } from "drizzle-orm";
+import { and, desc, eq, gt, gte, isNotNull, lte, or } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { TopicData, topicData } from "../schema/lodestone-news.ts";
 import moment from "moment-timezone";
@@ -162,6 +162,33 @@ export class TopicsRepository {
     await database
       .update(topicData)
       .set({ liveLetterAnnounced: 1 })
+      .where(eq(topicData.id, id));
+  }
+
+  public static async getEventsEndingSoon(withinMs: number): Promise<TopicData[]> {
+    const now = new Date();
+    const threshold = new Date(now.getTime() + withinMs);
+
+    const result = await database
+      .select()
+      .from(topicData)
+      .where(
+        and(
+          isNotNull(topicData.eventType),
+          isNotNull(topicData.eventTo),
+          gt(topicData.eventTo, now),
+          lte(topicData.eventTo, threshold),
+          eq(topicData.eventReminderSent, 0),
+        ),
+      );
+
+    return result;
+  }
+
+  public static async markEventReminderSent(id: number): Promise<void> {
+    await database
+      .update(topicData)
+      .set({ eventReminderSent: 1 })
       .where(eq(topicData.id, id));
   }
 
