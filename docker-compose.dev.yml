@@ -58,9 +58,8 @@ services:
       "deno run --allow-all src/database/migrate.ts && tail -f /dev/null",
     ]
     volumes:
-      - ./src:/app/src
-      - ./deno.json:/app/deno.json
-      - ./deno.lock:/app/deno.lock
+      - .:/app
+      - /app/node_modules
     env_file:
       - .env
     environment:

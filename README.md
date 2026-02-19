@@ -50,4 +50,5 @@ to add the bot to your server.
 - `/setup filters` - Set up keyword filter blacklists to exclude certain Lodestone news.
 
 ### Development, Contributing and Self Hosting
+
 Instructions can be found in the [DEV.md](DEV.md).
