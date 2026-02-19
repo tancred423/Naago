@@ -230,7 +230,7 @@ export class HelpCommandHelper {
         },
         {
           name: "/setup event-reminders",
-          value: "- Set up reminders for events that are ending soon." +
+          value: "- Set up reminders for events that are ending soon and live letters that are starting." +
             "\n- By default, reminders are enabled and sent to the topics news channel." +
             "\n- You can disable reminders or override the channel." +
             "\n- By default, this command requires \`Manage Channels\` permission to execute.",

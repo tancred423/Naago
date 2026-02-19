@@ -48,7 +48,7 @@ to add the bot to your server.
 - `/theme` - Choose a theme for your verified character's profile.
 - `/setup lodestone` - Set up automated lodestone news notifications.
 - `/setup filters` - Set up keyword filter blacklists to exclude certain Lodestone news.
-- `/setup event-reminders` - Set up reminders for events that are ending soon.
+- `/setup event-reminders` - Set up reminders for events that are ending soon and live letters that are starting.
 
 ### Development, Contributing and Self Hosting
 
