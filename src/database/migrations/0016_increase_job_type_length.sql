@@ -1,0 +1,1 @@
+ALTER TABLE `news_queue` MODIFY COLUMN `job_type` VARCHAR(50) NOT NULL;

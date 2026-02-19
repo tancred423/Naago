@@ -1,5 +1,6 @@
 import { MessageFlags, ModalSubmitInteraction } from "discord.js";
 import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
+import { EventReminderSetupsRepository } from "../database/repository/EventReminderSetupsRepository.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { FilterExpressionService } from "../service/FilterExpressionService.ts";
 import { InvalidSelectionError } from "./error/InvalidSelectionError.ts";
@@ -144,6 +145,52 @@ export class SetupCommandHelper {
 
     const embed = DiscordEmbedService.getSuccessEmbed(results.join("\n") || "No changes were made.");
     await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+  }
+
+  public static async handleEventRemindersModal(interaction: ModalSubmitInteraction): Promise<void> {
+    const guildId = interaction.guild!.id;
+    const fields = interaction.fields;
+
+    const enabledValues = fields.getStringSelectValues("setup_event_reminders_enabled");
+    if (enabledValues.length !== 1) {
+      throw new InvalidSelectionError(
+        `\`Event Reminders\`: Invalid selection (expected exactly 1 value, got ${enabledValues.length}).`,
+      );
+    }
+
+    const enabled = enabledValues[0] === "enabled";
+    const channelValues = fields.getSelectedChannels("setup_event_reminders_channel");
+
+    if (channelValues && channelValues.size > 1) {
+      throw new InvalidSelectionError(
+        `\`Event Reminders\`: Invalid selection (expected 0 or 1 channel, got ${channelValues.size}).`,
+      );
+    }
+
+    const channelId = channelValues?.first()?.id ?? null;
+
+    try {
+      await EventReminderSetupsRepository.set(guildId, enabled, channelId);
+
+      const results: string[] = [];
+      results.push(enabled ? "Event reminders are **enabled**." : "Event reminders are **disabled**.");
+
+      if (channelId) {
+        const channel = await interaction.guild!.channels.fetch(channelId);
+        results.push(`Reminders will be sent to ${channel?.toString() ?? channelId}.`);
+      } else if (enabled) {
+        results.push("Reminders will be sent to your topics news channel.");
+      }
+
+      const embed = DiscordEmbedService.getSuccessEmbed(results.join("\n"));
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    } catch (error: unknown) {
+      log.error(
+        `Event reminders setup could not be saved: ${error instanceof Error ? error.stack : String(error)}`,
+      );
+      const embed = DiscordEmbedService.getErrorEmbed("Event reminders could not be set up. Please try again later.");
+      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    }
   }
 
   public static async handleThemeModal(interaction: ModalSubmitInteraction): Promise<void> {

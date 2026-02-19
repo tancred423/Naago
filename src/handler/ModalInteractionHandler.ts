@@ -40,6 +40,9 @@ export class ModalInteractionHandler {
           case "filters":
             await SetupCommandHelper.handleFiltersModal(interaction);
             break;
+          case "event-reminders":
+            await SetupCommandHelper.handleEventRemindersModal(interaction);
+            break;
           default:
             throw new InvalidSubCommandError(subCommand);
         }

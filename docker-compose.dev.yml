@@ -58,8 +58,14 @@ services:
       "deno run --allow-all src/database/migrate.ts && tail -f /dev/null",
     ]
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ./src:/app/src
+      - ./deno.json:/app/deno.json
+      - ./deno.lock:/app/deno.lock
+      - ./DEV.md:/app/DEV.md
+      - ./README.md:/app/README.md
+      - ./TERMS_OF_SERVICE.md:/app/TERMS_OF_SERVICE.md
+      - ./PRIVACY_POLICY.md:/app/PRIVACY_POLICY.md
+      - ./drizzle.config.ts:/app/drizzle.config.ts
     env_file:
       - .env
     environment:

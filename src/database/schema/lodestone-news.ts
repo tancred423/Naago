@@ -14,6 +14,7 @@ export const topicData = mysqlTable("topic_data", {
   eventType: varchar("event_type", { length: 255 }),
   eventFrom: timestamp("event_from"),
   eventTo: timestamp("event_to"),
+  eventReminderSent: int("event_reminder_sent").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 }, (table) => ({
@@ -140,7 +141,7 @@ export type NewsQueueJob = typeof newsQueue.$inferSelect;
 export type NewNewsQueueJob = typeof newsQueue.$inferInsert;
 
 export type NewsType = "topics" | "notices" | "maintenances" | "updates" | "statuses";
-export type JobType = "SEND" | "UPDATE";
+export type JobType = "SEND" | "UPDATE" | "SEND_REMINDER" | "SEND_LIVE_LETTER_ANNOUNCEMENT";
 export type JobStatus =
   | "PENDING"
   | "PROCESSING"

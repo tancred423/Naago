@@ -4,6 +4,8 @@ import { NewsQueueRepository } from "../database/repository/NewsQueueRepository.
 import { PostedNewsMessagesRepository } from "../database/repository/PostedNewsMessagesRepository.ts";
 import { NewsQueueJob, NewsType } from "../database/schema/lodestone-news.ts";
 import { ComponentsV2Service } from "./ComponentsV2Service.ts";
+import { EventReminderService } from "./EventReminderService.ts";
+import { LiveLetterAnnouncementService } from "./LiveLetterAnnouncementService.ts";
 import * as log from "@std/log";
 
 // Rate limits (Discord API)
@@ -170,6 +172,10 @@ export class NewsQueueProcessor {
         await this.processSendJob(job);
       } else if (job.jobType === "UPDATE") {
         await this.processUpdateJob(job);
+      } else if (job.jobType === "SEND_REMINDER") {
+        await EventReminderService.processSendReminderJob(job);
+      } else if (job.jobType === "SEND_LIVE_LETTER_ANNOUNCEMENT") {
+        await LiveLetterAnnouncementService.processSendAnnouncementJob(job);
       } else {
         throw new Error(`Unknown job type: ${job.jobType}`);
       }
