@@ -33,11 +33,14 @@ export class EventsCommandHelper {
         const titleContent = `### [${event.title}](${event.link})`;
         let dateContent = "";
 
-        if (event.eventType && event.eventFrom && event.eventTo) {
-          const fromTimestamp = time(event.eventFrom, TimestampStyles.ShortDateTime);
-          const toTimestamp = time(event.eventTo, TimestampStyles.ShortDateTime);
-          const fromRelative = time(event.eventFrom, TimestampStyles.RelativeTime);
-          const toRelative = time(event.eventTo, TimestampStyles.RelativeTime);
+        const effectiveFrom = event.eventFromOverride ?? event.eventFrom;
+        const effectiveTo = event.eventToOverride ?? event.eventTo;
+
+        if ((event.eventType || (event.eventFromOverride && event.eventToOverride)) && effectiveFrom && effectiveTo) {
+          const fromTimestamp = time(effectiveFrom, TimestampStyles.ShortDateTime);
+          const toTimestamp = time(effectiveTo, TimestampStyles.ShortDateTime);
+          const fromRelative = time(effectiveFrom, TimestampStyles.RelativeTime);
+          const toRelative = time(effectiveTo, TimestampStyles.RelativeTime);
           dateContent = `**From:** ${fromTimestamp} (${fromRelative})\n` +
             `**To:** ${toTimestamp} (${toRelative})`;
         } else if (event.timestampLiveLetter) {
@@ -95,11 +98,14 @@ export class EventsCommandHelper {
         const titleContent = `### [${event.title}](${event.link})`;
         let dateContent = "";
 
-        if (event.eventType && event.eventFrom && event.eventTo) {
-          const fromTimestamp = time(event.eventFrom, TimestampStyles.ShortDateTime);
-          const toTimestamp = time(event.eventTo, TimestampStyles.ShortDateTime);
-          const fromRelative = time(event.eventFrom, TimestampStyles.RelativeTime);
-          const toRelative = time(event.eventTo, TimestampStyles.RelativeTime);
+        const effectiveFrom = event.eventFromOverride ?? event.eventFrom;
+        const effectiveTo = event.eventToOverride ?? event.eventTo;
+
+        if ((event.eventType || (event.eventFromOverride && event.eventToOverride)) && effectiveFrom && effectiveTo) {
+          const fromTimestamp = time(effectiveFrom, TimestampStyles.ShortDateTime);
+          const toTimestamp = time(effectiveTo, TimestampStyles.ShortDateTime);
+          const fromRelative = time(effectiveFrom, TimestampStyles.RelativeTime);
+          const toRelative = time(effectiveTo, TimestampStyles.RelativeTime);
           dateContent = `**From:** ${fromTimestamp} (${fromRelative})\n` +
             `**To:** ${toTimestamp} (${toRelative})`;
         } else if (event.timestampLiveLetter) {

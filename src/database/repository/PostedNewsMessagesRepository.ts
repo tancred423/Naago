@@ -53,6 +53,28 @@ export class PostedNewsMessagesRepository {
       );
   }
 
+  public static async findByMessage(
+    guildId: string,
+    channelId: string,
+    messageId: string,
+    newsType: NewsType,
+  ): Promise<PostedNewsMessage | null> {
+    const result = await database
+      .select()
+      .from(postedNewsMessages)
+      .where(
+        and(
+          eq(postedNewsMessages.guildId, guildId),
+          eq(postedNewsMessages.channelId, channelId),
+          eq(postedNewsMessages.messageId, messageId),
+          eq(postedNewsMessages.newsType, newsType),
+        ),
+      )
+      .limit(1);
+
+    return result[0] ?? null;
+  }
+
   public static async deleteByGuildId(guildId: string): Promise<void> {
     await database
       .delete(postedNewsMessages)
