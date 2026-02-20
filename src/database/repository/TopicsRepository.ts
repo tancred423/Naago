@@ -1,9 +1,14 @@
-import { and, desc, eq, gt, gte, isNotNull, lte, or } from "drizzle-orm";
+import { and, desc, eq, gt, gte, isNotNull, lte, or, sql } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { TopicData, topicData } from "../schema/lodestone-news.ts";
 import moment from "moment-timezone";
 import { AlreadyInDatabaseError } from "../error/AlreadyInDatabaseError.ts";
 import { Topic } from "../../naagostone/type/Topic.ts";
+
+const effectiveEventFrom = sql<Date>`COALESCE(${topicData.eventFromOverride}, ${topicData.eventFrom})`;
+const effectiveEventTo = sql<Date>`COALESCE(${topicData.eventToOverride}, ${topicData.eventTo})`;
+const hasEventOverride = and(isNotNull(topicData.eventFromOverride), isNotNull(topicData.eventToOverride));
+const isEvent = or(isNotNull(topicData.eventType), hasEventOverride);
 
 export class TopicsRepository {
   public static async find(
@@ -86,6 +91,24 @@ export class TopicsRepository {
     await database
       .update(topicData)
       .set({ eventType, eventFrom, eventTo })
+      .where(eq(topicData.id, id));
+  }
+
+  public static async updateEventOverride(
+    id: number,
+    eventFromOverride: Date,
+    eventToOverride: Date,
+  ): Promise<void> {
+    await database
+      .update(topicData)
+      .set({ eventFromOverride, eventToOverride })
+      .where(eq(topicData.id, id));
+  }
+
+  public static async clearEventOverride(id: number): Promise<void> {
+    await database
+      .update(topicData)
+      .set({ eventFromOverride: null, eventToOverride: null })
       .where(eq(topicData.id, id));
   }
 
@@ -174,10 +197,10 @@ export class TopicsRepository {
       .from(topicData)
       .where(
         and(
-          isNotNull(topicData.eventType),
-          isNotNull(topicData.eventTo),
-          gt(topicData.eventTo, now),
-          lte(topicData.eventTo, threshold),
+          isEvent,
+          sql`${effectiveEventTo} IS NOT NULL`,
+          gt(effectiveEventTo, now),
+          lte(effectiveEventTo, threshold),
           eq(topicData.eventReminderSent, 0),
         ),
       );
@@ -202,11 +225,11 @@ export class TopicsRepository {
       .where(
         or(
           and(
-            isNotNull(topicData.eventType),
-            isNotNull(topicData.eventFrom),
-            isNotNull(topicData.eventTo),
-            lte(topicData.eventFrom, now),
-            gte(topicData.eventTo, now),
+            isEvent,
+            sql`${effectiveEventFrom} IS NOT NULL`,
+            sql`${effectiveEventTo} IS NOT NULL`,
+            lte(effectiveEventFrom, now),
+            gte(effectiveEventTo, now),
           ),
           and(
             isNotNull(topicData.timestampLiveLetter),
@@ -217,8 +240,8 @@ export class TopicsRepository {
       );
 
     return result.sort((a, b) => {
-      const aEnd = a.eventTo?.getTime() ?? a.timestampLiveLetter?.getTime() ?? 0;
-      const bEnd = b.eventTo?.getTime() ?? b.timestampLiveLetter?.getTime() ?? 0;
+      const aEnd = (a.eventToOverride ?? a.eventTo)?.getTime() ?? a.timestampLiveLetter?.getTime() ?? 0;
+      const bEnd = (b.eventToOverride ?? b.eventTo)?.getTime() ?? b.timestampLiveLetter?.getTime() ?? 0;
       return aEnd - bEnd;
     });
   }
@@ -231,9 +254,9 @@ export class TopicsRepository {
       .where(
         or(
           and(
-            isNotNull(topicData.eventType),
-            isNotNull(topicData.eventFrom),
-            gte(topicData.eventFrom, now),
+            isEvent,
+            sql`${effectiveEventFrom} IS NOT NULL`,
+            gte(effectiveEventFrom, now),
           ),
           and(
             isNotNull(topicData.timestampLiveLetter),
@@ -243,8 +266,8 @@ export class TopicsRepository {
       );
 
     return result.sort((a, b) => {
-      const aStart = a.eventFrom?.getTime() ?? a.timestampLiveLetter?.getTime() ?? 0;
-      const bStart = b.eventFrom?.getTime() ?? b.timestampLiveLetter?.getTime() ?? 0;
+      const aStart = (a.eventFromOverride ?? a.eventFrom)?.getTime() ?? a.timestampLiveLetter?.getTime() ?? 0;
+      const bStart = (b.eventFromOverride ?? b.eventFrom)?.getTime() ?? b.timestampLiveLetter?.getTime() ?? 0;
       return aStart - bStart;
     });
   }

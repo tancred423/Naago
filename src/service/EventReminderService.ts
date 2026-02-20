@@ -31,7 +31,8 @@ export class EventReminderService {
   }
 
   private static async enqueueReminderJobs(event: TopicData, guildIds: string[]): Promise<void> {
-    if (!event.eventTo) return;
+    const effectiveTo = event.eventToOverride ?? event.eventTo;
+    if (!effectiveTo) return;
 
     const jobs: NewNewsQueueJob[] = [];
 
@@ -81,10 +82,11 @@ export class EventReminderService {
   }
 
   public static buildReminderComponents(event: TopicData): ContainerBuilder[] | null {
-    if (!event.eventTo) return null;
+    const effectiveTo = event.eventToOverride ?? event.eventTo;
+    if (!effectiveTo) return null;
 
-    const timestampFull = time(event.eventTo, TimestampStyles.LongDateTime);
-    const timestampRelative = time(event.eventTo, TimestampStyles.RelativeTime);
+    const timestampFull = time(effectiveTo, TimestampStyles.LongDateTime);
+    const timestampRelative = time(effectiveTo, TimestampStyles.RelativeTime);
 
     const header = DiscordEmbedService.buildTextContainer(
       `# Reminder: This event ends soon\n` +

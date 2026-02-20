@@ -120,6 +120,13 @@
       "when": 1739980800001,
       "tag": "0016_increase_job_type_length",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1740067200000,
+      "tag": "0017_add_event_override_to_topic_data",
+      "breakpoints": true
     }
   ]
 }

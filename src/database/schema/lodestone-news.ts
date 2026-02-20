@@ -14,6 +14,8 @@ export const topicData = mysqlTable("topic_data", {
   eventType: varchar("event_type", { length: 255 }),
   eventFrom: timestamp("event_from"),
   eventTo: timestamp("event_to"),
+  eventFromOverride: timestamp("event_from_override"),
+  eventToOverride: timestamp("event_to_override"),
   eventReminderSent: int("event_reminder_sent").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
