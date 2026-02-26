@@ -164,17 +164,20 @@ class ProfileCommand extends Command {
     const name = StringManipulationService.formatName(interaction.options.getString("name")!);
     const server = interaction.options.getString("server")!.toLowerCase();
 
-    if (!FfxivServerValidationService.isValidServer(server)) {
-      const embed = DiscordEmbedService.getErrorEmbed(`This server doesn't exist.`);
-      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+    await interaction.deferReply();
+
+    if (!await FfxivServerValidationService.isValidServer(server)) {
+      await DiscordMessageService.deleteAndFollowUpEphemeralError(
+        interaction,
+        `This server doesn't exist.`,
+      );
       return;
     }
 
-    await interaction.deferReply();
-
+    const [firstName, lastName] = name.split(" ");
     let characterIds: number[];
     try {
-      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(name, server);
+      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(firstName, lastName, server);
     } catch (error: unknown) {
       if (error instanceof LodestoneServiceUnavailableError) {
         const embed = DiscordEmbedService.getErrorEmbed(error.message);
