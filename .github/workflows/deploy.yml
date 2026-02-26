@@ -107,7 +107,7 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
-            echo "${{ secrets.GITHUB_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            echo "${{ secrets.DEPLOY_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             echo "Stopping existing containers..."
             docker compose down --volumes=false || true
             echo "Pulling latest images..."
