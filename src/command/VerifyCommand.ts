@@ -63,16 +63,18 @@ class VerifyCommand extends Command {
     const server = interaction.options.getString("server")!.toLowerCase();
     const userId = interaction.user.id;
 
-    if (!FfxivServerValidationService.isValidServer(server)) {
-      await interaction.reply({ content: "This server does not exist" });
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    if (!await FfxivServerValidationService.isValidServer(server)) {
+      const embed = DiscordEmbedService.getErrorEmbed("This server does not exist");
+      await interaction.editReply({ embeds: [embed] });
       return;
     }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
+    const [firstName, lastName] = name.split(" ");
     let characterIds: number[];
     try {
-      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(name, server);
+      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(firstName, lastName, server);
     } catch (error: unknown) {
       if (error instanceof LodestoneServiceUnavailableError) {
         const embed = DiscordEmbedService.getErrorEmbed(error.message);

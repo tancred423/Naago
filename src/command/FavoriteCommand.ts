@@ -78,17 +78,18 @@ class FavoriteCommand extends Command {
     const targetName = StringManipulationService.formatName(interaction.options.getString("name")!);
     const targetServer = interaction.options.getString("server")!.toLowerCase();
 
-    if (!FfxivServerValidationService.isValidServer(targetServer)) {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    if (!await FfxivServerValidationService.isValidServer(targetServer)) {
       const embed = DiscordEmbedService.getErrorEmbed(`The given server \`${targetServer}\` doesn't exist.`);
-      await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ embeds: [embed] });
       return;
     }
 
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-
+    const [firstName, lastName] = targetName.split(" ");
     let characterIds: number[];
     try {
-      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(targetName, targetServer);
+      characterIds = await NaagostoneApiService.fetchCharacterIdsByName(firstName, lastName, targetServer);
     } catch (error: unknown) {
       if (error instanceof LodestoneServiceUnavailableError) {
         const embed = DiscordEmbedService.getErrorEmbed(error.message);

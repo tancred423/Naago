@@ -9,18 +9,22 @@ import { Topic, TopicResponse } from "../type/Topic.ts";
 import { Update, UpdateResponse } from "../type/Updates.ts";
 import { Status, StatusResponse } from "../type/Status.ts";
 import { PhysicalDataCenter, WorldStatusResponse } from "../type/WorldStatus.ts";
+import { AllWorldsResponse } from "../type/AllWorldsResponse.ts";
 
 const naagostoneHost = Deno.env.get("NAAGOSTONE_HOST")!;
 const naagostonePort = Deno.env.get("NAAGOSTONE_PORT")!;
 
 export class NaagostoneApiService {
   public static async fetchCharacterIdsByName(
-    name: string,
-    server: string,
+    firstName: string,
+    lastName: string,
+    world: string,
   ): Promise<number[]> {
-    const nameEncoded = encodeURIComponent(name);
+    const firstNameEncoded = encodeURIComponent(firstName);
+    const lastNameEncoded = encodeURIComponent(lastName);
+    const worldEncoded = encodeURIComponent(world);
     const response = await fetch(
-      `http://${naagostoneHost}:${naagostonePort}/character/search?name=${nameEncoded}&worldname=${server}`,
+      `http://${naagostoneHost}:${naagostonePort}/characters?firstname=${firstNameEncoded}&lastname=${lastNameEncoded}&world=${worldEncoded}`,
     );
 
     if (response.status === 503) {
@@ -36,7 +40,7 @@ export class NaagostoneApiService {
   }
 
   public static async fetchCharacterById(id: number): Promise<Character | null> {
-    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/character/${id}`);
+    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/characters/${id}`);
 
     if (response.status === 503) {
       throw new LodestoneServiceUnavailableError();
@@ -51,7 +55,7 @@ export class NaagostoneApiService {
   }
 
   public static async fetchLatest10Topics(): Promise<Topic[]> {
-    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/topics`);
+    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/news/topics`);
 
     if (response.status === 503) {
       throw new LodestoneServiceUnavailableError();
@@ -66,7 +70,7 @@ export class NaagostoneApiService {
   }
 
   public static async fetchLatest10Notices(): Promise<Notice[]> {
-    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/notices`);
+    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/news/notices`);
 
     if (response.status === 503) {
       throw new LodestoneServiceUnavailableError();
@@ -81,7 +85,7 @@ export class NaagostoneApiService {
   }
 
   public static async fetchLatest10Maintenances(): Promise<Maintenance[]> {
-    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/maintenances`);
+    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/news/maintenances`);
 
     if (response.status === 503) {
       throw new LodestoneServiceUnavailableError();
@@ -96,7 +100,7 @@ export class NaagostoneApiService {
   }
 
   public static async fetchLatest10Updates(): Promise<Update[]> {
-    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/updates`);
+    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/news/updates`);
 
     if (response.status === 503) {
       throw new LodestoneServiceUnavailableError();
@@ -111,7 +115,7 @@ export class NaagostoneApiService {
   }
 
   public static async fetchLatest10Statuses(): Promise<Status[]> {
-    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/lodestone/statuses`);
+    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/news/statuses`);
 
     if (response.status === 503) {
       throw new LodestoneServiceUnavailableError();
@@ -126,7 +130,7 @@ export class NaagostoneApiService {
   }
 
   public static async fetchWorldStatus(): Promise<PhysicalDataCenter[]> {
-    const url = `http://${naagostoneHost}:${naagostonePort}/lodestone/worldstatus`;
+    const url = `http://${naagostoneHost}:${naagostonePort}/worldstatus`;
     const response = await fetch(url);
 
     if (response.status === 503) {
@@ -139,5 +143,16 @@ export class NaagostoneApiService {
 
     const data = await response.json() as WorldStatusResponse;
     return data?.worldStatus ?? [];
+  }
+
+  public static async fetchAllWorlds(): Promise<string[]> {
+    const response = await fetch(`http://${naagostoneHost}:${naagostonePort}/worlds`);
+
+    if (!response.ok) {
+      throw new ApiRequestFailedError(`Failed to fetch all worlds: ${response.statusText}`);
+    }
+
+    const data = await response.json() as AllWorldsResponse;
+    return data?.allWorlds ?? [];
   }
 }
