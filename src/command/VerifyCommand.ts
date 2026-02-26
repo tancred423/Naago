@@ -16,6 +16,7 @@ import { Verification } from "../database/schema/verifications.ts";
 import { Character } from "../naagostone/type/CharacterTypes.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 import * as log from "@std/log";
+import { CommandMentionService } from "../service/CommandMentionService.ts";
 
 class VerifyCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -233,7 +234,9 @@ class VerifyCommand extends Command {
     const verification = await VerificationsRepository.find(userId);
 
     if (!verification) {
-      const embed = DiscordEmbedService.getErrorEmbed("Please verify your character first. See `/verify add`.");
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Please verify your character first. See ${CommandMentionService.mentionOrBacktick("verify", "add")}.`,
+      );
       await interaction.editReply({ embeds: [embed] });
       return;
     }

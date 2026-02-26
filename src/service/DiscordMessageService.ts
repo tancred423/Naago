@@ -13,7 +13,7 @@ export class DiscordMessageService {
     message: string,
   ): Promise<void> {
     const embed = DiscordEmbedService.getSuccessEmbed(message);
-    await interaction.editReply({ content: " ", embeds: [embed] });
+    await interaction.editReply({ content: " ", components: [], embeds: [embed] });
   }
 
   public static async editReplyError(
@@ -21,7 +21,7 @@ export class DiscordMessageService {
     message: string,
   ): Promise<void> {
     const embed = DiscordEmbedService.getErrorEmbed(message);
-    await interaction.editReply({ content: " ", embeds: [embed] });
+    await interaction.editReply({ content: " ", components: [], embeds: [embed] });
   }
 
   public static async deleteAndFollowUpEphemeralError(

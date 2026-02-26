@@ -7,6 +7,7 @@ import { EventReminderSetupsRepository } from "../database/repository/EventRemin
 import { NewsQueueRepository } from "../database/repository/NewsQueueRepository.ts";
 import { DiscordEmbedService } from "./DiscordEmbedService.ts";
 import { NewNewsQueueJob, TopicData } from "../database/schema/lodestone-news.ts";
+import { CommandMentionService } from "./CommandMentionService.ts";
 
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
@@ -91,8 +92,10 @@ export class EventReminderService {
     const header = DiscordEmbedService.buildTextContainer(
       `# Reminder: This event ends soon\n` +
         `This event ends at ${timestampFull} (${timestampRelative})\n` +
-        `You can view all ongoing and upcoming events with \`/events\`.\n\n` +
-        `-# To disable or change the channel of these reminders, use \`/setup event-reminders\`.`,
+        `You can view all ongoing and upcoming events with ${CommandMentionService.mentionOrBacktick("events")}.\n\n` +
+        `-# To disable or change the channel of these reminders, use ${
+          CommandMentionService.mentionOrBacktick("setup", "event-reminders")
+        }.`,
       "COLOR_TOPICS",
     );
 

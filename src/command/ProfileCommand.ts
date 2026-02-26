@@ -24,6 +24,7 @@ import { Command } from "./type/Command.ts";
 import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { CommandMentionService } from "../service/CommandMentionService.ts";
 
 class ProfileCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -80,7 +81,9 @@ class ProfileCommand extends Command {
     const verification = await VerificationsRepository.find(userId);
 
     if (!verification?.isVerified) {
-      const embed = DiscordEmbedService.getErrorEmbed("Please verify your character first. See `/verify add`.");
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Please verify your character first. See ${CommandMentionService.mentionOrBacktick("verify", "add")}.`,
+      );
       await interaction.reply({ flags: MessageFlags.Ephemeral, embeds: [embed] });
       return;
     }
@@ -262,7 +265,9 @@ class ProfileCommand extends Command {
     const verification = await VerificationsRepository.find(userId);
 
     if (!verification?.isVerified) {
-      const embed = DiscordEmbedService.getErrorEmbed("Please verify your character first. See `/verify add`.");
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Please verify your character first. See ${CommandMentionService.mentionOrBacktick("verify", "add")}.`,
+      );
       await interaction.reply({ flags: MessageFlags.Ephemeral, embeds: [embed] });
       return;
     }
@@ -270,7 +275,9 @@ class ProfileCommand extends Command {
     const favorites = await FavoritesRepository.get(userId);
 
     if (favorites?.length === 0) {
-      const embed = DiscordEmbedService.getErrorEmbed(`Please add favorites first. See \`/favorite add\``);
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Please add favorites first. See ${CommandMentionService.mentionOrBacktick("favorite", "add")}`,
+      );
       await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
       return;
     }

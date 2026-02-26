@@ -11,6 +11,7 @@ import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
 import { Command } from "./type/Command.ts";
+import { CommandMentionService } from "../service/CommandMentionService.ts";
 
 class ThemeCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -22,7 +23,9 @@ class ThemeCommand extends Command {
     const verification = await VerificationsRepository.find(userId);
 
     if (!verification?.isVerified) {
-      const embed = DiscordEmbedService.getErrorEmbed("Please verify your character first. See `/verify add`.");
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Please verify your character first. See ${CommandMentionService.mentionOrBacktick("verify", "add")}.`,
+      );
       await interaction.reply({ flags: MessageFlags.Ephemeral, embeds: [embed] });
       return;
     }
