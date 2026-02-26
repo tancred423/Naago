@@ -32,6 +32,9 @@ jobs:
       - name: Type check
         run: deno check src/**/*.ts
 
+      - name: Run tests
+        run: deno test --allow-all --parallel tests/
+
   build:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -104,7 +107,7 @@ jobs:
           script: |
             set -e
             cd ${{ secrets.DEPLOY_PATH }}
-            echo "${{ secrets.DEPLOY_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+            echo "${{ secrets.GITHUB_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             echo "Stopping existing containers..."
             docker compose down --volumes=false || true
             echo "Pulling latest images..."

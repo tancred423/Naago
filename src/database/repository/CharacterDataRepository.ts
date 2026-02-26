@@ -1,7 +1,7 @@
 import { database } from "../connection.ts";
 import { CharacterData, characterData } from "../schema/character-data.ts";
 import { eq } from "drizzle-orm";
-import moment from "moment";
+import moment from "moment-timezone";
 import { Character } from "../../naagostone/type/CharacterTypes.ts";
 
 export class CharacterDataRepository {
