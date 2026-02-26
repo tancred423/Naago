@@ -4,6 +4,7 @@ import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
 
 const MAX_TOTAL_CHARACTERS = 4000;
 const MAX_TOTAL_COMPONENTS = 40;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 function hexToNumber(hex: string): number {
   return parseInt(hex.replace("#", ""), 16);
@@ -37,12 +38,15 @@ export class EventsCommandHelper {
         const effectiveTo = event.eventToOverride ?? event.eventTo;
 
         if ((event.eventType || (event.eventFromOverride && event.eventToOverride)) && effectiveFrom && effectiveTo) {
+          const now = Date.now();
+          const isAboutToEnd = effectiveTo.getTime() > now && effectiveTo.getTime() <= now + ONE_DAY_MS;
           const fromTimestamp = time(effectiveFrom, TimestampStyles.ShortDateTime);
           const toTimestamp = time(effectiveTo, TimestampStyles.ShortDateTime);
           const fromRelative = time(effectiveFrom, TimestampStyles.RelativeTime);
           const toRelative = time(effectiveTo, TimestampStyles.RelativeTime);
           dateContent = `**From:** ${fromTimestamp} (${fromRelative})\n` +
-            `**To:** ${toTimestamp} (${toRelative})`;
+            `**To:** ${toTimestamp} (${toRelative})` +
+            (isAboutToEnd ? " ⚠️ **Ends soon!**" : "");
         } else if (event.timestampLiveLetter) {
           const liveLetterTimestamp = time(event.timestampLiveLetter, TimestampStyles.ShortDateTime);
           const liveLetterRelative = time(event.timestampLiveLetter, TimestampStyles.RelativeTime);
