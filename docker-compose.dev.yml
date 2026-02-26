@@ -59,6 +59,7 @@ services:
     ]
     volumes:
       - ./src:/app/src
+      - ./tests:/app/tests
       - ./deno.json:/app/deno.json
       - ./deno.lock:/app/deno.lock
       - ./DEV.md:/app/DEV.md
@@ -74,9 +75,14 @@ services:
       - "3000:3000"
     networks:
       - naago-network
+      - naagostone-network
 
 volumes:
   mysql_data_dev:
 
 networks:
   naago-network:
+
+  naagostone-network:
+    external: true
+    name: naagostone-network
