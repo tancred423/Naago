@@ -11,6 +11,7 @@ import { AlreadyInDatabaseError } from "../database/error/AlreadyInDatabaseError
 import { Command } from "./type/Command.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { CommandMentionService } from "../service/CommandMentionService.ts";
 
 class ContextFavoriteAddCommand extends Command {
   public readonly data = new ContextMenuCommandBuilder()
@@ -53,7 +54,9 @@ class ContextFavoriteAddCommand extends Command {
         await DiscordMessageService.editReplyError(
           interaction,
           `\`${targetCharacter.name}\` was NOT added as favorite as you already reached the maximum of 25.` +
-            "\nPlease remove a favorite before adding a new one. See `/favorite remove`.",
+            `\nPlease remove a favorite before adding a new one. See ${
+              CommandMentionService.mentionOrBacktick("favorite", "remove")
+            }.`,
         );
         return;
       }

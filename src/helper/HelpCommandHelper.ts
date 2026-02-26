@@ -11,6 +11,7 @@ import { DiscordColorService } from "../service/DiscordColorService.ts";
 import { InvalidHelpPageError } from "./error/InvalidHelpPageError.ts";
 import moment from "moment";
 import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
+import { CommandMentionService } from "../service/CommandMentionService.ts";
 
 export class HelpCommandHelper {
   public static async handlePageSwapButton(
@@ -53,21 +54,25 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/profile me",
-          value: "- Get the profile of your verified character.\n- Characters can be verified with `/verify add`.",
+          name: CommandMentionService.mentionOrPlain("profile", "me"),
+          value: `- Get the profile of your verified character.\n- Characters can be verified with ${
+            CommandMentionService.mentionOrBacktick("verify", "add")
+          }.`,
           inline: false,
         },
         {
-          name: "/profile find",
+          name: CommandMentionService.mentionOrPlain("profile", "find"),
           value:
             "- Get any character's profile by providing the full character name and the server the character is on." +
             "\n- Alternatively you can right click a user → choose `Apps` → `Find`. This is faster but requires this user to have a verified character.",
           inline: false,
         },
         {
-          name: "/profile favorite",
+          name: CommandMentionService.mentionOrPlain("profile", "favorite"),
           value:
-            "- A quick access to character profiles.\n- Favorites can be added or removed with `/favorite add` and `/favorite remove` respectively." +
+            `- A quick access to character profiles.\n- Favorites can be added or removed with ${
+              CommandMentionService.mentionOrBacktick("favorite", "add")
+            } and ${CommandMentionService.mentionOrBacktick("favorite", "remove")} respectively.` +
             "\n- Alternatively you can right click a user → choose `Apps` → `Add Favorite` / `Remove Favorite`. This is faster but requires this user to have a verified character.",
           inline: false,
         },
@@ -90,14 +95,16 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/verify add",
+          name: CommandMentionService.mentionOrPlain("verify", "add"),
           value: "- Links your FFXIV character to your Discord account." +
             "\n- You will have to verify it by changing the bio of your Lodestone profile." +
-            "\n- Verification is needed to show your profile via `/profile me`, manage and access favorites and to set a theme.",
+            `\n- Verification is needed to show your profile via ${
+              CommandMentionService.mentionOrBacktick("profile", "me")
+            }, manage and access favorites and to set a theme.`,
           inline: false,
         },
         {
-          name: "/verify remove",
+          name: CommandMentionService.mentionOrPlain("verify", "remove"),
           value: "- Unlinks your FFXIV character from your Discord account." +
             "\n- Also removes any other information stored of you including your favorites and your chosen theme.",
           inline: false,
@@ -121,14 +128,16 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/favorite add",
+          name: CommandMentionService.mentionOrPlain("favorite", "add"),
           value: "- Save any character as favorite." +
-            "\n- You can then access them quickly with `/profile favorite`." +
+            `\n- You can then access them quickly with ${
+              CommandMentionService.mentionOrBacktick("profile", "favorite")
+            }.` +
             "\n- You can have up to 25 favorites.",
           inline: false,
         },
         {
-          name: "/favorite remove",
+          name: CommandMentionService.mentionOrPlain("favorite", "remove"),
           value: "- Remove one of your favorites.",
           inline: false,
         },
@@ -151,35 +160,35 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/events",
+          name: CommandMentionService.mentionOrPlain("events"),
           value: "- Lists all currently ongoing and upcoming FFXIV events." +
             "\n- Shows seasonal events, Moogle Treasure Troves, and Live Letters.",
           inline: false,
         },
         {
-          name: "/help",
+          name: CommandMentionService.mentionOrPlain("help"),
           value: "- You are already here " + DiscordEmojiService.getAsMarkdown("EMOJI_DOGGO_SMILE"),
           inline: false,
         },
         {
-          name: "/liveletter",
+          name: CommandMentionService.mentionOrPlain("liveletter"),
           value: "- Shows information about the next or current Live Letter.",
           inline: false,
         },
         {
-          name: "/maintenance",
+          name: CommandMentionService.mentionOrPlain("maintenance"),
           value: "- View current maintenances if any." +
             "\n- Shows active maintenance schedules and their durations.",
           inline: false,
         },
         {
-          name: "/when-is-reset",
+          name: CommandMentionService.mentionOrPlain("when-is-reset"),
           value: "- Shows daily and weekly reset times for FFXIV." +
             "\n- Includes duty roulettes, GC missions, tomestone caps, fashion report and more.",
           inline: false,
         },
         {
-          name: "/worldstatus",
+          name: CommandMentionService.mentionOrPlain("worldstatus"),
           value: "- Shows server status, character creation status and server congestion.",
           inline: false,
         },
@@ -202,7 +211,7 @@ export class HelpCommandHelper {
       .setThumbnail(client.user!.displayAvatarURL())
       .addFields([
         {
-          name: "/setup lodestone",
+          name: CommandMentionService.mentionOrPlain("setup", "lodestone"),
           value: `- Set up which channels receive automated Lodestone news updates.` +
             "\n- You can set or remove channels for each category of news." +
             "\n- The Lodestone news categories are:" +
@@ -215,7 +224,7 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
-          name: "/setup filters",
+          name: CommandMentionService.mentionOrPlain("setup", "filters"),
           value: "- Set up keyword filter blacklist to exclude certain Lodestone news." +
             '\n- Configure comma-separated keywords for each news category. E.g. "ddos, difficulty logging in to north america"' +
             "\n- If any keyword matches content in a news article, it will not be posted. The keywords are case-insensitive." +
@@ -229,7 +238,7 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
-          name: "/setup event-reminders",
+          name: CommandMentionService.mentionOrPlain("event-reminders"),
           value: "- Set up reminders for events that are ending soon and live letters that are starting." +
             "\n- By default, reminders are enabled and sent to the topics news channel." +
             "\n- You can disable reminders or override the channel." +
@@ -237,7 +246,7 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
-          name: "/theme",
+          name: CommandMentionService.mentionOrPlain("theme"),
           value: "- Set a theme for your verified character's profile.",
           inline: false,
         },

@@ -22,6 +22,7 @@ import { CharacterDataRepository } from "../database/repository/CharacterDataRep
 import { Character } from "../naagostone/type/CharacterTypes.ts";
 import { AlreadyInDatabaseError } from "../database/error/AlreadyInDatabaseError.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { CommandMentionService } from "../service/CommandMentionService.ts";
 
 class FavoriteCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -55,7 +56,9 @@ class FavoriteCommand extends Command {
     const verification = await VerificationsRepository.find(userId);
 
     if (!verification?.isVerified) {
-      const embed = DiscordEmbedService.getErrorEmbed("Please verify your character first. See `/verify add`.");
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Please verify your character first. See ${CommandMentionService.mentionOrBacktick("verify", "add")}.`,
+      );
       await interaction.reply({ flags: MessageFlags.Ephemeral, embeds: [embed] });
       return;
     }
@@ -151,7 +154,9 @@ class FavoriteCommand extends Command {
         await DiscordMessageService.editReplyError(
           interaction,
           `\`${targetName}\` was NOT added as favorite as you already reached the maximum of 25.` +
-            "\nPlease remove a favorite before adding a new one. See \`/favorite remove\`.",
+            `\nPlease remove a favorite before adding a new one. See ${
+              CommandMentionService.mentionOrBacktick("favorite", "remove")
+            }.`,
         );
         return;
       }
@@ -177,7 +182,9 @@ class FavoriteCommand extends Command {
     const favorites = await FavoritesRepository.get(userId);
 
     if (favorites?.length === 0) {
-      const embed = DiscordEmbedService.getErrorEmbed(`Please add favorites first. See \`/favorite add\``);
+      const embed = DiscordEmbedService.getErrorEmbed(
+        `Please add favorites first. See ${CommandMentionService.mentionOrBacktick("favorite", "add")}`,
+      );
       await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
       return;
     }

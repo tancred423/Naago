@@ -35,6 +35,7 @@ import { NewsQueueRepository } from "./database/repository/NewsQueueRepository.t
 import { EventReminderService } from "./service/EventReminderService.ts";
 import { LiveLetterAnnouncementService } from "./service/LiveLetterAnnouncementService.ts";
 import { EventReminderSetupsRepository } from "./database/repository/EventReminderSetupsRepository.ts";
+import { CommandMentionService } from "./service/CommandMentionService.ts";
 
 await load({ export: true });
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -125,10 +126,11 @@ for (const file of commandFiles) {
     });
 }
 
-client.once("clientReady", () => {
+client.once("clientReady", async () => {
   log.info(`Connected: Discord (${client.user?.tag})`);
 
   GlobalClient.client = client;
+  await CommandMentionService.init(client);
   setPresence().catch((err) => {
     log.error(`Failed to set presence on start: ${err instanceof Error ? err.stack : String(err)}`);
   });
