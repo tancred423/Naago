@@ -203,39 +203,50 @@ function buildTimeString(totalSeconds: number): string {
   const SECONDS_IN_DAY = 86400;
   const SECONDS_IN_WEEK = 604800;
 
-  const weeks = Math.floor(totalSeconds / SECONDS_IN_WEEK);
-  const remainingAfterWeeks = totalSeconds - weeks * SECONDS_IN_WEEK;
-  const days = Math.floor(remainingAfterWeeks / SECONDS_IN_DAY);
-  const remainingAfterDays = remainingAfterWeeks - days * SECONDS_IN_DAY;
-  const roundedHours = Math.round(remainingAfterDays / SECONDS_IN_HOUR);
+  totalSeconds = Math.round(totalSeconds / SECONDS_IN_HOUR) * SECONDS_IN_HOUR;
+
+  let weeks = Math.floor(totalSeconds / SECONDS_IN_WEEK);
+  totalSeconds -= weeks * SECONDS_IN_WEEK;
+
+  let days = Math.floor(totalSeconds / SECONDS_IN_DAY);
+  totalSeconds -= days * SECONDS_IN_DAY;
+
+  let hours = Math.floor(totalSeconds / SECONDS_IN_HOUR);
+
+  if (hours === 24) {
+    hours = 0;
+    days += 1;
+  }
+
+  if (days === 7) {
+    days = 0;
+    weeks += 1;
+  }
 
   if (weeks > 0) {
-    if (days === 0 && roundedHours === 0) {
+    if (days === 0 && hours === 0) {
       return `${weeks} ${weeks === 1 ? "week" : "weeks"}`;
     }
-    if (days > 0 && roundedHours > 0) {
-      return `${weeks}w, ${days}d, ${roundedHours}h`;
+    if (days > 0 && hours > 0) {
+      return `${weeks}w, ${days}d, ${hours}h`;
     }
     if (days > 0) {
       return `${weeks}w, ${days}d`;
     }
-    return `${weeks}w, ${roundedHours}h`;
+    return `${weeks}w, ${hours}h`;
   }
+
   if (days > 0) {
-    if (roundedHours === 24) {
-      return `${days + 1} days`;
-    }
-    if (roundedHours > 0) {
-      return `${days}d, ${roundedHours}h`;
+    if (hours > 0) {
+      return `${days}d, ${hours}h`;
     }
     return `${days} ${days === 1 ? "day" : "days"}`;
   }
-  if (roundedHours === 24) {
-    return "1 day";
+
+  if (hours >= 2) {
+    return `${hours} ${hours === 1 ? "hour" : "hours"}`;
   }
-  if (roundedHours >= 2) {
-    return `${roundedHours} ${roundedHours === 1 ? "hour" : "hours"}`;
-  }
+
   return "< 1 hour";
 }
 
