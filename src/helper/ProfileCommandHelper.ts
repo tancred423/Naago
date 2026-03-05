@@ -79,7 +79,7 @@ export class ProfileCommandHandler {
     const components = ProfileGeneratorService.getComponents(profilePage, "profile", characterId);
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
+      content: `Latest Update: <t:${Math.floor(characterDataDto.latestUpdate.getTime() / 1000)}:R>${cachedHint}`,
       files: [file],
       embeds: [],
       attachments: [],
@@ -140,7 +140,7 @@ export class ProfileCommandHandler {
       : "";
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
+      content: `Latest Update: <t:${Math.floor(characterDataDto.latestUpdate.getTime() / 1000)}:R>${cachedHint}`,
       files: [file],
       embeds: [],
       attachments: [],

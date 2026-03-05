@@ -8,7 +8,7 @@ import {
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { CharacterDataRepository } from "../database/repository/CharacterDataRepository.ts";
 import { Character } from "../naagostone/type/CharacterTypes.ts";
-import moment from "moment";
+import { subMinutes } from "date-fns";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { CharacterDataDto } from "../naagostone/dto/CharacterDataDto.ts";
 import { StringManipulationService } from "./StringManipulationService.ts";
@@ -43,8 +43,8 @@ export class FetchCharacterService {
       return this.fetchCharacterForced(interaction, characterId);
     }
 
-    const latestUpdate = moment(new Date(characterData.latestUpdate));
-    if (latestUpdate.isBefore(moment().subtract(10, "minutes"))) {
+    const latestUpdate = new Date(characterData.latestUpdate);
+    if (latestUpdate < subMinutes(new Date(), 10)) {
       return this.fetchCharacterForced(interaction, characterId);
     }
 
@@ -67,7 +67,7 @@ export class FetchCharacterService {
 
       await CharacterDataRepository.set(character);
 
-      return new CharacterDataDto(moment(), character);
+      return new CharacterDataDto(new Date(), character);
     } catch (error: unknown) {
       if (error instanceof LodestoneServiceUnavailableError) {
         log.warn(
@@ -77,7 +77,7 @@ export class FetchCharacterService {
         if (cachedData) {
           log.info(`[CHARACTER] Using cached data for character ${characterId}`);
           return new CharacterDataDto(
-            moment(new Date(cachedData.latestUpdate)),
+            new Date(cachedData.latestUpdate),
             JSON.parse(cachedData.jsonString) as Character,
             true,
           );

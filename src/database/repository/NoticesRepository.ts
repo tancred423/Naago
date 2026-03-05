@@ -1,6 +1,5 @@
 import { and, eq } from "drizzle-orm";
 import { database } from "../connection.ts";
-import moment from "moment-timezone";
 import { AlreadyInDatabaseError } from "../error/AlreadyInDatabaseError.ts";
 import { NoticeData, noticeData } from "../schema/lodestone-news.ts";
 import { Notice } from "../../naagostone/type/Notice.ts";
@@ -10,7 +9,7 @@ export class NoticesRepository {
     title: string,
     date: Date,
   ): Promise<NoticeData | null> {
-    const dateSQL = moment(date).tz("Europe/London").toDate();
+    const dateSQL = new Date(date);
 
     const result = await database
       .select()
@@ -37,7 +36,7 @@ export class NoticesRepository {
   }
 
   public static async add(notice: Notice): Promise<number> {
-    const dateSQL = moment(notice.date).tz("Europe/London").toDate();
+    const dateSQL = new Date(notice.date);
     const currentNotice = await this.find(notice.title, dateSQL);
     if (currentNotice) {
       throw new AlreadyInDatabaseError(

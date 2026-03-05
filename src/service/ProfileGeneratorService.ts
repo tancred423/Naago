@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { CanvasRenderingContext2D, createCanvas, loadImage } from "canvas";
 import { ActionRowBuilder, ButtonBuilder } from "discord.js";
-import moment from "moment";
+import { format } from "date-fns";
 import { Buffer } from "node:buffer";
 
 declare module "canvas" {
@@ -289,7 +289,7 @@ class Profile {
       "Started",
       this.character.started === "Private"
         ? "Private"
-        : moment(parseInt(this.character.started) * 1000).format("Do MMM Y"),
+        : format(new Date(parseInt(this.character.started) * 1000), "do MMM y"),
     );
     await profileBlock.add(
       "City-state",
@@ -1753,8 +1753,8 @@ class Profile {
 
       ctx.font = `bold 16px roboto condensed`;
       if (cleared && ultData.date) {
-        const date = moment(ultData.date);
-        ctx.fillText(date.format("MMM D, YYYY"), ux + boxWidth / 2, uy + 33, boxWidth - 10);
+        const date = new Date(ultData.date);
+        ctx.fillText(format(date, "MMM d, yyyy"), ux + boxWidth / 2, uy + 33, boxWidth - 10);
 
         if (ultData.week !== null && ultData.week !== undefined) {
           ctx.fillText(`Week ${ultData.week}`, ux + boxWidth / 2, uy + 50, boxWidth - 10);
@@ -1892,8 +1892,8 @@ class Profile {
 
         ctx.font = `bold 12px roboto condensed`;
         if (cleared && raidClear?.date) {
-          const date = moment(raidClear.date);
-          ctx.fillText(date.format("MMM D, YYYY"), raidX + raidBoxWidth / 2, raidY + 22, raidBoxWidth - 8);
+          const date = new Date(raidClear.date);
+          ctx.fillText(format(date, "MMM d, yyyy"), raidX + raidBoxWidth / 2, raidY + 22, raidBoxWidth - 8);
 
           if (raidClear?.week !== null && raidClear?.week !== undefined) {
             ctx.fillText(`Week ${raidClear.week}`, raidX + raidBoxWidth / 2, raidY + 37, raidBoxWidth - 8);

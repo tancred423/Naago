@@ -1,4 +1,3 @@
-import moment from "moment";
 import { StringManipulationService } from "./StringManipulationService.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { Maintenance } from "../naagostone/type/Maintenance.ts";
@@ -35,7 +34,7 @@ export class MaintenanceSenderService {
       maintenance.tag = maintenance.tag === "[Maintenance]" ? null : maintenance.tag;
       maintenance.tag = StringManipulationService.convertTag("maintenance", maintenance.tag ?? null);
 
-      const date = moment(maintenance.date).tz("Europe/London").toDate();
+      const date = new Date(maintenance.date);
       const existingMaintenance = await MaintenancesRepository.find(maintenance.title, date);
 
       itemsWithExisting.push({ maintenance, existing: existingMaintenance });

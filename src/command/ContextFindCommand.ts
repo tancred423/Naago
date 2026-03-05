@@ -47,7 +47,7 @@ class ContextFindCommand extends Command {
 
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", "profile", targetCharacter?.id);
-    const unix = targetCharacterDataDto.latestUpdate.unix();
+    const unix = Math.floor(targetCharacterDataDto.latestUpdate.getTime() / 1000);
 
     const cachedHint = targetCharacterDataDto.isCachedDueToUnavailability
       ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"

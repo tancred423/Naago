@@ -1,4 +1,3 @@
-import moment from "moment";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { Update } from "../naagostone/type/Updates.ts";
 import { UpdatesRepository } from "../database/repository/UpdatesRepository.ts";
@@ -34,7 +33,7 @@ export class UpdateSenderService {
     for (const update of latestUpdates) {
       if (!update) continue;
 
-      const date = moment(update.date).tz("Europe/London").toDate();
+      const date = new Date(update.date);
       const existingUpdate = await UpdatesRepository.find(update.title, date);
 
       itemsWithExisting.push({ update, existing: existingUpdate });

@@ -11,11 +11,18 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import moment from "moment";
+import { getUnixTime } from "date-fns";
 import { DiscordColorService } from "../service/DiscordColorService.ts";
 import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
 import { PaissaApiService } from "../paissa/service/PaissaApiService.ts";
 import { LotteryPhaseInfo } from "../paissa/type/PaissaApiTypes.ts";
+
+const DAY_MS = 86_400_000;
+const WEEK_MS = 7 * DAY_MS;
+
+function utcToday(now: Date, hours: number): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), hours, 0, 0, 0));
+}
 
 type Page = "daily" | "weekly";
 
@@ -35,7 +42,7 @@ export class WhenIsResetCommandHelper {
   ): Promise<{ content: string; components: (ContainerBuilder | ActionRowBuilder<ButtonBuilder>)[]; flags: number }> {
     const botColorResolvable = await DiscordColorService.getBotColorByInteraction(interaction);
     const color = resolveColor(botColorResolvable);
-    const now = moment.utc();
+    const now = new Date();
 
     const components: (ContainerBuilder | ActionRowBuilder<ButtonBuilder>)[] = [];
 
@@ -81,14 +88,14 @@ export class WhenIsResetCommandHelper {
   }
 
   private static buildDailyContainer(
-    dailyReset: moment.Moment,
-    gcReset: moment.Moment,
-    levequestAllowance: moment.Moment,
-    cosmicExploration: moment.Moment,
+    dailyReset: Date,
+    gcReset: Date,
+    levequestAllowance: Date,
+    cosmicExploration: Date,
     color: number,
   ): ContainerBuilder {
-    const dailyTimestamp = time(Math.floor(dailyReset.valueOf() / 1000), TimestampStyles.ShortTime);
-    const dailyTimestampRelative = time(Math.floor(dailyReset.valueOf() / 1000), TimestampStyles.RelativeTime);
+    const dailyTimestamp = time(getUnixTime(dailyReset), TimestampStyles.ShortTime);
+    const dailyTimestampRelative = time(getUnixTime(dailyReset), TimestampStyles.RelativeTime);
 
     const dailyAffects = [
       "Allied Society Quest Allowances",
@@ -97,8 +104,8 @@ export class WhenIsResetCommandHelper {
       "Mini Cactpot",
     ];
 
-    const gcTimestamp = time(Math.floor(gcReset.valueOf() / 1000), TimestampStyles.ShortTime);
-    const gcTimestampRelative = time(Math.floor(gcReset.valueOf() / 1000), TimestampStyles.RelativeTime);
+    const gcTimestamp = time(getUnixTime(gcReset), TimestampStyles.ShortTime);
+    const gcTimestampRelative = time(getUnixTime(gcReset), TimestampStyles.RelativeTime);
     const emojiDailyReset = DiscordEmojiService.getAsMarkdown("EMOJI_DAILY_RESET");
     const emojiGrandCompany = DiscordEmojiService.getAsMarkdown("EMOJI_GRAND_COMPANY");
     const emojiLeveQuest = DiscordEmojiService.getAsMarkdown("EMOJI_LEVE_QUEST");
@@ -109,28 +116,28 @@ export class WhenIsResetCommandHelper {
       "GC Supply and Provision Missions",
     ];
 
-    const levequestTimestamp = time(Math.floor(levequestAllowance.valueOf() / 1000), TimestampStyles.FullDateShortTime);
+    const levequestTimestamp = time(getUnixTime(levequestAllowance), TimestampStyles.FullDateShortTime);
     const levequestTimestampRelative = time(
-      Math.floor(levequestAllowance.valueOf() / 1000),
+      getUnixTime(levequestAllowance),
       TimestampStyles.RelativeTime,
     );
 
-    const now = moment.utc();
-    const nextMidnight = now.clone().hour(0).minute(0).second(0).millisecond(0);
-    if (now.isSameOrAfter(nextMidnight)) {
-      nextMidnight.add(1, "day");
+    const now = new Date();
+    let nextMidnight = utcToday(now, 0);
+    if (now >= nextMidnight) {
+      nextMidnight = new Date(nextMidnight.getTime() + DAY_MS);
     }
-    const nextNoon = now.clone().hour(12).minute(0).second(0).millisecond(0);
-    if (now.isSameOrAfter(nextNoon)) {
-      nextNoon.add(1, "day");
+    let nextNoon = utcToday(now, 12);
+    if (now >= nextNoon) {
+      nextNoon = new Date(nextNoon.getTime() + DAY_MS);
     }
 
-    const midnightTimestamp = time(Math.floor(nextMidnight.valueOf() / 1000), TimestampStyles.ShortTime);
-    const noonTimestamp = time(Math.floor(nextNoon.valueOf() / 1000), TimestampStyles.ShortTime);
+    const midnightTimestamp = time(getUnixTime(nextMidnight), TimestampStyles.ShortTime);
+    const noonTimestamp = time(getUnixTime(nextNoon), TimestampStyles.ShortTime);
 
-    const cosmicExplorationTimestamp = time(Math.floor(cosmicExploration.valueOf() / 1000), TimestampStyles.ShortTime);
+    const cosmicExplorationTimestamp = time(getUnixTime(cosmicExploration), TimestampStyles.ShortTime);
     const cosmicExplorationTimestampRelative = time(
-      Math.floor(cosmicExploration.valueOf() / 1000),
+      getUnixTime(cosmicExploration),
       TimestampStyles.RelativeTime,
     );
 
@@ -165,14 +172,14 @@ export class WhenIsResetCommandHelper {
   }
 
   private static buildWeeklyContainer(
-    weeklyReset: moment.Moment,
-    fashionReport: moment.Moment,
-    jumboCactpot: moment.Moment,
+    weeklyReset: Date,
+    fashionReport: Date,
+    jumboCactpot: Date,
     housingLotteryPhase: LotteryPhaseInfo | null,
     color: number,
   ): ContainerBuilder {
-    const weeklyTimestamp = time(Math.floor(weeklyReset.valueOf() / 1000), TimestampStyles.FullDateShortTime);
-    const weeklyTimestampRelative = time(Math.floor(weeklyReset.valueOf() / 1000), TimestampStyles.RelativeTime);
+    const weeklyTimestamp = time(getUnixTime(weeklyReset), TimestampStyles.FullDateShortTime);
+    const weeklyTimestampRelative = time(getUnixTime(weeklyReset), TimestampStyles.RelativeTime);
 
     const weeklyAffects = [
       "Adventurer Squadron Priority Missions",
@@ -186,11 +193,11 @@ export class WhenIsResetCommandHelper {
       "Wondrous Tails Journal",
     ];
 
-    const fashionTimestamp = time(Math.floor(fashionReport.valueOf() / 1000), TimestampStyles.FullDateShortTime);
-    const fashionTimestampRelative = time(Math.floor(fashionReport.valueOf() / 1000), TimestampStyles.RelativeTime);
+    const fashionTimestamp = time(getUnixTime(fashionReport), TimestampStyles.FullDateShortTime);
+    const fashionTimestampRelative = time(getUnixTime(fashionReport), TimestampStyles.RelativeTime);
 
-    const jumboTimestamp = time(Math.floor(jumboCactpot.valueOf() / 1000), TimestampStyles.FullDateShortTime);
-    const jumboTimestampRelative = time(Math.floor(jumboCactpot.valueOf() / 1000), TimestampStyles.RelativeTime);
+    const jumboTimestamp = time(getUnixTime(jumboCactpot), TimestampStyles.FullDateShortTime);
+    const jumboTimestampRelative = time(getUnixTime(jumboCactpot), TimestampStyles.RelativeTime);
 
     const emojiWeeklyReset = DiscordEmojiService.getAsMarkdown("EMOJI_WEEKLY_RESET");
     const emojiFashionReport = DiscordEmojiService.getAsMarkdown("EMOJI_FASHION_REPORT");
@@ -263,77 +270,86 @@ export class WhenIsResetCommandHelper {
       .addSectionComponents(paissaDbSection);
   }
 
-  private static getNextDailyReset(now: moment.Moment): moment.Moment {
-    const todayReset = now.clone().hour(15).minute(0).second(0).millisecond(0);
-
-    if (now.isBefore(todayReset)) {
-      return todayReset;
-    } else {
-      return todayReset.add(1, "day");
-    }
+  private static getNextDailyReset(now: Date): Date {
+    const todayReset = utcToday(now, 15);
+    return now < todayReset ? todayReset : new Date(todayReset.getTime() + DAY_MS);
   }
 
-  private static getNextGcReset(now: moment.Moment): moment.Moment {
-    const todayReset = now.clone().hour(20).minute(0).second(0).millisecond(0);
-
-    if (now.isBefore(todayReset)) {
-      return todayReset;
-    } else {
-      return todayReset.add(1, "day");
-    }
+  private static getNextGcReset(now: Date): Date {
+    const todayReset = utcToday(now, 20);
+    return now < todayReset ? todayReset : new Date(todayReset.getTime() + DAY_MS);
   }
 
-  private static getNextWeeklyReset(now: moment.Moment): moment.Moment {
-    const nextTuesday = now.clone().day(2).hour(8).minute(0).second(0).millisecond(0);
-
-    if (now.isSameOrAfter(nextTuesday)) {
-      return nextTuesday.add(1, "week");
-    }
-
-    return nextTuesday;
+  private static getNextWeeklyReset(now: Date): Date {
+    const diff = 2 - now.getUTCDay();
+    const nextTuesday = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + diff,
+      8,
+      0,
+      0,
+      0,
+    ));
+    return now >= nextTuesday ? new Date(nextTuesday.getTime() + WEEK_MS) : nextTuesday;
   }
 
-  private static getNextFashionReport(now: moment.Moment): moment.Moment {
-    const nextFriday = now.clone().day(5).hour(8).minute(0).second(0).millisecond(0);
-
-    if (now.isSameOrAfter(nextFriday)) {
-      return nextFriday.add(1, "week");
-    }
-
-    return nextFriday;
+  private static getNextFashionReport(now: Date): Date {
+    const diff = 5 - now.getUTCDay();
+    const nextFriday = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + diff,
+      8,
+      0,
+      0,
+      0,
+    ));
+    return now >= nextFriday ? new Date(nextFriday.getTime() + WEEK_MS) : nextFriday;
   }
 
-  private static getNextJumboCactpot(now: moment.Moment): moment.Moment {
-    const nextSaturday = now.clone().day(6).hour(20).minute(0).second(0).millisecond(0);
-
-    if (now.isSameOrAfter(nextSaturday)) {
-      return nextSaturday.add(1, "week");
-    }
-
-    return nextSaturday;
+  private static getNextJumboCactpot(now: Date): Date {
+    const diff = 6 - now.getUTCDay();
+    const nextSaturday = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + diff,
+      20,
+      0,
+      0,
+      0,
+    ));
+    return now >= nextSaturday ? new Date(nextSaturday.getTime() + WEEK_MS) : nextSaturday;
   }
 
-  private static getNextLevequestAllowance(now: moment.Moment): moment.Moment {
-    const todayNoon = now.clone().hour(12).minute(0).second(0).millisecond(0);
-    const tomorrowMidnight = now.clone().add(1, "day").hour(0).minute(0).second(0).millisecond(0);
-    const tomorrowNoon = now.clone().add(1, "day").hour(12).minute(0).second(0).millisecond(0);
+  private static getNextLevequestAllowance(now: Date): Date {
+    const todayNoon = utcToday(now, 12);
+    const tomorrowMidnight = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 1,
+      0,
+      0,
+      0,
+      0,
+    ));
+    const tomorrowNoon = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 1,
+      12,
+      0,
+      0,
+      0,
+    ));
 
-    if (now.isBefore(todayNoon)) {
-      return todayNoon;
-    } else if (now.isBefore(tomorrowMidnight)) {
-      return tomorrowMidnight;
-    } else {
-      return tomorrowNoon;
-    }
+    if (now < todayNoon) return todayNoon;
+    if (now < tomorrowMidnight) return tomorrowMidnight;
+    return tomorrowNoon;
   }
 
-  private static getNextCosmicExploration(now: moment.Moment): moment.Moment {
-    const todayReset = now.clone().hour(9).minute(0).second(0).millisecond(0);
-
-    if (now.isBefore(todayReset)) {
-      return todayReset;
-    } else {
-      return todayReset.add(1, "day");
-    }
+  private static getNextCosmicExploration(now: Date): Date {
+    const todayReset = utcToday(now, 9);
+    return now < todayReset ? todayReset : new Date(todayReset.getTime() + DAY_MS);
   }
 }

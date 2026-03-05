@@ -1,7 +1,6 @@
 import { database } from "../connection.ts";
 import { CharacterData, characterData } from "../schema/character-data.ts";
 import { eq } from "drizzle-orm";
-import moment from "moment-timezone";
 import { Character } from "../../naagostone/type/CharacterTypes.ts";
 
 export class CharacterDataRepository {
@@ -18,8 +17,7 @@ export class CharacterDataRepository {
   }
 
   public static async set(character: Character): Promise<void> {
-    const now = Date.now();
-    const nowSQL = moment(now).tz("UTC").toDate();
+    const nowSQL = new Date();
     await database
       .insert(characterData)
       .values({

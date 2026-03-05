@@ -12,7 +12,7 @@ import {
   ModalSubmitInteraction,
 } from "discord.js";
 import { CanvasRenderingContext2D, registerFont } from "canvas";
-import moment from "moment";
+import { format } from "date-fns";
 import cron from "node-cron";
 import * as log from "@std/log";
 import { dirname, join } from "node:path";
@@ -44,7 +44,7 @@ log.setup({
   handlers: {
     console: new log.ConsoleHandler("DEBUG", {
       formatter: (logRecord) => {
-        const formattedDate = `[${moment(logRecord.datetime).format("YYYY-MM-DD HH:mm:ss.SSS Z")}]`;
+        const formattedDate = `[${format(logRecord.datetime, "yyyy-MM-dd HH:mm:ss.SSS xxx")}]`;
         return `${formattedDate} [${logRecord.levelName}] ${logRecord.msg}`;
       },
     }),
@@ -56,8 +56,6 @@ log.setup({
     },
   },
 });
-
-moment.locale("en");
 
 const fontsPath = join(__dirname, "..", "fonts");
 try {

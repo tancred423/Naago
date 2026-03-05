@@ -1,4 +1,3 @@
-import moment from "moment";
 import { Topic } from "../naagostone/type/Topic.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
 import { TopicsRepository } from "../database/repository/TopicsRepository.ts";
@@ -34,7 +33,7 @@ export class TopicSenderService {
     for (const topic of latestTopics) {
       if (!topic) continue;
 
-      const date = moment(topic.date).tz("Europe/London").toDate();
+      const date = new Date(topic.date);
       const existingTopic = await TopicsRepository.find(topic.title, date);
 
       itemsWithExisting.push({ topic, existing: existingTopic });

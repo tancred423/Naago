@@ -1,4 +1,3 @@
-import moment from "moment";
 import { StringManipulationService } from "./StringManipulationService.ts";
 import { NoticesRepository } from "../database/repository/NoticesRepository.ts";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
@@ -37,7 +36,7 @@ export class NoticeSenderService {
 
       notice.tag = StringManipulationService.convertTag("notice", notice.tag);
 
-      const date = moment(notice.date).tz("Europe/London").toDate();
+      const date = new Date(notice.date);
       const existingNotice = await NoticesRepository.find(notice.title, date);
 
       itemsWithExisting.push({ notice, existing: existingNotice });
