@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, gte, isNotNull, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, gte, isNotNull, lte, ne, or, sql } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { TopicData, topicData } from "../schema/lodestone-news.ts";
 import moment from "moment-timezone";
@@ -68,7 +68,13 @@ export class TopicsRepository {
       })
       .$returningId();
 
-    return result[0].id;
+    const newId = result[0].id;
+
+    if (timestampLiveLetterSQL) {
+      await this.markOlderLiveLettersAsAnnounced(timestampLiveLetterSQL, newId);
+    }
+
+    return newId;
   }
 
   public static async updateDescriptions(
@@ -188,6 +194,22 @@ export class TopicsRepository {
       .where(eq(topicData.id, id));
   }
 
+  public static async markOlderLiveLettersAsAnnounced(
+    timestampLiveLetter: Date,
+    excludeId: number,
+  ): Promise<void> {
+    await database
+      .update(topicData)
+      .set({ liveLetterAnnounced: 1 })
+      .where(
+        and(
+          eq(topicData.timestampLiveLetter, timestampLiveLetter),
+          ne(topicData.id, excludeId),
+          eq(topicData.liveLetterAnnounced, 0),
+        ),
+      );
+  }
+
   public static async getEventsEndingSoon(withinMs: number): Promise<TopicData[]> {
     const now = new Date();
     const threshold = new Date(now.getTime() + withinMs);
@@ -235,6 +257,7 @@ export class TopicsRepository {
             isNotNull(topicData.timestampLiveLetter),
             lte(topicData.timestampLiveLetter, now),
             gte(topicData.timestampLiveLetter, twoHoursAgo),
+            eq(topicData.liveLetterAnnounced, 0),
           ),
         ),
       );
@@ -261,6 +284,7 @@ export class TopicsRepository {
           and(
             isNotNull(topicData.timestampLiveLetter),
             gte(topicData.timestampLiveLetter, now),
+            eq(topicData.liveLetterAnnounced, 0),
           ),
         ),
       );
