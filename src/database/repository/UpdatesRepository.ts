@@ -26,16 +26,6 @@ export class UpdatesRepository {
     return result[0] ?? null;
   }
 
-  public static async findById(id: number): Promise<UpdateData | null> {
-    const result = await database
-      .select()
-      .from(updateData)
-      .where(eq(updateData.id, id))
-      .limit(1);
-
-    return result[0] ?? null;
-  }
-
   public static async add(update: Update): Promise<number> {
     const dateSQL = moment(update.date).tz("Europe/London").toDate();
     const currentUpdate = await this.find(update.title, dateSQL);

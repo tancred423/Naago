@@ -149,17 +149,6 @@ export class TopicsRepository {
     return { descriptionChanged, descriptionV2Changed };
   }
 
-  public static async getNewestLiveLetterTimestamp(): Promise<Date | null> {
-    const result = await database
-      .select({ timestampLiveLetter: topicData.timestampLiveLetter })
-      .from(topicData)
-      .where(isNotNull(topicData.timestampLiveLetter))
-      .orderBy(desc(topicData.id))
-      .limit(1);
-
-    return result[0]?.timestampLiveLetter ?? null;
-  }
-
   public static async getNewestLiveLetterTopic(): Promise<TopicData | null> {
     const result = await database
       .select()

@@ -26,16 +26,6 @@ export class NoticesRepository {
     return result[0] ?? null;
   }
 
-  public static async findById(id: number): Promise<NoticeData | null> {
-    const result = await database
-      .select()
-      .from(noticeData)
-      .where(eq(noticeData.id, id))
-      .limit(1);
-
-    return result[0] ?? null;
-  }
-
   public static async add(notice: Notice): Promise<number> {
     const dateSQL = moment(notice.date).tz("Europe/London").toDate();
     const currentNotice = await this.find(notice.title, dateSQL);

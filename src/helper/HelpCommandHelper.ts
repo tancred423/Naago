@@ -176,9 +176,9 @@ export class HelpCommandHelper {
           inline: false,
         },
         {
-          name: CommandMentionService.mentionOrPlain("maintenance"),
-          value: "- View current maintenances if any." +
-            "\n- Shows active maintenance schedules and their durations.",
+          name: CommandMentionService.mentionOrPlain("maintenances"),
+          value: "- Lists all currently ongoing and upcoming FFXIV maintenances." +
+            "\n- Shows maintenance schedules and their durations.",
           inline: false,
         },
         {

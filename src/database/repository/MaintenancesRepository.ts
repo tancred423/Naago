@@ -1,4 +1,4 @@
-import { and, eq, gte, like, lte, not } from "drizzle-orm";
+import { and, eq, gt, gte, lte } from "drizzle-orm";
 import { database } from "../connection.ts";
 import moment from "moment";
 import { AlreadyInDatabaseError } from "../error/AlreadyInDatabaseError.ts";
@@ -21,16 +21,6 @@ export class MaintenancesRepository {
           eq(maintenanceData.date, dateSQL),
         ),
       )
-      .limit(1);
-
-    return result[0] ?? null;
-  }
-
-  public static async findById(id: number): Promise<MaintenanceData | null> {
-    const result = await database
-      .select()
-      .from(maintenanceData)
-      .where(eq(maintenanceData.id, id))
       .limit(1);
 
     return result[0] ?? null;
@@ -87,45 +77,35 @@ export class MaintenancesRepository {
     return { descriptionChanged, descriptionV2Changed };
   }
 
-  public static async findActive(): Promise<MaintenanceData[]> {
-    const now = moment().tz("Europe/London").toDate();
+  public static async getOngoingMaintenances(): Promise<MaintenanceData[]> {
+    const now = new Date();
 
-    const activeMaintenances = await database
+    const result = await database
       .select()
       .from(maintenanceData)
       .where(
         and(
           lte(maintenanceData.startDate, now),
           gte(maintenanceData.endDate, now),
-          not(eq(maintenanceData.tag, "Maintenance: Follow-up")),
         ),
       )
-      .orderBy(maintenanceData.id);
+      .orderBy(maintenanceData.endDate);
 
-    const result: MaintenanceData[] = [];
-    const MAX_EMBEDS = 5;
+    return result;
+  }
 
-    for (const maintenance of activeMaintenances) {
-      if (result.length >= MAX_EMBEDS) break;
+  public static async getUpcomingMaintenances(): Promise<MaintenanceData[]> {
+    const now = new Date();
 
-      result.push(maintenance);
-
-      const followUps = await database
-        .select()
-        .from(maintenanceData)
-        .where(
-          and(
-            eq(maintenanceData.tag, "Maintenance: Follow-up"),
-            like(maintenanceData.title, `%${maintenance.title}%`),
-          ),
-        )
-        .orderBy(maintenanceData.id);
-
-      for (const followUp of followUps) {
-        if (result.length >= MAX_EMBEDS) break;
-        result.push(followUp);
-      }
-    }
+    const result = await database
+      .select()
+      .from(maintenanceData)
+      .where(
+        and(
+          gt(maintenanceData.startDate, now),
+        ),
+      )
+      .orderBy(maintenanceData.startDate);
 
     return result;
   }

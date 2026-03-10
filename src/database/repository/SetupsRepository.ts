@@ -49,19 +49,6 @@ export class SetupsRepository {
       .onDuplicateKeyUpdate({ set: { channelId } });
   }
 
-  public static async getBlacklistKeywords(
-    guildId: string,
-    type: string,
-  ): Promise<string | null> {
-    const result = await database
-      .select({ blacklistKeywords: setups.blacklistKeywords })
-      .from(setups)
-      .where(and(eq(setups.guildId, guildId), eq(setups.type, type)))
-      .limit(1);
-
-    return result[0]?.blacklistKeywords ?? null;
-  }
-
   public static async setBlacklistKeywords(
     guildId: string,
     type: string,
