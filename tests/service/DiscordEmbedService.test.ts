@@ -4,9 +4,7 @@ import { ContainerBuilder, EmbedBuilder } from "discord.js";
 Deno.env.set("COLOR_GREEN", "#00ff00");
 Deno.env.set("COLOR_RED", "#ff0000");
 Deno.env.set("COLOR_TOPICS", "#3498db");
-Deno.env.set("COLOR_MAINTENANCES", "#e67e22");
 Deno.env.set("EMOJI_NEWS_TOPIC", "<:topic:123>");
-Deno.env.set("EMOJI_NEWS_MAINTENANCE", "<:maint:456>");
 Deno.env.set("EMOJI_LODESTONE", "<:lodestone:789>");
 
 const { DiscordEmbedService } = await import("../../src/service/DiscordEmbedService.ts");
@@ -135,41 +133,5 @@ Deno.test("getTopicContainerFromData - truncates long descriptions", () => {
     updatedAt: new Date(),
   };
   const container = DiscordEmbedService.getTopicContainerFromData(topic);
-  assertInstanceOf(container, ContainerBuilder);
-});
-
-Deno.test("getMaintenanceContainerFromData - returns ContainerBuilder for maintenance", () => {
-  const maintenance = {
-    id: 1,
-    tag: "Emergency",
-    title: "Server Maintenance",
-    link: "https://example.com/maint",
-    date: new Date("2025-01-01T00:00:00Z"),
-    description: "Maintenance description",
-    descriptionV2: null,
-    startDate: null,
-    endDate: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-  const container = DiscordEmbedService.getMaintenanceContainerFromData(maintenance);
-  assertInstanceOf(container, ContainerBuilder);
-});
-
-Deno.test("getMaintenanceContainerFromData - uses default label when tag is null", () => {
-  const maintenance = {
-    id: 2,
-    tag: null,
-    title: "Regular Maintenance",
-    link: "https://example.com/maint2",
-    date: new Date("2025-01-01T00:00:00Z"),
-    description: "Regular maintenance",
-    descriptionV2: null,
-    startDate: null,
-    endDate: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-  const container = DiscordEmbedService.getMaintenanceContainerFromData(maintenance);
   assertInstanceOf(container, ContainerBuilder);
 });

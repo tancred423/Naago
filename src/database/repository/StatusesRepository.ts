@@ -26,16 +26,6 @@ export class StatusesRepository {
     return result[0] ?? null;
   }
 
-  public static async findById(id: number): Promise<StatusData | null> {
-    const result = await database
-      .select()
-      .from(statusData)
-      .where(eq(statusData.id, id))
-      .limit(1);
-
-    return result[0] ?? null;
-  }
-
   public static async add(status: Status): Promise<number> {
     const dateSQL = moment(status.date).tz("Europe/London").toDate();
     const currentStatus = await this.find(status.title, dateSQL);

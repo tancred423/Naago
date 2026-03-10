@@ -1,27 +1,11 @@
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { database } from "../connection.ts";
-import { NewNewsQueueJob, newsQueue, NewsQueueJob, NewsType } from "../schema/lodestone-news.ts";
+import { NewNewsQueueJob, newsQueue, NewsQueueJob } from "../schema/lodestone-news.ts";
 
 export class NewsQueueRepository {
-  public static async add(job: NewNewsQueueJob): Promise<number> {
-    const result = await database.insert(newsQueue).values(job);
-    return result[0].insertId;
-  }
-
   public static async addMany(jobs: NewNewsQueueJob[]): Promise<void> {
     if (jobs.length === 0) return;
     await database.insert(newsQueue).values(jobs);
-  }
-
-  public static async getNextPendingJob(): Promise<NewsQueueJob | null> {
-    const jobs = await database
-      .select()
-      .from(newsQueue)
-      .where(eq(newsQueue.status, "PENDING"))
-      .orderBy(desc(newsQueue.priority), asc(newsQueue.createdAt))
-      .limit(1);
-
-    return jobs[0] || null;
   }
 
   public static async getNextPendingJobsBatch(limit: number): Promise<NewsQueueJob[]> {
@@ -44,16 +28,6 @@ export class NewsQueueRepository {
         updatedAt: sql`NOW()`,
       })
       .where(inArray(newsQueue.id, ids));
-  }
-
-  public static async markAsProcessing(id: number): Promise<void> {
-    await database
-      .update(newsQueue)
-      .set({
-        status: "PROCESSING",
-        updatedAt: sql`NOW()`,
-      })
-      .where(eq(newsQueue.id, id));
   }
 
   public static async markAsCompleted(id: number): Promise<void> {
@@ -178,17 +152,5 @@ export class NewsQueueRepository {
       );
 
     return result[0].affectedRows;
-  }
-
-  public static async deleteByNewsId(newsType: NewsType, newsId: number): Promise<void> {
-    await database
-      .delete(newsQueue)
-      .where(
-        and(
-          eq(newsQueue.newsType, newsType),
-          eq(newsQueue.newsId, newsId),
-          inArray(newsQueue.status, ["PENDING", "PROCESSING"]),
-        ),
-      );
   }
 }

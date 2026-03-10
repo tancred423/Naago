@@ -6,7 +6,7 @@ import {
   time,
   TimestampStyles,
 } from "discord.js";
-import { MaintenanceData, TopicData } from "../database/schema/lodestone-news.ts";
+import { TopicData } from "../database/schema/lodestone-news.ts";
 import { DiscordComponentsV2 } from "../naagostone/type/DiscordComponentsV2.ts";
 
 const green = Deno.env.get("COLOR_GREEN")!;
@@ -58,28 +58,6 @@ export class DiscordEmbedService {
     container.addSeparatorComponents((s) => s);
     const footer = `${lodestoneEmoji}  Lodestone · ${
       time(Math.floor(topic.date.getTime() / 1000), TimestampStyles.ShortDateTime)
-    }`;
-    container.addTextDisplayComponents((td) => td.setContent("-# " + footer));
-
-    return container;
-  }
-
-  public static getMaintenanceContainerFromData(maintenance: MaintenanceData): ContainerBuilder {
-    const colorHex = Deno.env.get("COLOR_MAINTENANCES")!;
-    const newsEmoji = Deno.env.get("EMOJI_NEWS_MAINTENANCE") ?? "";
-    const lodestoneEmoji = Deno.env.get("EMOJI_LODESTONE") ?? "";
-
-    const container = new ContainerBuilder().setAccentColor(hexToNumber(colorHex));
-
-    const typeLabel = maintenance.tag ?? "Maintenance";
-    container.addTextDisplayComponents((td) => td.setContent(`${newsEmoji}  **${typeLabel}**`));
-    container.addTextDisplayComponents((td) => td.setContent(`### [${maintenance.title}](${maintenance.link})`));
-
-    this.addDescription(container, maintenance.description, maintenance.descriptionV2, maintenance.link);
-
-    container.addSeparatorComponents((s) => s);
-    const footer = `${lodestoneEmoji}  Lodestone · ${
-      time(Math.floor(maintenance.date.getTime() / 1000), TimestampStyles.ShortDateTime)
     }`;
     container.addTextDisplayComponents((td) => td.setContent("-# " + footer));
 

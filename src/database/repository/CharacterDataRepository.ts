@@ -34,10 +34,4 @@ export class CharacterDataRepository {
         },
       });
   }
-
-  public static async delete(characterId: number): Promise<void> {
-    await database
-      .delete(characterData)
-      .where(eq(characterData.characterId, characterId));
-  }
 }

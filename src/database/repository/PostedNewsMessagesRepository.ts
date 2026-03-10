@@ -21,21 +21,6 @@ export class PostedNewsMessagesRepository {
     });
   }
 
-  public static async findByNewsId(
-    newsType: NewsType,
-    newsId: number,
-  ): Promise<PostedNewsMessage[]> {
-    return await database
-      .select()
-      .from(postedNewsMessages)
-      .where(
-        and(
-          eq(postedNewsMessages.newsType, newsType),
-          eq(postedNewsMessages.newsId, newsId),
-        ),
-      );
-  }
-
   public static async findByNewsIdAndVersion(
     newsType: NewsType,
     newsId: number,
@@ -73,27 +58,5 @@ export class PostedNewsMessagesRepository {
       .limit(1);
 
     return result[0] ?? null;
-  }
-
-  public static async deleteByGuildId(guildId: string): Promise<void> {
-    await database
-      .delete(postedNewsMessages)
-      .where(eq(postedNewsMessages.guildId, guildId));
-  }
-
-  public static async deleteByMessageId(
-    guildId: string,
-    channelId: string,
-    messageId: string,
-  ): Promise<void> {
-    await database
-      .delete(postedNewsMessages)
-      .where(
-        and(
-          eq(postedNewsMessages.guildId, guildId),
-          eq(postedNewsMessages.channelId, channelId),
-          eq(postedNewsMessages.messageId, messageId),
-        ),
-      );
   }
 }

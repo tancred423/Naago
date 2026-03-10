@@ -13,20 +13,6 @@ export class EventReminderSetupsRepository {
     return result[0] ?? null;
   }
 
-  public static async setEnabled(guildId: string, enabled: boolean): Promise<void> {
-    await database
-      .insert(eventReminderSetups)
-      .values({ guildId, enabled: enabled ? 1 : 0 })
-      .onDuplicateKeyUpdate({ set: { enabled: enabled ? 1 : 0 } });
-  }
-
-  public static async setChannelId(guildId: string, channelId: string | null): Promise<void> {
-    await database
-      .insert(eventReminderSetups)
-      .values({ guildId, channelId })
-      .onDuplicateKeyUpdate({ set: { channelId } });
-  }
-
   public static async set(guildId: string, enabled: boolean, channelId: string | null): Promise<void> {
     await database
       .insert(eventReminderSetups)
