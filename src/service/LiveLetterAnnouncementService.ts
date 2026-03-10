@@ -19,17 +19,45 @@ export class LiveLetterAnnouncementService {
     if (unannouncedLiveLetters.length === 0) return;
 
     const now = Date.now();
+    const deduplicated = this.deduplicateByTimestamp(unannouncedLiveLetters);
 
-    for (const topic of unannouncedLiveLetters) {
-      if (!topic.timestampLiveLetter) continue;
+    for (const { newest, duplicates } of deduplicated) {
+      for (const dup of duplicates) {
+        await TopicsRepository.markLiveLetterAsAnnounced(dup.id);
+        log.info(`[LIVE LETTER] Marked duplicate topic ID ${dup.id} as announced (dedup of topic ID ${newest.id})`);
+      }
 
-      const diffMs = topic.timestampLiveLetter.getTime() - now;
+      if (!newest.timestampLiveLetter) continue;
+
+      const diffMs = newest.timestampLiveLetter.getTime() - now;
       if (diffMs > 0 || diffMs < -TWO_HOURS_MS) continue;
 
-      await this.enqueueAnnouncementJobs(topic);
-      await TopicsRepository.markLiveLetterAsAnnounced(topic.id);
-      log.info(`[LIVE LETTER] Enqueued announcement jobs for: ${topic.title}`);
+      await this.enqueueAnnouncementJobs(newest);
+      await TopicsRepository.markLiveLetterAsAnnounced(newest.id);
+      log.info(`[LIVE LETTER] Enqueued announcement jobs for: ${newest.title}`);
     }
+  }
+
+  static deduplicateByTimestamp(
+    topics: TopicData[],
+  ): { newest: TopicData; duplicates: TopicData[] }[] {
+    const grouped = new Map<number, TopicData[]>();
+
+    for (const topic of topics) {
+      if (!topic.timestampLiveLetter) continue;
+      const key = topic.timestampLiveLetter.getTime();
+      const group = grouped.get(key) ?? [];
+      group.push(topic);
+      grouped.set(key, group);
+    }
+
+    const result: { newest: TopicData; duplicates: TopicData[] }[] = [];
+    for (const [, group] of grouped) {
+      group.sort((a, b) => b.id - a.id);
+      result.push({ newest: group[0], duplicates: group.slice(1) });
+    }
+
+    return result;
   }
 
   private static async enqueueAnnouncementJobs(topic: TopicData): Promise<void> {
