@@ -26,8 +26,6 @@
     "drizzle-orm": "npm:drizzle-orm@^0.38.3",
     "drizzle-kit": "npm:drizzle-kit@^0.30.1",
     "html-entities": "npm:html-entities@^2.3.2",
-    "moment": "npm:moment@^2.29.1",
-    "moment-timezone": "npm:moment-timezone@^0.5.34",
     "mysql2": "npm:mysql2@^3.10.1",
     "node-cron": "npm:node-cron@^3.0.0",
     "turndown": "npm:turndown@^7.1.1"

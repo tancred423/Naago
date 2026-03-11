@@ -5,6 +5,7 @@ import { FetchCharacterService } from "../service/FetchCharacterService.ts";
 import { Command } from "./type/Command.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
+import { DateHelper } from "../helper/DateHelper.ts";
 
 class ContextFindCommand extends Command {
   public readonly data = new ContextMenuCommandBuilder()
@@ -47,7 +48,7 @@ class ContextFindCommand extends Command {
 
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", "profile", targetCharacter?.id);
-    const unix = targetCharacterDataDto.latestUpdate.unix();
+    const unix = DateHelper.toEpochSeconds(targetCharacterDataDto.latestUpdate);
 
     const cachedHint = targetCharacterDataDto.isCachedDueToUnavailability
       ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"

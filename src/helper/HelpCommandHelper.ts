@@ -9,7 +9,6 @@ import {
 } from "discord.js";
 import { DiscordColorService } from "../service/DiscordColorService.ts";
 import { InvalidHelpPageError } from "./error/InvalidHelpPageError.ts";
-import moment from "moment";
 import { DiscordEmojiService } from "../service/DiscordEmojiService.ts";
 import { CommandMentionService } from "../service/CommandMentionService.ts";
 
@@ -263,7 +262,7 @@ export class HelpCommandHelper {
   ): Promise<{ embeds: EmbedBuilder[]; components: ActionRowBuilder<ButtonBuilder>[] }> {
     const client = interaction.client;
     const components = HelpCommandHelper.getButtons("about");
-    const uptimeFormatted = time(moment().subtract(client.uptime!, "ms").toDate(), "R");
+    const uptimeFormatted = time(new Date(Date.now() - client.uptime!), "R");
     const deploymentHash = Deno.env.get("DEPLOYMENT_HASH");
     const embed = new EmbedBuilder()
       .setColor(await DiscordColorService.getBotColorByInteraction(interaction))
