@@ -25,6 +25,7 @@ import { InvalidSubCommandError } from "./error/InvalidSubCommandError.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 import { CommandMentionService } from "../service/CommandMentionService.ts";
+import { DateHelper } from "../helper/DateHelper.ts";
 
 class ProfileCommand extends Command {
   public readonly data = new SlashCommandBuilder()
@@ -152,9 +153,10 @@ class ProfileCommand extends Command {
 
       const file = new AttachmentBuilder(profileImage);
       const components = ProfileGeneratorService.getComponents(profilePage, "profile", characterId);
+      const unix = DateHelper.toEpochSeconds(characterDataDto.latestUpdate);
 
       await interaction.editReply({
-        content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
+        content: `Latest Update: <t:${unix}:R>${cachedHint}`,
         files: [file],
         embeds: [],
         attachments: [],
@@ -246,13 +248,14 @@ class ProfileCommand extends Command {
 
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", "profile", characterId);
+    const unix = DateHelper.toEpochSeconds(characterDataDto.latestUpdate);
 
     const cachedHint = characterDataDto.isCachedDueToUnavailability
       ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"
       : "";
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
+      content: `Latest Update: <t:${unix}:R>${cachedHint}`,
       files: [file],
       embeds: [],
       attachments: [],

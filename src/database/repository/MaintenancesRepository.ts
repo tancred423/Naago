@@ -1,6 +1,5 @@
 import { and, eq, gt, gte, lte } from "drizzle-orm";
 import { database } from "../connection.ts";
-import moment from "moment";
 import { AlreadyInDatabaseError } from "../error/AlreadyInDatabaseError.ts";
 import { MaintenanceData, maintenanceData } from "../schema/lodestone-news.ts";
 import { Maintenance } from "../../naagostone/type/Maintenance.ts";
@@ -10,15 +9,13 @@ export class MaintenancesRepository {
     title: string,
     date: Date,
   ): Promise<MaintenanceData | null> {
-    const dateSQL = moment(date).tz("Europe/London").toDate();
-
     const result = await database
       .select()
       .from(maintenanceData)
       .where(
         and(
           eq(maintenanceData.title, title),
-          eq(maintenanceData.date, dateSQL),
+          eq(maintenanceData.date, date),
         ),
       )
       .limit(1);
@@ -27,7 +24,7 @@ export class MaintenancesRepository {
   }
 
   public static async add(maintenance: Maintenance): Promise<number> {
-    const dateSQL = moment(maintenance.date).tz("Europe/London").toDate();
+    const dateSQL = new Date(maintenance.date);
     const currentMaintenance = await this.find(maintenance.title, dateSQL);
     if (currentMaintenance) {
       throw new AlreadyInDatabaseError(
@@ -44,10 +41,8 @@ export class MaintenancesRepository {
         date: dateSQL,
         description: maintenance.description.markdown,
         descriptionV2: maintenance.description.discord_components_v2 ?? null,
-        startDate: maintenance.start_timestamp
-          ? moment(maintenance.start_timestamp).tz("Europe/London").toDate()
-          : null,
-        endDate: maintenance.end_timestamp ? moment(maintenance.end_timestamp).tz("Europe/London").toDate() : null,
+        startDate: maintenance.start_timestamp ? new Date(maintenance.start_timestamp) : null,
+        endDate: maintenance.end_timestamp ? new Date(maintenance.end_timestamp) : null,
       })
       .$returningId();
 
