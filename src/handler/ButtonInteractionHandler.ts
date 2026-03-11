@@ -48,6 +48,8 @@ export class ButtonInteractionHandler {
 
     switch (commandName) {
       case "profile": {
+        await interaction.deferUpdate();
+
         if (buttonIdSplit.length >= 2) {
           const buttonName = buttonIdSplit[1];
           StatisticsService.trackProfileButton(buttonName).catch((err) => {
@@ -57,7 +59,6 @@ export class ButtonInteractionHandler {
 
         const content = StringManipulationService.buildLoadingText("Generating profile image...");
         await interaction.message.edit({ content });
-        await interaction.deferUpdate();
         await ProfileCommandHandler.handlePageSwapButton(interaction, buttonIdSplit);
         break;
       }
