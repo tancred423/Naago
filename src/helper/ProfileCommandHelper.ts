@@ -8,6 +8,7 @@ import { ProfileGeneratorService } from "../service/ProfileGeneratorService.ts";
 import { ProfilePageType } from "../service/type/ProfilePageTypes.ts";
 import { LodestoneServiceUnavailableError } from "../naagostone/error/LodestoneServiceUnavailableError.ts";
 import { DiscordMessageService } from "../service/DiscordMessageService.ts";
+import { DateHelper } from "./DateHelper.ts";
 
 export class ProfileCommandHandler {
   public static async handlePageSwapButton(interaction: ButtonInteraction, buttonIdSplit: string[]): Promise<void> {
@@ -77,9 +78,10 @@ export class ProfileCommandHandler {
 
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents(profilePage, "profile", characterId);
+    const unix = DateHelper.toEpochSeconds(characterDataDto.latestUpdate);
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
+      content: `Latest Update: <t:${unix}:R>${cachedHint}`,
       files: [file],
       embeds: [],
       attachments: [],
@@ -134,13 +136,14 @@ export class ProfileCommandHandler {
 
     const file = new AttachmentBuilder(profileImage);
     const components = ProfileGeneratorService.getComponents("profile", "profile", characterId);
+    const unix = DateHelper.toEpochSeconds(characterDataDto.latestUpdate);
 
     const cachedHint = characterDataDto.isCachedDueToUnavailability
       ? "\n⚠️ *Lodestone is currently unavailable. Showing cached data.*"
       : "";
 
     await interaction.editReply({
-      content: `Latest Update: <t:${characterDataDto.latestUpdate.unix()}:R>${cachedHint}`,
+      content: `Latest Update: <t:${unix}:R>${cachedHint}`,
       files: [file],
       embeds: [],
       attachments: [],

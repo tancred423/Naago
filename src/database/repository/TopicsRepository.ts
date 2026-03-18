@@ -1,7 +1,6 @@
 import { and, desc, eq, gt, gte, isNotNull, lte, ne, or, sql } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { TopicData, topicData } from "../schema/lodestone-news.ts";
-import moment from "moment-timezone";
 import { AlreadyInDatabaseError } from "../error/AlreadyInDatabaseError.ts";
 import { Topic } from "../../naagostone/type/Topic.ts";
 
@@ -15,15 +14,13 @@ export class TopicsRepository {
     title: string,
     date: Date,
   ): Promise<TopicData | null> {
-    const dateSQL = moment(date).tz("Europe/London").toDate();
-
     const result = await database
       .select()
       .from(topicData)
       .where(
         and(
           eq(topicData.title, title),
-          eq(topicData.date, dateSQL),
+          eq(topicData.date, date),
         ),
       )
       .limit(1);
@@ -42,7 +39,7 @@ export class TopicsRepository {
   }
 
   public static async add(topic: Topic): Promise<number> {
-    const dateSQL = moment(topic.date).tz("Europe/London").toDate();
+    const dateSQL = new Date(topic.date);
     const currentTopic = await this.find(topic.title, dateSQL);
     if (currentTopic) {
       throw new AlreadyInDatabaseError("This topic is already in the database");

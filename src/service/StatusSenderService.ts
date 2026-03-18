@@ -1,4 +1,3 @@
-import moment from "moment";
 import { StringManipulationService } from "./StringManipulationService.ts";
 import * as log from "@std/log";
 import { NaagostoneApiService } from "../naagostone/service/NaagostoneApiService.ts";
@@ -37,7 +36,7 @@ export default class StatusSenderService {
 
       status.tag = StringManipulationService.convertTag("status", status.tag);
 
-      const date = moment(status.date).tz("Europe/London").toDate();
+      const date = new Date(status.date);
       const existingStatus = await StatusesRepository.find(status.title, date);
 
       itemsWithExisting.push({ status, existing: existingStatus });
