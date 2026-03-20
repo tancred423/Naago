@@ -1,4 +1,4 @@
-import { ButtonInteraction, MessageFlags } from "discord.js";
+import { ButtonInteraction, DiscordAPIError, MessageFlags, PermissionsBitField } from "discord.js";
 import { ArrayManipulationService } from "../service/ArrayManipulationService.ts";
 import { DiscordEmbedService } from "../service/DiscordEmbedService.ts";
 import { HelpCommandHelper } from "../helper/HelpCommandHelper.ts";
@@ -58,7 +58,7 @@ export class ButtonInteractionHandler {
         }
 
         const content = StringManipulationService.buildLoadingText("Generating profile image...");
-        await interaction.message.edit({ content });
+        await this.updateInteractionMessage(interaction, content);
         await ProfileCommandHandler.handlePageSwapButton(interaction, buttonIdSplit);
         break;
       }
@@ -96,5 +96,139 @@ export class ButtonInteractionHandler {
           `ButtonUtil#execute: Command '${commandName}' not found.`,
         );
     }
+  }
+
+  private static async updateInteractionMessage(interaction: ButtonInteraction, content: string): Promise<void> {
+    try {
+      await interaction.message.edit({ content });
+    } catch (error: unknown) {
+      this.logMessageEditFailure(interaction, error);
+    }
+  }
+
+  private static logMessageEditFailure(interaction: ButtonInteraction, error: unknown): void {
+    if (error instanceof DiscordAPIError && error.code === 50001) {
+      const diagnosis = this.buildMissingAccessDiagnosis(interaction);
+      log.error(
+        `DiscordAPIError(50001) Missing Access editing interaction message. ${diagnosis} error=${
+          this.formatError(error)
+        }`,
+      );
+      return;
+    }
+
+    log.error(`Failed to edit interaction message: ${this.formatError(error)}`);
+  }
+
+  private static buildMissingAccessDiagnosis(interaction: ButtonInteraction): string {
+    const clientUser = interaction.client.user;
+    const guildChannel = interaction.inGuild() ? interaction.channel : null;
+    const permissions = clientUser && guildChannel ? guildChannel.permissionsFor(clientUser) : null;
+    const permissionSnapshot = this.getRelevantPermissionSnapshot(guildChannel, permissions);
+    const missingPermissions = permissionSnapshot
+      .filter((entry) => entry.allowed === false)
+      .map((entry) => entry.name);
+    const botIsMessageAuthor = interaction.message.author?.id === clientUser?.id;
+    const likelyCauses: string[] = [];
+
+    if (!clientUser) {
+      likelyCauses.push("client user unavailable");
+    }
+
+    if (!interaction.inGuild()) {
+      likelyCauses.push("interaction is outside a guild");
+    }
+
+    if (!interaction.channel) {
+      likelyCauses.push("interaction channel unavailable");
+    }
+
+    if (!botIsMessageAuthor) {
+      likelyCauses.push("message author is not the bot");
+    }
+
+    if (guildChannel && !guildChannel.viewable) {
+      likelyCauses.push("bot cannot view the channel");
+    }
+
+    if (guildChannel && !permissions) {
+      likelyCauses.push("bot permissions could not be resolved for the channel");
+    }
+
+    if (missingPermissions.length > 0) {
+      likelyCauses.push(`missing relevant permissions: ${missingPermissions.join(",")}`);
+    }
+
+    if (!interaction.message.editable) {
+      likelyCauses.push("Discord.js reports message.editable=false");
+    }
+
+    if (guildChannel?.isThread()) {
+      if (!guildChannel.joined) {
+        likelyCauses.push("bot is not a member of the thread");
+      }
+
+      if (guildChannel.archived) {
+        likelyCauses.push("thread is archived");
+      }
+
+      if (guildChannel.locked) {
+        likelyCauses.push("thread is locked");
+      }
+    }
+
+    return this.formatDiagnosticFields({
+      guildId: interaction.guild?.id ?? null,
+      guildName: interaction.guild?.name ?? null,
+      channelId: interaction.channelId ?? null,
+      channelName: interaction.inGuild() ? guildChannel?.name ?? null : null,
+      channelType: interaction.channel?.type ?? null,
+      channelViewable: guildChannel?.viewable ?? null,
+      messageId: interaction.message.id,
+      messageAuthorId: interaction.message.author?.id ?? null,
+      messageEditable: interaction.message.editable,
+      botUserId: clientUser?.id ?? null,
+      botIsMessageAuthor,
+      relevantPermissions: permissionSnapshot.length > 0
+        ? permissionSnapshot.map((entry) => `${entry.name}:${entry.allowed === null ? "unknown" : entry.allowed}`).join(
+          ",",
+        )
+        : null,
+      threadJoined: guildChannel?.isThread() ? guildChannel.joined : null,
+      threadArchived: guildChannel?.isThread() ? guildChannel.archived : null,
+      threadLocked: guildChannel?.isThread() ? guildChannel.locked : null,
+      likelyCauses: likelyCauses.length > 0 ? likelyCauses.join(" | ") : "unknown",
+    });
+  }
+
+  private static getRelevantPermissionSnapshot(
+    channel: ButtonInteraction["channel"],
+    permissions: Readonly<PermissionsBitField> | null,
+  ): Array<{ name: string; allowed: boolean | null }> {
+    const entries = [
+      { name: "ViewChannel", flag: PermissionsBitField.Flags.ViewChannel },
+      { name: "ReadMessageHistory", flag: PermissionsBitField.Flags.ReadMessageHistory },
+      {
+        name: channel?.isThread() ? "SendMessagesInThreads" : "SendMessages",
+        flag: channel?.isThread()
+          ? PermissionsBitField.Flags.SendMessagesInThreads
+          : PermissionsBitField.Flags.SendMessages,
+      },
+    ];
+
+    return entries.map(({ name, flag }) => ({
+      name,
+      allowed: permissions ? permissions.has(flag) : null,
+    }));
+  }
+
+  private static formatDiagnosticFields(fields: Record<string, boolean | number | string | null>): string {
+    return Object.entries(fields)
+      .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
+      .join(" ");
+  }
+
+  private static formatError(error: unknown): string {
+    return error instanceof Error ? error.stack ?? error.message : String(error);
   }
 }
