@@ -11,7 +11,7 @@
 - Clone [naagostone](https://github.com/tancred423/naagostone) and start its containers. Add the naagostone port to this
   `.env`.
 
--> Naagostone is a Lodestone parser that Naago uses to find characters, their information and fetch lodestone news.
+→ Naagostone is a Lodestone parser that Naago uses to find characters, their information and fetch lodestone news.
 
 ### dev.sh
 
@@ -39,8 +39,13 @@ phpMyAdmin is available at http://localhost:8080 (or the port set in `.env`).
 ## Contributing
 
 If you want to contribute to the original repo, you can open an issue and pull request. Pull requests have to be
-approved by the repo owner (tancred423) and an automatic code check will run. Make sure to run `deno fmt`, `deno lint`
-and `deno check` before opening a PR. These can be executed in the container's shell.
+approved by the repo owner (tancred423) and an automatic code check will run. Make sure to run `deno task check` before opening a PR. These can be executed in the container's shell.
+
+→ `deno task check` combines:
+   - Formatting with `deno fmt`
+   - Linting with `deno lint`
+   - Type checking with `deno check src/**/*.ts`
+   - Unit tests with `deno test --allow-all --parallel tests/`
 
 ## Production
 
