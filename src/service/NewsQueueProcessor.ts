@@ -189,6 +189,11 @@ export class NewsQueueProcessor {
         return;
       }
 
+      if (errorMessage === "Unknown Message") {
+        await NewsQueueRepository.markAsStoppedUnknownMessage(job.id);
+        return;
+      }
+
       if (errorMessage === "Unknown Channel") {
         await NewsQueueRepository.markAsStoppedUnknownChannel(job.id);
         return;
