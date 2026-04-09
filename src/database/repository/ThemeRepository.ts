@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 import { database } from "../connection.ts";
 import { themes } from "../schema/themes.ts";
 
@@ -28,5 +28,15 @@ export class ThemeRepository {
     await database
       .delete(themes)
       .where(eq(themes.userId, userId));
+  }
+
+  public static async countByTheme(): Promise<Array<{ theme: string; count: number }>> {
+    return await database
+      .select({
+        theme: themes.theme,
+        count: count(),
+      })
+      .from(themes)
+      .groupBy(themes.theme);
   }
 }

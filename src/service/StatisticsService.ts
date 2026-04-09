@@ -10,6 +10,7 @@ import { SetupsRepository } from "../database/repository/SetupsRepository.ts";
 import { StatsVerifiedCharactersRepository } from "../database/repository/StatsVerifiedCharactersRepository.ts";
 import { VerificationsRepository } from "../database/repository/VerificationsRepository.ts";
 import { StatsThemeUsageRepository } from "../database/repository/StatsThemeUsageRepository.ts";
+import { ThemeRepository } from "../database/repository/ThemeRepository.ts";
 import { GlobalClient } from "../GlobalClient.ts";
 
 export class StatisticsService {
@@ -55,12 +56,20 @@ export class StatisticsService {
     }
   }
 
-  public static async trackTheme(themeName: string): Promise<void> {
+  public static async recordThemeDistribution(): Promise<void> {
     try {
       const today = StatisticsService.getTodayDate();
-      await StatsThemeUsageRepository.increment(today, themeName);
+      const distribution = await ThemeRepository.countByTheme();
+
+      await StatsThemeUsageRepository.deleteByDate(today);
+
+      for (const { theme, count } of distribution) {
+        await StatsThemeUsageRepository.addOrUpdate(today, theme, count);
+      }
+
+      log.info(`Recorded theme distribution: ${distribution.map((d) => `${d.theme}=${d.count}`).join(", ")}`);
     } catch (error) {
-      log.error(`Failed to track theme usage: ${error instanceof Error ? error.stack : String(error)}`);
+      log.error(`Failed to record theme distribution: ${error instanceof Error ? error.stack : String(error)}`);
     }
   }
 

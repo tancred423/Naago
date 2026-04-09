@@ -5,6 +5,7 @@ import { StatsActiveUsersDailyRepository } from "../../src/database/repository/S
 import { StatsCommandUsageRepository } from "../../src/database/repository/StatsCommandUsageRepository.ts";
 import { StatsProfileButtonUsageRepository } from "../../src/database/repository/StatsProfileButtonUsageRepository.ts";
 import { StatsThemeUsageRepository } from "../../src/database/repository/StatsThemeUsageRepository.ts";
+import { ThemeRepository } from "../../src/database/repository/ThemeRepository.ts";
 import { StatsDailyStatisticsRepository } from "../../src/database/repository/StatsDailyStatisticsRepository.ts";
 import { StatsServerCountsRepository } from "../../src/database/repository/StatsServerCountsRepository.ts";
 import { StatsLodestoneNewsSetupsRepository } from "../../src/database/repository/StatsLodestoneNewsSetupsRepository.ts";
@@ -54,14 +55,38 @@ Deno.test("trackProfileButton - calls repository increment", async () => {
   }
 });
 
-Deno.test("trackTheme - calls repository increment", async () => {
-  const incStub = stub(StatsThemeUsageRepository, "increment", () => Promise.resolve());
+Deno.test("recordThemeDistribution - snapshots current theme distribution", async () => {
+  const countByThemeStub = stub(ThemeRepository, "countByTheme", () =>
+    Promise.resolve([
+      { theme: "dark", count: 50 },
+      { theme: "light", count: 30 },
+    ]));
+  const deleteByDateStub = stub(StatsThemeUsageRepository, "deleteByDate", () => Promise.resolve());
+  const addOrUpdateStub = stub(StatsThemeUsageRepository, "addOrUpdate", () => Promise.resolve());
+
   try {
-    await StatisticsService.trackTheme("dark");
-    assertSpyCalls(incStub, 1);
-    assertEquals(incStub.calls[0].args[1], "dark");
+    await StatisticsService.recordThemeDistribution();
+    assertSpyCalls(countByThemeStub, 1);
+    assertSpyCalls(deleteByDateStub, 1);
+    assertSpyCalls(addOrUpdateStub, 2);
+    assertEquals(addOrUpdateStub.calls[0].args[1], "dark");
+    assertEquals(addOrUpdateStub.calls[0].args[2], 50);
+    assertEquals(addOrUpdateStub.calls[1].args[1], "light");
+    assertEquals(addOrUpdateStub.calls[1].args[2], 30);
   } finally {
-    incStub.restore();
+    countByThemeStub.restore();
+    deleteByDateStub.restore();
+    addOrUpdateStub.restore();
+  }
+});
+
+Deno.test("recordThemeDistribution - does not throw on error", async () => {
+  const countByThemeStub = stub(ThemeRepository, "countByTheme", () => Promise.reject(new Error("db error")));
+
+  try {
+    await StatisticsService.recordThemeDistribution();
+  } finally {
+    countByThemeStub.restore();
   }
 });
 
