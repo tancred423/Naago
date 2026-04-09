@@ -187,6 +187,9 @@ client.once("clientReady", async () => {
     await StatisticsService.recordVerifiedCharacters().catch((err) => {
       log.error(`Failed to record verified characters: ${err instanceof Error ? err.stack : String(err)}`);
     });
+    await StatisticsService.recordThemeDistribution().catch((err) => {
+      log.error(`Failed to record theme distribution: ${err instanceof Error ? err.stack : String(err)}`);
+    });
     await StatisticsService.cleanupOldActiveUserData().catch((err) => {
       log.error(`Failed to cleanup old active user data: ${err instanceof Error ? err.stack : String(err)}`);
     });
