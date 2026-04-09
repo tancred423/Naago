@@ -64,6 +64,17 @@ export class NewsQueueRepository {
       .where(eq(newsQueue.id, id));
   }
 
+  public static async markAsStoppedUnknownMessage(id: number): Promise<void> {
+    await database
+      .update(newsQueue)
+      .set({
+        status: "STOPPED_UNKNOWN_MESSAGE",
+        errorMessage: "Unknown Message",
+        updatedAt: sql`NOW()`,
+      })
+      .where(eq(newsQueue.id, id));
+  }
+
   public static async markAsStoppedUnknownChannel(id: number): Promise<void> {
     await database
       .update(newsQueue)
