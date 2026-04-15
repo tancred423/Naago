@@ -1,5 +1,5 @@
 > **Archived**
-> 
+>
 > Moved to https://gitlab.com/team-naago/naago
 
 # M'naago
