@@ -1,3 +1,7 @@
+> **Archived**
+>
+> Moved to https://gitlab.com/team-naago/naago
+
 # M'naago
 
 A FFXIV Discord Bot for character profiles and lodestone news.
